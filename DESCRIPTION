@@ -1,0 +1,16 @@
+Package: ASL2050influenza
+Type: Package
+Title: Functions for Avian Influenza Simulation
+Version: 0.1.0
+Authors@R: c(
+    person("Noam", "Ross", , "ross@ecohealthalliance.org", role = c("aut", "cre"),
+    person("EcoHealth Alliance", role="cph"))
+    )
+Description: Implements Hosseini et al (2050) avian influenza metapopulation
+  model for use in the African Sustainable Livestock 2050 project
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+LinkingTo: Rcpp
+Imports: Rcpp
+Suggests: testthat
