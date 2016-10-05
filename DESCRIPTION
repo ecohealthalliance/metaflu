@@ -1,16 +1,21 @@
-Package: ASL2050influenza
+Package: metaflu
 Type: Package
-Title: Functions for Avian Influenza Simulation
+Title: Functions for Avian Influenza Metapopulation Simulation
 Version: 0.1.0
 Authors@R: c(
     person("Noam", "Ross", , "ross@ecohealthalliance.org", role = c("aut", "cre"),
     person("EcoHealth Alliance", role="cph"))
     )
 Description: Implements Hosseini et al (2050) avian influenza metapopulation
-  model for use in the African Sustainable Livestock 2050 project
+    model for use in the African Sustainable Livestock 2050 project
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 LinkingTo: Rcpp
-Imports: Rcpp
-Suggests: testthat
+Imports:
+    Rcpp
+Suggests:
+    testthat
+RoxygenNote: 5.0.1
+URL: https://github.com/noamross/metaflu
+BugReports: https://github.com/noamross/metaflu/issues
