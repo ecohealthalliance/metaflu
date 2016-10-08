@@ -2,32 +2,43 @@
 output:
   md_document:
     variant: markdown_github
+bibliography: notebook/references.bib
+csl: notebook/elsevier-with-titles.csl
 ---
 
 [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
-<a href="https://travis-ci.org/ecohealthalliance/ASL2050influenza"> <object data="https://img.shields.io/badge/build-unknown-lightgrey.svg" type="image/png">
-    <img src="https://travis-ci.org/ecohealthalliance/ASL2050influenza.svg?branch=master" />
+<a href="https://travis-ci.org/ecohealthalliance/metaflu"> <object data="https://img.shields.io/badge/build-unknown-lightgrey.svg" type="image/png">
+    <img src="https://travis-ci.org/ecohealthalliance/metaflu.svg?branch=master" />
   </object></a>
 [![MIT Licensed - Copyright 2016 EcoHealth Alliance](https://img.shields.io/badge/license-MIT-blue.svg)](https://badges.mit-license.org/)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r, echo = FALSE}
+```{r setup, echo = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "README-"
 )
+library(knitcitations)
+cite_options(citation_format = 'pandoc')
 ```
 
-# ASL2050influenza
+# African Sustainable Livestock 2050 Avian Influenza Analysis
 
-The goal of ASL2050influenza is to ...
+This repository contains code and analysis for EcoHealth Alliance's Africa
+Sustainable Livestock 2050 project in collaboration with FAO, specifically
+for work related to Avian Influenza
 
-## Example
+This repository is setup as an R package that implements the core model,
+which is based on Hosseini et al.'s 2013 metapopulation model 
+`r citep("10.1371/journal.pone.0080091")`.  The `notebook/` directory 
+contains interim notes and analyses.
 
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-## basic example code
+```{r bibptex}
+write.bibtex(file="notebook/references.bib")
 ```
+
+## References
+
+<div id="refs"></div>
