@@ -35,7 +35,7 @@ which is based on Hosseini et al.'s 2013 metapopulation model
 `r citep("10.1371/journal.pone.0080091")`.  The `notebook/` directory 
 contains interim notes and analyses.
 
-```{r bibptex}
+```{r bibtex, echo = FALSE, message = FALSE, cache=FALSE, results = 'asis'}
 write.bibtex(file="notebook/references.bib")
 ```
 
