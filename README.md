@@ -6,7 +6,7 @@ African Sustainable Livestock 2050 Avian Influenza Analysis
 
 This repository contains code and analysis for EcoHealth Alliance's Africa Sustainable Livestock 2050 project in collaboration with FAO, specifically for work related to Avian Influenza
 
-This repository is setup as an R package that implements the core model, which is based on Hosseini et al.'s 2013 metapopulation model \[1\]. The `notebook/` directory contains interim notes and analyses.
+This repository is setup as an R package that implements the core model, which is based on Hosseini et al.'s 2013 metapopulation model \[[1](#ref-Hosseini_2013)\]. The `notebook/` directory contains interim notes and analyses.
 
 References
 ----------

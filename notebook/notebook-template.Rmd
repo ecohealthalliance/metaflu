@@ -1,0 +1,28 @@
+---
+title: "Notebook Template"
+author: Some One
+date: YYYY-MM-DD
+output: html_document
+bibliography: references.bib
+csl: elsevier-with-titles.csl
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitcitations)
+cite_options(citation_format = 'pandoc')
+P <- rprojroot::find_rstudio_root_file
+```
+
+Your text
+
+A citation: `r citep('10.1371/journal.pone.0080091')`
+
+
+```{r, include=FALSE}
+write.bibtex(P("notebook/references.bib"))
+```
+
+## References
+
+<div id="refs"></div>
