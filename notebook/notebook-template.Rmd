@@ -20,7 +20,7 @@ A citation: `r citep('10.1371/journal.pone.0080091')`
 
 
 ```{r, include=FALSE}
-write.bibtex(P("notebook/references.bib"))
+write.bibtex(file=P("notebook/references.bib"))
 ```
 
 ## References
