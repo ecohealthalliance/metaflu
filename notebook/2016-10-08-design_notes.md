@@ -11,6 +11,8 @@ Approach:
 -  Add term for external regular source of disease
 -  Use a Monte Carlo sensitivity approach to deal with uncertainty in parameters, esp ones
    we do not have. 
+-  Ensure that simulations are reproducible with seed, parallel or not, let
+   user set seed, memoize seeded simulation calls
 
 Questions:
 
