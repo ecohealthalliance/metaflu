@@ -18,11 +18,11 @@ P <- rprojroot::find_rstudio_root_file
 
 Your text
 
-A citation: `r citep('10.1371/journal.pone.0080091')`
+A citation: `r citep('10.1098/rspb.2011.1417')`
 
 
 ```{r, include=FALSE}
-write.bibtex(file="references.bib")
+write.bibtex(file = P("notebook/references.bib"))
 ```
 
 ## References
