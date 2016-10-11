@@ -4,8 +4,8 @@
 \alias{mf_sim}
 \title{Influenza Metapopulation Simulator}
 \usage{
-mf_sim(parameters, network, times = NULL, n_sims = 1, seed = NULL,
-  .parallel = FALSE)
+mf_sim(init, parameters, times = NULL, n_sims = 1, seed = NULL,
+  .parallel = FALSE, .progress = TRUE)
 }
 \description{
 Influenza Metapopulation Simulator
