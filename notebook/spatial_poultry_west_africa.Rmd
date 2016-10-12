@@ -13,7 +13,7 @@ P <- rprojroot::find_rstudio_root_file
 
 ###Assessing the Potential Impact of Avian Influenza on Poultry in West Africa: A Spatial Equilibrium Analysis
 
-This paper `r citep('10.1111/j.1477-9552.2007.00099.x')` uses a spatial equilibrium model to quantify the economic losses that would result from avian influenza outbreaks in West Africa, specifically modeling Nigeria in detail. In the most serious outbreak scenario, where avian influenza is spread widely along two migratory bird pathways in Nigeria and there is local transmission of the disease, the country's chicken production falls 21.1% at a cost of around $250 million USD in lost revenue. 
+This paper `r citep('10.1111/j.1477-9552.2007.00099.x')` uses a spatial equilibrium model to quantify the economic losses that would result from avian influenza outbreaks in West Africa, specifically modeling Nigeria in detail. In the most serious outbreak scenario, where avian influenza is spread widely along two migratory bird pathways in Nigeria and there is local transmission of the disease, the model predicts that the country's chicken production would fall by 21.1% at a cost of around $250 million USD in lost revenue. 
 
 - The authors used FAO *Gridded Livestock of the World* spatial dataset to define poultry distribution. When they compared chicken density and population density, they found that < 4% of West African population lives in high density chicken areas -- most poultry in this region are raised in small backyard groups (< 50 chickens).
 
