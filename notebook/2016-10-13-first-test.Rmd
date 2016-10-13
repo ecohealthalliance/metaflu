@@ -17,6 +17,8 @@ P <- rprojroot::find_rstudio_root_file
 ```{r setup2}
 library(metaflu)
 library(ggplot2)
+library(parallel)
+library(dplyr)
 ```
 
 Set parameters for the simulator.  For now, no real network - just two unconnected
@@ -42,10 +44,18 @@ initial_cond <- matrix(c(99, 1, 0, 0,
                        nrow=2, byrow=TRUE)
 ```
 
-```{r runsim}
-output <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, progress=FALSE)
+Run the simulator and plot
 
-ggplot(output, aes(x=time, y=population, col=class, group=paste0(class, patch))) +
+```{r runsim}
+options(mc.cores=2)
+output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2, parallel = FALSE)
+output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2, parallel = TRUE)
+output3 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, parallel = TRUE)
+
+outputs <- bind_rows(output1, output2, output3, .id="run")
+
+ggplot(outputs, aes(x=time, y=population, col=class, group=paste0(class, patch))) +
+  facet_grid(run~sim) +
   geom_line()
 ```
 
