@@ -1,4 +1,4 @@
 library(testthat)
-library(ASL2050influenza)
+library(metaflu)
 
 test_check("ASL2050influenza")

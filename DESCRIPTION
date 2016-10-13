@@ -11,11 +11,17 @@ Description: Implements Hosseini et al (2050) avian influenza metapopulation
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-LinkingTo: Rcpp
+LinkingTo:
+    Rcpp,
+    RcppArmadillo,
+    RcppProgress
 Imports:
-    Rcpp
+    Rcpp,
+    RcppArmadillo,
+    RcppProgress
 Suggests:
     testthat
 RoxygenNote: 5.0.1
+SystemRequirements: C++11
 URL: https://github.com/noamross/metaflu
 BugReports: https://github.com/noamross/metaflu/issues
