@@ -11,9 +11,9 @@ cite_options(citation_format = 'pandoc')
 P <- rprojroot::find_rstudio_root_file
 ```
 
-###Assessing the Potential Impact of Avian Influenza on Poultry in West Africa: A Spatial Equilibrium Analysis
+###Assessing the Potential Impact of Avian Influenza on Poultry in West Africa: A Spatial Equilibrium Analysis `r citep('10.1111/j.1477-9552.2007.00099.x')`
 
-This paper `r citep('10.1111/j.1477-9552.2007.00099.x')` uses a spatial equilibrium model to quantify the economic losses that would result from avian influenza outbreaks in West Africa, specifically modeling Nigeria in detail. In the most serious outbreak scenario, where avian influenza is spread widely along two migratory bird pathways in Nigeria and there is local transmission of the disease, the model predicts that the country's chicken production would fall by 21.1% at a cost of around $250 million USD in lost revenue. 
+This paper uses a spatial equilibrium model to quantify the economic losses that would result from avian influenza outbreaks in West Africa, specifically modeling Nigeria in detail. In the most serious outbreak scenario, where avian influenza is spread widely along two migratory bird pathways in Nigeria and there is local transmission of the disease, the model predicts that the country's chicken production would fall by 21.1% at a cost of around $250 million USD in lost revenue. 
 
 - The authors used FAO *Gridded Livestock of the World* spatial dataset to define poultry distribution. When they compared chicken density and population density, they found that < 4% of West African population lives in high density chicken areas -- most poultry in this region are raised in small backyard groups (< 50 chickens).
 
@@ -22,6 +22,9 @@ This paper `r citep('10.1111/j.1477-9552.2007.00099.x')` uses a spatial equilibr
 - The authors' model only considers poultry-to-poultry and wildfowl-to-poultry transmission, no other human or livestock pathways. 
 
 - This is an economic model which considers supply, demand, and income -- but not import/export of chickens. The demand parameter is "shocked" by the avian influenza outbreak, incorporating the psychological effect an outbreak would have on demand and the chicken economy.
+
+###Modeling highly pathogenic avian influenza transmission in wild birds and poultry in West Bengal, India `r citep('10.1038/srep02175')`
+
 
 
 ```{r, include=FALSE}
