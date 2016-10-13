@@ -1,0 +1,51 @@
+---
+output: html_document
+bibliography: references.bib
+csl: elsevier-with-titles.csl
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitcitations)
+cite_options(citation_format = 'pandoc')
+P <- rprojroot::find_rstudio_root_file
+```
+#Ecology of Wild Birds
+###Victims and vectors: highly pathogenic avian influenza H5N1 and the ecology of wild birds
+
+This review paper `r citep('10.3184/175815510X12737339356701')` examines the ecology and role of wild birds in transmitting HPAI (highly pathogenic avian influenza) to poultry, and ultimately, to humans. Important points include:
+
+- Wild birds serve as the natural reservoir for LPAI (low pathogenic avian influenza) and the authors seem to favor theory that they are primarily shuttles of LPAI (not HPAI) between poultry populations. The authors cite the lack of wild bird HPAI samples and the reduced ability to migrate or function while infected with HPAI to support this theory. Ducks are a notable exception to this, as they can have asymptomatic HPAI infections. 
+
+- The authors argue that HPAI is more likely to occur in systems where wild birds and poultry interact, and cite evidence for HPAI development primarily occurring within poultry hosts for biological reasons.
+
+- Wet markets, rice paddies, and anywhere where backyard flocks commingle with wild birds are identified as areas for HPAI development.
+
+- While LPAI transmission in wild birds is fecal-oral, the authors theorize that HPAI strains adapt toward respiratory transmission due to selection for this trait in closely-kept, confined poultry populations. 
+
+- Cold temperatures help certain influenza subtypes survive in the environment, below average rainfall also correlated with HPAI outbreak in waterbirds. 
+
+- Great tables on key wild bird events, pathologic H5N1 exposure results in bird species, and healthy wild birds found infected with HPAI. 
+
+###Ecology of avian influenza viruses in a changing world
+This paper discusses both the ecology of avian influenza viruses and how anthropogenic changes may affect future virus transmission `r citep('10.1111/j.1749-6632.2010.05451.x')`. Some novel points include:
+
+- The authors suggest that shorebirds are likely responsible for distant geographical spread of HPAI. They point out that despite some literature regarding reduced migration ability for infected birds, the evidence is not definitive; additionally, infections could hop between birds in the same flock as the group migrates or be asymptomatic at first, allowing shorebirds to travel large distances. Even given much lower prevalence in these birds, only a few infected cases would allow intercontinental spread.  
+
+- Decreasing wetlands may cause more aggregation of waterfowl and increased contact rate between wild birds and poultry.
+
+- Climate changes in water temperature, higher salinity, and acidic conditions may decrease the survival of influenza virus in the environment.
+
+- Reduced genetic diversity of poultry may make them more susceptible.
+
+- The transit of vaccine-protected poultry may occasionally help spread disease as some vaccine-protected animals continue to shed virus.
+
+
+
+```{r, include=FALSE}
+write.bibtex(file = P("notebook/references.bib"))
+```
+
+## References
+
+<div id="refs"></div>
