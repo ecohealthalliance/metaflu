@@ -1,5 +1,5 @@
-#ifndef STRUCTURES
-#define STRUCTURES
+#ifndef STRUCTURES  //compliler flags prevent this from being re-run if included
+#define STRUCTURES  // in multiple files
 
 #include <RcppArmadillo.h>
 
@@ -35,10 +35,11 @@ struct mf_parmlist {
     nu = as<double>(parmlist["nu"]);
     sigma = as<double>(parmlist["phi"]);
     omega = as<double>(parmlist["omega"]);
-    chi = as<arma::mat>(parmlist["omega"]);
+    chi = as<arma::mat>(parmlist["chi"]);
     chi_cum = cumsum(chi, 1);
     K = chi.n_rows;
     n_actions = as<int>(parmlist["n_actions"]);
+
   }
 };
 
