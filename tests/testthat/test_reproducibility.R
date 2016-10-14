@@ -84,6 +84,6 @@ test_that("non-seeded runs after same-seeded runs are not identical", {
 
 test_that("RDS-saved model same as model created with same settings", {
   output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2)
-  load1 <- readRDS("temp.rds")
+  load1 <- readRDS("stored_sim_results.rds")
   expect_identical(output2, load1)
 })
