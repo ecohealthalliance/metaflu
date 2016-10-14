@@ -7,7 +7,7 @@ Authors@R: c(
     person("EcoHealth Alliance", role="cph"))
     )
 Description: Implements Hosseini et al (2050) avian influenza metapopulation
-    model for use in the African Sustainable Livestock 2050 project
+    model for use in the African Sustainable Livestock 2050 project.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -18,7 +18,11 @@ LinkingTo:
 Imports:
     Rcpp,
     RcppArmadillo,
-    RcppProgress
+    RcppProgress,
+    dplyr,
+    tibble,
+    parallel,
+    reshape2
 Suggests:
     testthat
 RoxygenNote: 5.0.1
