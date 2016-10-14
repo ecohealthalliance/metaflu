@@ -3,6 +3,7 @@
 #' @param parameters a list of parameter values.  See below for details
 #' @param times a vector of output times to report
 #' @param n_sims number of simulations to run
+#' @param seed if set, a random seed for the simulations
 #' @param parallel run the simulations in parallel?
 #' @param progress TRUE/FALSE show a progress bar?
 #' @importFrom dplyr rename_ mutate_ recode select_ arrange_ bind_rows

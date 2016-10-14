@@ -5,7 +5,7 @@
 \title{Influenza Metapopulation Simulator}
 \usage{
 mf_sim(init, parameters, times, n_sims = 1, seed = NULL, parallel = FALSE,
-  progress = TRUE)
+  progress = FALSE)
 }
 \arguments{
 \item{init}{Intital conditions - a patches X 4 (SIRV) matrix of populations}
@@ -15,6 +15,8 @@ mf_sim(init, parameters, times, n_sims = 1, seed = NULL, parallel = FALSE,
 \item{times}{a vector of output times to report}
 
 \item{n_sims}{number of simulations to run}
+
+\item{seed}{if set, a random seed for the simulations}
 
 \item{parallel}{run the simulations in parallel?}
 
