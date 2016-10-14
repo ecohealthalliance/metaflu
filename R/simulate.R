@@ -6,6 +6,10 @@
 #' @param seed if set, a random seed for the simulations
 #' @param parallel run the simulations in parallel?
 #' @param progress TRUE/FALSE show a progress bar?
+#' @param network_generator an expression used to generate a network adjacency
+#'   matrix.  If used, will replace \code{chi} in the parameters object
+#' @param stoch_network if TRUE, a new network will be generated for each simulation
+#'   otherwise, the network will be generated once for each simulation
 #' @importFrom dplyr rename_ mutate_ recode select_ arrange_ bind_rows
 #' @importFrom tibble as_tibble
 #' @importFrom parallel mclapply
@@ -22,12 +26,20 @@ mf_sim <- function(init, parameters, times, n_sims=1, seed=NULL, parallel=FALSE,
     on.exit(assign(".Random.seed", old_seed, envir=globalenv()), add=TRUE)
   }
 
-
   if(parallel) n_cores = getOption("mc.cores", 2L) else n_cores = 1
 
+  if(!is.null(parameters[["network_type"]]) && !parameters[["stochastic_network"]]) {
+    parameters[["chi"]] <- make_net(parameters[["network_type"]],
+                                    parameters[["network_parms"]])
+  }
+
   results = mclapply(seq_len(n_sims), function(sim) {
+    if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
+      parameters[["chi"]] <- make_net(parameters[["network_type"]],
+                                      parameters[["network_parms"]])
+    }
     reshape2::melt(sim_gillespie(init=init, parmlist=parameters, times=times, progress=progress))
-  }, mc.set.seed=TRUE, mc.silent = TRUE)
+  }, mc.set.seed=TRUE, mc.silent = FALSE)
 
   results = as_tibble(bind_rows(results, .id = "sim"))
   results = rename_(results, .dots = c("patch"="Var1", "class"="Var2", "time"="Var3", "population"="value"))
@@ -38,5 +50,14 @@ mf_sim <- function(init, parameters, times, n_sims=1, seed=NULL, parallel=FALSE,
   results = arrange_(results, "sim", "time", "patch", "class")
   return(results)
 }
+
+#' @import igraph
+make_net <- function(network_type, network_parms) {
+  net = as_adj(do.call(paste0("sample_", network_type), network_parms),
+               sparse=FALSE)
+  net = net/rowSums(net)
+
+}
+
 
 # TODO: option to output all event times, not a grid

@@ -32,7 +32,7 @@ struct mf_parmlist {
     phi = as<double>(parmlist["phi"]);
     eta = as<double>(parmlist["eta"]);
     nu = as<double>(parmlist["nu"]);
-    sigma = as<double>(parmlist["phi"]);
+    sigma = as<double>(parmlist["sigma"]);
     omega = as<double>(parmlist["omega"]);
     chi = as<arma::mat>(parmlist["chi"]);
     chi_cum = cumsum(chi, 1);

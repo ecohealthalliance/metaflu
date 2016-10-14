@@ -21,6 +21,12 @@ mf_sim(init, parameters, times, n_sims = 1, seed = NULL, parallel = FALSE,
 \item{parallel}{run the simulations in parallel?}
 
 \item{progress}{TRUE/FALSE show a progress bar?}
+
+\item{network_generator}{an expression used to generate a network adjacency
+matrix.  If used, will replace \code{chi} in the parameters object}
+
+\item{stoch_network}{if TRUE, a new network will be generated for each simulation
+otherwise, the network will be generated once for each simulation}
 }
 \description{
 Influenza Metapopulation Simulator

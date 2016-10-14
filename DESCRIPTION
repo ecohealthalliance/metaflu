@@ -22,7 +22,8 @@ Imports:
     dplyr,
     tibble,
     parallel,
-    reshape2
+    reshape2,
+    igraph
 Suggests:
     testthat
 RoxygenNote: 5.0.1
