@@ -25,6 +25,22 @@ This paper uses a spatial equilibrium model to quantify the economic losses that
 
 ###Modeling highly pathogenic avian influenza transmission in wild birds and poultry in West Bengal, India `r citep('10.1038/srep02175')`
 
+The authors of this paper used a stochastic continuous time model to simulate introduction of H5N1 to poultry communities in West Bengal, India. Additionally, they performed a spatial cluster analysis of outbreaks, calculated R~0~ using three methods, and performed a logistic regression to identify significant predictors of H5N1 outbreaks.
+
+- SIC-SIRS model for change in disease status of a poultry flock (Susceptible - Infectious - Culled) and wild birds (SIRS), unit of interest is the village, with an infectious period of 7 days.  
+
+- Every village (n = 37,945) considered to have both poultry flock and wild birds; once a flock in a village is infected it is assumed entire village is infected and will be culled. 
+
+- Transmission rate between wild birds and poultry communities ($1.00 * 10^{-8}$) was based on previous study of avian influenza dynamics in wild birds `r citep('10.3934/dcdsb.2012.17.2829')`.
+
+- Transmission rate between poultry communities was estimated from SI calculations of observations, similar to a previous paper `r citep('10.1017/S0950268808000885')`, with a mean of 0.127 and exponentially distributed ($\mu = 0.122$).
+
+- R~0~ calculations: 
+    - 0.859 (0.326 SD) via  SI equations
+    - 1.069 via observed doubling time 
+    - 1.034 via simulation results
+
+- No consideration of LPAI in model; only HPAI entering from wild bird groups.
 
 
 ```{r, include=FALSE}

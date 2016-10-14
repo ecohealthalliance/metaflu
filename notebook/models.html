@@ -130,6 +130,20 @@ $(document).ready(function () {
 </div>
 <div id="modeling-highly-pathogenic-avian-influenza-transmission-in-wild-birds-and-poultry-in-west-bengal-india-pandit_2013" class="section level3">
 <h3>Modeling highly pathogenic avian influenza transmission in wild birds and poultry in West Bengal, India <span class="citation">[<a href="#ref-Pandit_2013">2</a>]</span></h3>
+<p>The authors of this paper used a stochastic continuous time model to simulate introduction of H5N1 to poultry communities in West Bengal, India. Additionally, they performed a spatial cluster analysis of outbreaks, calculated R<sub>0</sub> using three methods, and performed a logistic regression to identify significant predictors of H5N1 outbreaks.</p>
+<ul>
+<li><p>SIC-SIRS model for change in disease status of a poultry flock (Susceptible - Infectious - Culled) and wild birds (SIRS), unit of interest is the village, with an infectious period of 7 days.</p></li>
+<li><p>Every village (n = 37,945) considered to have both poultry flock and wild birds; once a flock in a village is infected it is assumed entire village is infected and will be culled.</p></li>
+<li><p>Transmission rate between wild birds and poultry communities (<span class="math inline">\(1.00 * 10^{-8}\)</span>) was based on previous study of avian influenza dynamics in wild birds <span class="citation">[<a href="#ref-Vaidya_2012">3</a>]</span>.</p></li>
+<li><p>Transmission rate between poultry communities was estimated from SI calculations of observations, similar to a previous paper <span class="citation">[<a href="#ref-WARD_2008">4</a>]</span>, with a mean of 0.127 and exponentially distributed (<span class="math inline">\(\mu = 0.122\)</span>).</p></li>
+<li>R<sub>0</sub> calculations:
+<ul>
+<li>0.859 (0.326 SD) via SI equations</li>
+<li>1.069 via observed doubling time</li>
+<li>1.034 via simulation results</li>
+</ul></li>
+<li><p>No consideration of LPAI in model; only HPAI entering from wild bird groups.</p></li>
+</ul>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
@@ -139,6 +153,12 @@ $(document).ready(function () {
 </div>
 <div id="ref-Pandit_2013">
 <p>[2] P.S. Pandit, D.A. Bunn, S.A. Pande, S.S. Aly, Modeling Highly Pathogenic Avian Influenza Transmission in Wild Birds and Poultry in West Bengal, India. Sci. Rep. 3 (2013). doi:<a href="https://doi.org/10.1038/srep02175">10.1038/srep02175</a>.</p>
+</div>
+<div id="ref-Vaidya_2012">
+<p>[3] N.K. Vaidya, F.-B. Wang, X. Zou, Avian Influenza Dynamics in Wild Birds with Bird Mobility and Spatial Heterogeneous Environment. Discrete and Continuous Dynamical Systems - Series B. 17 (2012) 2829–2848. doi:<a href="https://doi.org/10.3934/dcdsb.2012.17.2829">10.3934/dcdsb.2012.17.2829</a>.</p>
+</div>
+<div id="ref-WARD_2008">
+<p>[4] M.P. WARD, D. MAFTEI, C. APOSTU, A. SURU, Estimation of the Basic Reproductive Number ( R0) for Epidemic, Highly Pathogenic Avian Influenza Subtype H5N1 Spread. Epidemiology and Infection. 137 (2008) 219. doi:<a href="https://doi.org/10.1017/s0950268808000885">10.1017/s0950268808000885</a>.</p>
 </div>
 </div>
 </div>
