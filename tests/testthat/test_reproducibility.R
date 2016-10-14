@@ -8,7 +8,7 @@ try_parms = list(
   phi = 1.96e-4,                    #infectiousness of environmental virions
   eta = 0.14,                       #degradation rate of environmental virions
   nu =  0.001,                      #uptake rate of environmental virion
-  sigma = 1e5,                      #virion shedding rate
+  sigma = 0,                        #virion shedding rate
   omega = 0,                        #movement rate
   chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
 )
@@ -16,6 +16,10 @@ try_parms = list(
 initial_cond <- matrix(c(99, 1, 0, 0,
                          99, 1, 0, 0),
                        nrow=2, byrow=TRUE)
+
+rdsOutput <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2)
+saveRDS(rdsOutput,"temp.rds")
+
 context("Reproducibility")
 
 test_that("outputs with same seed are identical regardless of parallelism", {
@@ -47,7 +51,7 @@ test_that("patches are not identical", {
     phi = 1.96e-4,                    #infectiousness of environmental virions
     eta = 0.14,                       #degradation rate of environmental virions
     nu =  0.001,                      #uptake rate of environmental virion
-    sigma = 1e5,                      #virion shedding rate
+    sigma = 0,                      #virion shedding rate
     omega = 0,                        #movement rate
     chi = matrix(c(1,0,0,0,1,0,0,0,1), nrow=3)  #patch connectivity matrix
   )
@@ -79,8 +83,6 @@ test_that("non-seeded runs after same-seeded runs are not identical", {
 })
 
 test_that("RDS-saved model same as model created with same settings", {
-  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2)
-  saveRDS(output1,"temp.rds")
   output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2)
   load1 <- readRDS("temp.rds")
   expect_identical(output2, load1)
