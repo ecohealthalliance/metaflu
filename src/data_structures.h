@@ -21,7 +21,6 @@ struct mf_parmlist {
   arma::mat chi;            //patch connectivity matrix
   arma::mat chi_cum;        //patch connectivity matrix, row-wise cumulative
   int K;                    //total number of patches
-  int n_actions;             // number of possible event types
 
   mf_parmlist() ;  //default constructor
 
@@ -38,8 +37,6 @@ struct mf_parmlist {
     chi = as<arma::mat>(parmlist["chi"]);
     chi_cum = cumsum(chi, 1);
     K = chi.n_rows;
-    n_actions = as<int>(parmlist["n_actions"]);
-
   }
 };
 

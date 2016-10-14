@@ -35,8 +35,7 @@ try_parms = list(
   nu =  0.001,                      #uptake rate of environmental virion
   sigma = 1e5,                      #virion shedding rate
   omega = 0,                        #movement rate
-  chi = matrix(c(1,0,0,1), nrow=2),  #patch connectivity matrix
-  n_actions = 10                    # this really shouldn't be defined here.
+  chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
 )
 
 initial_cond <- matrix(c(99, 1, 0, 0,
