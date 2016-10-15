@@ -20,7 +20,7 @@ void update_rates(arma::mat &rates, const arma::mat &state, const mf_parmlist &p
     rates.cols(7, 9) = state.cols(0, 2) * parms.omega; // emigration of all classes
 };
 
-arma::Mat<sword> action_matrix = {
+arma::imat action_matrix = {
                                     {-1,  1,  0,  0},  //0 infection
                                     { 0, -1, +1,  0},  //1 recovery
                                     {-1,  0,  0,  0},  //2 S mortality

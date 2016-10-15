@@ -6,10 +6,6 @@
 #' @param seed if set, a random seed for the simulations
 #' @param parallel run the simulations in parallel?
 #' @param progress TRUE/FALSE show a progress bar?
-#' @param network_generator an expression used to generate a network adjacency
-#'   matrix.  If used, will replace \code{chi} in the parameters object
-#' @param stoch_network if TRUE, a new network will be generated for each simulation
-#'   otherwise, the network will be generated once for each simulation
 #' @importFrom dplyr rename_ mutate_ recode select_ arrange_ bind_rows
 #' @importFrom tibble as_tibble
 #' @importFrom parallel mclapply

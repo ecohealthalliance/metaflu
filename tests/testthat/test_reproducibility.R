@@ -1,4 +1,4 @@
-suppressWarnings(suppressMessages(library(tidyverse)))
+suppressWarnings(suppressMessages(library(dplyr)))
 
 try_parms = list(
   beta = 0.004,                     #contact rate for direct transmission

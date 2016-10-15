@@ -1,12 +1,11 @@
+// [[Rcpp::plugins(cpp11)]]
+// [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::depends(RcppProgress)]]
+
 #include "includes.h"
 using namespace Rcpp;
 using namespace arma;
 
-
-
-// [[Rcpp::plugins(cpp11)]]
-// [[Rcpp::depends(RcppArmadillo)]]
-// [[Rcpp::depends(RcppProgress)]]
 // [[Rcpp::export]]
 arma::cube sim_gillespie(const arma::mat &init, const List parmlist, const arma::vec &times, const bool &progress) {
   mf_parmlist parms(parmlist);
