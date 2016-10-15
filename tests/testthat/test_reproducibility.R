@@ -17,8 +17,8 @@ initial_cond <- matrix(c(99, 1, 0, 0,
                          99, 1, 0, 0),
                        nrow=2, byrow=TRUE)
 
-rdsOutput <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2)
-saveRDS(rdsOutput,"temp.rds")
+#rdsOutput <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2)
+#saveRDS(rdsOutput,"stored_sim_results.rds")
 
 context("Reproducibility")
 
