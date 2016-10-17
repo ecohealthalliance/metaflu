@@ -1,5 +1,6 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
+// [[Rcpp::plugins(cpp11)]]
 
 #include "includes.h"
 using namespace Rcpp;
@@ -15,7 +16,7 @@ arma::cube sim_gillespie(const arma::mat &init, const List parmlist, const arma:
   arma::vec::const_iterator next_record_time = times.begin();
   uword record = 0;
   double time_max = as_scalar(times.tail(1));
-  arma::mat rates = arma::zeros<arma::mat>(state.n_rows, action_matrix().n_rows);
+  arma::mat rates = arma::zeros<arma::mat>(state.n_rows, action_matrix.n_rows);
   uword event;
   uword action;
   uword patch;

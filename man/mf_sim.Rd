@@ -5,7 +5,7 @@
 \title{Influenza Metapopulation Simulator}
 \usage{
 mf_sim(init, parameters, times, n_sims = 1, seed = NULL, parallel = FALSE,
-  progress = FALSE)
+  progress = FALSE, .test = FALSE)
 }
 \arguments{
 \item{init}{Intital conditions - a patches X 4 (SIRV) matrix of populations}

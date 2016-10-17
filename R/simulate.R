@@ -10,7 +10,7 @@
 #' @importFrom tibble as_tibble
 #' @importFrom parallel mclapply
 #' @export
-mf_sim <- function(init, parameters, times, n_sims=1, seed=NULL, parallel=FALSE, progress=FALSE) {
+mf_sim <- function(init, parameters, times, n_sims=1, seed=NULL, parallel=FALSE, progress=FALSE, .test=FALSE) {
   progress = progress & !parallel  #progress bars don't work in parallel
 
   old_rng_kind = RNGkind("L'Ecuyer-CMRG")  # set a parallel-friendly RNG generator
@@ -29,13 +29,23 @@ mf_sim <- function(init, parameters, times, n_sims=1, seed=NULL, parallel=FALSE,
                                     parameters[["network_parms"]])
   }
 
+  if(!.test) {
   results = mclapply(seq_len(n_sims), function(sim) {
     if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
       parameters[["chi"]] <- make_net(parameters[["network_type"]],
                                       parameters[["network_parms"]])
     }
     reshape2::melt(sim_gillespie(init=init, parmlist=parameters, times=times, progress=progress))
-  }, mc.set.seed=TRUE, mc.silent = FALSE)
+  }, mc.set.seed=TRUE, mc.silent = FALSE, mc.cores = n_cores)
+  } else {
+    results = lapply(seq_len(n_sims), function(sim) {
+      if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
+        parameters[["chi"]] <- make_net(parameters[["network_type"]],
+                                        parameters[["network_parms"]])
+      }
+      reshape2::melt(sim_gillespie(init=init, parmlist=parameters, times=times, progress=progress))
+    })
+  }
 
   results = as_tibble(bind_rows(results, .id = "sim"))
   results = rename_(results, .dots = c("patch"="Var1", "class"="Var2", "time"="Var3", "population"="value"))
