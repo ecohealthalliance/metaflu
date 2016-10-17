@@ -37,7 +37,8 @@ for work related to Avian Influenza
 This repository is setup as an R package that implements the core model,
 which is based on Hosseini et al.'s 2013 metapopulation model 
 `r citep("10.1371/journal.pone.0080091")`.  The `notebook/` directory 
-contains interim notes and analyses.
+contains interim notes and analyses. References for this project can be found in
+[this Paperpile folder](https://paperpile.com/shared/NmMQtu)
 
 ```{r bibtex, echo = FALSE, message = FALSE, cache=FALSE, results = 'asis'}
 write.bibtex(file="notebook/references.bib")
