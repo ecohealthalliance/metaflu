@@ -6,6 +6,8 @@
 #' @param seed if set, a random seed for the simulations
 #' @param parallel run the simulations in parallel?
 #' @param progress TRUE/FALSE show a progress bar?
+#' @param .test If TRUE, runs in testing mode, allowing profiling by calling
+#' \code{lapply()} instead of \code{mclapply()}.
 #' @importFrom dplyr rename_ mutate_ recode select_ arrange_ bind_rows
 #' @importFrom tibble as_tibble
 #' @importFrom parallel mclapply
@@ -36,7 +38,7 @@ mf_sim <- function(init, parameters, times, n_sims=1, seed=NULL, parallel=FALSE,
                                       parameters[["network_parms"]])
     }
     reshape2::melt(sim_gillespie(init=init, parmlist=parameters, times=times, progress=progress))
-  }, mc.set.seed=TRUE, mc.silent = FALSE, mc.cores = n_cores)
+  }, mc.set.seed=TRUE, mc.silent = FALSE)
   } else {
     results = lapply(seq_len(n_sims), function(sim) {
       if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
