@@ -1,8 +1,8 @@
 #' Influenza Metapopulation Simulator
 #'
-#' The simulator uses the \strong{foreach} and \strong{doRNG} packages to ensure
+#' The simulator uses the **foreach** and **doRNG** packages to ensure
 #' reproducible, parallelizable results.  To run code in parallel, register
-#' a \strong{foreach} back-end such as \code{\link[doMC]{registerDoMC}}.
+#' a **foreach** back-end such as [doMC::registerDoMC()].
 #' @param init Intital conditions - a patches X 4 (SIRV) matrix of populations
 #' @param parameters a list of parameter values.  See below for details
 #' @param times a vector of output times to report

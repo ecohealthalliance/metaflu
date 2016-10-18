@@ -18,7 +18,7 @@ mf_sim(init, parameters, times, n_sims = 1)
 \description{
 The simulator uses the \strong{foreach} and \strong{doRNG} packages to ensure
 reproducible, parallelizable results.  To run code in parallel, register
-a \strong{foreach} back-end such as \code{\link[doMC]{registerDoMC}}.
+a \strong{foreach} back-end such as \code{\link[doMC:registerDoMC]{doMC::registerDoMC()}}.
 }
 \examples{
  library(doMC)

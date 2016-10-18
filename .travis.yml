@@ -37,8 +37,10 @@ notifications:
     on_failure: change
 
 r_github_packages:
+  - klutometis/roxygen
   - jimhester/covr
   - MangoTheCat/goodpractice
+  - hadley/pkgdown
 
 after_success:
   - Rscript -e 'options(covr.gcov = "gcov-4.9");library(covr);codecov()'
