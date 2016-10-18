@@ -9,7 +9,9 @@ using namespace arma;
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 void update_rates(arma::mat &rates, const arma::mat &state, const mf_parmlist &parms) {
-    rates.col(0) = state.col(0) % (parms.beta *  state.col(1) + parms.nu * ( 1 - exp(-parms.phi * state.col(3)))); //infection events
+    rates.col(0) = state.col(0) % (parms.beta *  state.col(1) / pow(sum(state.cols(0, 2), 1), parms.rho) + //infection events (contact)
+                                   parms.nu * ( 1 - exp(-parms.phi * state.col(3))) + //virion uptake
+                                   parms.lambda); //external infection
     rates.col(1) = state.col(1) * parms.gamma; //recovery events
     rates.col(2) = state.col(0) * parms.mu;    //susceptible mortality
     rates.col(3) = state.col(1) * (parms.mu + parms.alpha); //infected mortality

@@ -1,4 +1,8 @@
-suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages({
+  library(dplyr)
+  library(foreach)
+  library(doMC)
+}))
 
 try_parms = list(
   beta = 0.004,                     #contact rate for direct transmission
@@ -10,27 +14,31 @@ try_parms = list(
   nu =  0.001,                      #uptake rate of environmental virion
   sigma = 0,                        #virion shedding rate
   omega = 0,                        #movement rate
+  rho = 0,                          #contact rate nonlinearity 0=density-dependent, 1=frequency-dependent
+  lambda = 0,                      #force of infection from external sources
   chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
 )
 
-initial_cond <- matrix(c(99, 1, 0, 0,
-                         99, 1, 0, 0),
-                       nrow=2, byrow=TRUE)
-
-#rdsOutput <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2)
-#saveRDS(rdsOutput,"stored_sim_results.rds")
+initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
+# registerDoSEQ()
+# set.seed(123)
+# rdsOutput <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+# saveRDS(rdsOutput,"tests/testthat/stored_sim_results.rds")
 
 context("Reproducibility")
 
 test_that("outputs with same seed are identical regardless of parallelism", {
-  options(mc.cores=2)
-  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2, parallel = FALSE)
-  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2, parallel = TRUE)
+  registerDoSEQ()
+  set.seed(123)
+  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  registerDoMC(cores = 2)
+  set.seed(123)
+  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
   expect_identical(output1, output2)
 })
 
 test_that("sims within run are not identical", {
-  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 3, seed = 2, parallel = FALSE)
+  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 3)
   sim1 <- output1 %>%
     filter(sim == 1)
   sim2 <- output1 %>%
@@ -53,9 +61,12 @@ test_that("patches are not identical", {
     nu =  0.001,                      #uptake rate of environmental virion
     sigma = 0,                      #virion shedding rate
     omega = 0,                        #movement rate
+    rho = 0,                          #contact rate nonlinearity 0=density-dependent, 1=frequency-dependent
+    lambda = 0,                      #force of infection from external sources
     chi = matrix(c(1,0,0,0,1,0,0,0,1), nrow=3)  #patch connectivity matrix
   )
-  output1 <- mf_sim(init = initial_cond, parameters = patch3_parms, times=0:1000, n_sims = 1, seed = 2, parallel = FALSE)
+  initial_cond_patch3 <- matrix(c(99, 1, 0, 0), nrow=3, ncol=4, byrow=TRUE)
+  output1 <- mf_sim(init = initial_cond_patch3, parameters = patch3_parms, times=0:1000, n_sims = 1)
   p1 <- output1 %>%
     filter(patch == 1)
   p2 <- output1 %>%
@@ -68,22 +79,27 @@ test_that("patches are not identical", {
 })
 
 test_that("non-seeded runs after same-seeded runs are not identical", {
-  options(mc.cores=2)
-  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2, parallel = TRUE)
-  output1a <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, parallel = TRUE)
-  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2, parallel = TRUE)
-  output2a <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, parallel = TRUE)
+  registerDoMC(cores = 2)
+  set.seed(123)
+  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  output1a <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  output2a <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
   expect_false(isTRUE(identical(output1a,output2a)))
   #non-parallel check
-  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2, parallel = FALSE)
-  output1a <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, parallel = FALSE)
-  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2, parallel = FALSE)
-  output2a <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, parallel = FALSE)
+  registerDoSEQ()
+  set.seed(123)
+  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  set.seed(123)
+  output1a <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  output2a <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
   expect_false(isTRUE(identical(output1a,output2a)))
 })
 
 test_that("RDS-saved model same as model created with same settings", {
-  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2, seed = 2)
+  set.seed(123)
+  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
   load1 <- readRDS("stored_sim_results.rds")
   expect_identical(output2, load1)
 })
