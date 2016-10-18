@@ -26,6 +26,9 @@ Imports:
 Suggests:
     testthat,
     doMC
+Remotes:
+  klutometis/roxygen
+  hadley/pkgdown
 RoxygenNote: 5.0.1.9000
 SystemRequirements: C++11
 URL: https://github.com/noamross/metaflu
