@@ -1,14 +1,11 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 
 language: r
-
 sudo: false
-
 cache: packages
 
 os:
   - linux
-
 r:
   - oldrel
   - release
@@ -28,16 +25,20 @@ before_install: |
   CXX1X=g++-4.9
   CXX1XSTD=-std=c++11
 
-
 matrix:
   allow_failures:
     - r: devel
 
 notifications:
   email: false
+  slack:
+    secure: Q+p3G2+RqEqdEfyLKnOrsV3eKipi1hD0BifvKweur1+zJbiRCmGguP+652rjvABI2Xa3IJJjUMZczxRnv+3MeI/wzTTscWFMTlqszJ9zpCSTQBrc+/fB+MkJSFXPHiKmRXkr3zezp3SuVccdi+q5Fj3BDbuDhkbXyLxZyqgvsruNyaSN9cLCTbobdhF6YL4pvyOOEonnQETQbk3/Z1pvh802/rjVptXVeZWjvu3GPt+ZDKvz/BZszAQ0M2QduThaBi4M9QMpFXTXxkD5cGuoA1XsZgCZo2EC7HJaz92FmuRTC2qFKPOBYX6L6R+lNjOcr5Lm8v1tBeK8tFewCoAyEf80Hhq7rA9Dlr7qO7yAm1yG6TwR8DK0Nt/baaW2ZdBoX1Ay6xvSeNMKIBALai6+tRqshnZK4/0Q2lEtyKVuVwbPNV/gRpxGZ+/c7IxKEKiH8mZ+MZ7LX+lqCWKG0fhTMcFjOdIKFGfTy6hIW9iBMmC2O44Zi/nEeKLXXxqCeX5N7c3VeDZ3Wp6OpjkxOz7x821QBlTJNYAlkXEn4GGU3AKI3/SUGI/c2eC2W6+Q1xycob9mnGejnOpWr9H0ioeqG8WfoyayW0xMElyySmNrYBwzB94d165uyiGLqnCA2nGWqZVeJnBkPuz6pVVEqFPSgaRYOigv6UkAvep+uZIa12M=
+    on_success: change
+    on_failure: change
 
 r_github_packages:
   - jimhester/covr
 
 after_success:
   - Rscript -e 'options(covr.gcov = "gcov-4.9");library(covr);codecov()'
+  - Rscript -e 'library(goodpractice);gp(checks=all_checks()[grepl("(rcmdcheck|covr)",all_checks()])'
