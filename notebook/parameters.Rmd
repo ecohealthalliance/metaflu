@@ -58,7 +58,7 @@ Environmental transmission not deemed relevant for initial model ~ more relevant
 
 __Movement Rate $\omega$__
 
-Original paper uses values from FAO Poultry Review in Egypt`r citep('ftp://ftp.fao.org/docrep/fao/011/ai355e/ai355e00.pdf')`, although exact decision on how to quantify $\omega$ not immediately clear. Once the method is understood, this resource may provide more specific information for Ethiopia: `r citep('http://www.fao.org/docrep/013/al837e/al837e00.pdf')`. Alternatively, FAO data may be relevant here. 
+Original paper uses values from FAO Poultry Review in Egypt `r citep('ftp://ftp.fao.org/docrep/fao/011/ai355e/ai355e00.pdf')`, although exact decision on how to quantify $\omega$ not immediately clear. Once the method is understood, this resource may provide more specific information for Ethiopia: `r citep('http://www.fao.org/docrep/013/al837e/al837e00.pdf')`. Alternatively, FAO data may be relevant here. 
 
 
 ```{r, include=FALSE}
