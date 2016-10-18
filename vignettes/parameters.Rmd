@@ -62,7 +62,7 @@ Original paper uses values from FAO Poultry Review in Egypt `r citep('ftp://ftp.
 
 
 ```{r, include=FALSE}
-write.bibtex(file = P("notebook/references.bib"))
+write.bibtex(file = P("vignettes/references.bib"))
 ```
 
 ## References

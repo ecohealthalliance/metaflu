@@ -70,7 +70,7 @@ The current consensus seems to be that wild birds are the reservoir for LPAI, bu
 
 
 ```{r, include=FALSE}
-write.bibtex(file = P("notebook/references.bib"))
+write.bibtex(file = P("vignettes/references.bib"))
 ```
 
 ## References

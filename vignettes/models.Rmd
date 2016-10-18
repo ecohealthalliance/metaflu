@@ -111,7 +111,7 @@ Most compartmental models operate on the village- or flock-level; I have been un
 
 
 ```{r, include=FALSE}
-write.bibtex(file = P("notebook/references.bib"))
+write.bibtex(file = P("vignettes/references.bib"))
 ```
 
 ## References

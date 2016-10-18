@@ -37,7 +37,7 @@ There are more case studies to examine; however, there does not seem to be a cle
 
 
 ```{r, include=FALSE}
-write.bibtex(file = P("notebook/references.bib"))
+write.bibtex(file = P("vignettes/references.bib"))
 ```
 
 ## References
