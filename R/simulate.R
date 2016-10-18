@@ -70,3 +70,4 @@ make_net <- function(network_type, network_parms) {
 
 
 # TODO: option to output all event times, not a grid
+#
