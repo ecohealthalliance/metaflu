@@ -1,0 +1,68 @@
+---
+title: "Parameters"
+output: html_document
+bibliography: references.bib
+csl: elsevier-with-titles.csl
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitcitations)
+cite_options(citation_format = 'pandoc')
+P <- rprojroot::find_rstudio_root_file
+```
+
+###Previous Model Parameters `r citep('10.1371/journal.pone.0080091')`:
+
+Direct Transmission $\beta = 0.004$  
+
+Recovery Rate $\upsilon = (0-0.167)$
+
+Disease Mortality Rate $\alpha = (0 - 0.4)$
+
+Environmental Uptake Rate $\nu = 0.001$
+
+Virion Infectiousness $\phi = 1.96 * 10^{-4}$
+
+Virus Degradation Rate $\eta = 0.14$
+
+Virion Shedding Rate $\sigma = 10^5$
+
+Movement Rate $\omega = 0.30$
+
+###New Model Paramaters
+
+__Poultry to Poultry Direct Transmission $\beta_{PP}$__
+Originally adapted from duck study `r citep('10.1128/JVI.78.9.4892-4901.2004')` ~ but unclear how exactly. Existing studies / models deal with village- or flock-level transmission, not individuals. For example, in West Bengal`r citep('10.1038/srep02175')`: $1.00 * 10^{-8}$, originally taken from a study in wild birds `r citep('10.3934/dcdsb.2012.17.2829')`. 
+
+__Wild Bird to Poultry Direct Transmission $\beta_{WP}$__  
+Transmission between wild birds and poultry *communities* ($1.00 * 10^{-8}$) was based on previous study of avian influenza dynamics in *wild birds* `r citep('10.3934/dcdsb.2012.17.2829')`
+
+__Poultry to Human Direct Transmission $\beta_{PH}$__  
+Fitted parameters from models predicting the seasonality of cumulative cases of HPAI H5N1 `r citep('10.1142/S0218339013400044')`, the estimated range for direct poultry to human transmission was $1.9 * 10^{-11}$ to $2.3 * 10^{-11}$.
+
+__Recovery Rate $\upsilon$__  
+Recovery for HPAI infected poultry does not seem to be commonly modeled -- instead either SI models `r citep(list('10.1017/S0950268808000885', '10.1142/S0218339013400044'))` or SIC (Culled) `r citep('10.1038/srep02175')` are used.  
+
+__Disease Mortality Rate $\alpha$__  
+Originally given as a range from studies based on ducks / chickens. When re-calculated based on chicken-specific parameter paper`r citep('10.1371/journal.ppat.1000281')`, $\alpha = 0.39$.
+
+__Environmental Uptake Rate $\nu$__  
+__Virion Infectiousness $\phi$__  
+__Virus Degradation Rate $\eta$__  
+__Virion Shedding Rate $\sigma$__  
+
+Environmental transmission not deemed relevant for initial model ~ more relevant for fecal-oral LPAI transmission when no epidemic occurs. In a long-term model could be interesting to consider effects of cleaning. HPAI environmental persistence has been researched under laboratory conditions `r citep('10.1021/es1016153')`. 
+
+__Movement Rate $\omega$__
+
+Original paper uses values from FAO Poultry Review in Egypt`r citep('ftp://ftp.fao.org/docrep/fao/011/ai355e/ai355e00.pdf')`, although exact decision on how to quantify $\omega$ not immediately clear. Once the method is understood, this resource may provide more specific information for Ethiopia: `r citep('http://www.fao.org/docrep/013/al837e/al837e00.pdf')`. Alternatively, FAO data may be relevant here. 
+
+
+```{r, include=FALSE}
+write.bibtex(file = P("notebook/references.bib"))
+```
+
+## References
+
+<div id="refs"></div>
