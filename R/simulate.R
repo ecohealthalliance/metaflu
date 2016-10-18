@@ -20,6 +20,8 @@
 #'    nu =  0.001,                      #uptake rate of environmental virion
 #'    sigma = 0,                        #virion shedding rate
 #'    omega = 0,                        #movement rate
+#'    rho = 0,                          #contact rate nonlinearity 0=density-dependent, 1=frequency-dependent
+#'    lambda = 0,                      #force of infection from external sources
 #'    chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
 #'    )
 #'  initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
