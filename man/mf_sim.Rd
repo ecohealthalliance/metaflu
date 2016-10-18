@@ -24,17 +24,17 @@ a \strong{foreach} back-end such as \code{\link[doMC:registerDoMC]{doMC::registe
  library(doMC)
  registerDoMC(cores=2)
  parms = list(
-   beta = 0.004,                     #contact rate for direct transmission
-   gamma = 0.167,                    #recovery rate
-   mu = 0,                           #base mortality rate
-   alpha = 0,                        #disease mortality rate
-   phi = 1.96e-4,                    #infectiousness of environmental virions
-   eta = 0.14,                       #degradation rate of environmental virions
-   nu =  0.001,                      #uptake rate of environmental virion
-   sigma = 0,                        #virion shedding rate
-   omega = 0,                        #movement rate
-   rho = 0,                          #contact rate nonlinearity 0=density-dependent, 1=frequency-dependent
-   lambda = 0,                      #force of infection from external sources
+   beta = 0.004,   #contact rate for direct transmission
+   gamma = 0.167,  #recovery rate
+   mu = 0,         #base mortality rate
+   alpha = 0,      #disease mortality rate
+   phi = 1.96e-4,  #infectiousness of environmental virions
+   eta = 0.14,     #degradation rate of environmental virions
+   nu =  0.001,    #uptake rate of environmental virion
+   sigma = 0,      #virion shedding rate
+   omega = 0,      #movement rate
+   rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+   lambda = 0,    #force of infection from external sources
    chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
    )
  initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
