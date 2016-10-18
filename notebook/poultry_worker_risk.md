@@ -1,0 +1,31 @@
+# Poultry Worker Risk
+
+
+
+This document summarizes papers which have identified risk or prevalence of avian influenza transmission in poultry workers / handlers. 
+
+###H5N1 *clade 0* Original Outbreak, Hong Kong: 1997
+An age- and sex-matched case-control study of risk factors for original H5N1 disease for 15 human cases in Hong Kong shows that people exposed to live poultry had 4.5 times the odds of disease than those unexposed to live poultry (P = 0.045) [@Mounts_1999]. In addition to small sample size, there may have been differential bias: interviews were answered by proxy for most cases (11/15) at a time after local television had linked illness to poultry markets. 
+
+###H5N1 *clade 0* Original Outbreak, Hong Kong: 1997
+In this study, researchers investigated H5-antibody positivity (microneutralization and Western blot testing) in poultry workers and government workers involved in the culling of ~ 1.5 million chickens after the initial H5N1 outbreak [@Bridges_2002]. The H5-positivity in poultry workers was 10%, in government workers was 3% -- for comparison, they cite 0% proportion found among adult blood donors and 0.07% among health-care workers.  
+In a nested case control study of these poultry workers, the authors showed that the risk of infection increases with the number of types of poultry exposure; with work in retail versus farm, wholesale, or other poultry industry; with touching, butchering, or feeding poultry; and with preparing poultry for restaurants. The authors argue that this evidence, taken together, strongly suggests that *occupational exposure to live poultry in retail markets* is responsible for the spread of disease -- not exposure in other contexts.  
+
+###H7N3 Poultry Workers, British Columbia: 2004
+In 2004, the Canadian Food Inspection Agency identified avian influenza in 42 commercial poultry farms in the Fraser Valley region of British Columbia, representing about 1.3 million birds [@Tweed_2004]. Approximately 2000 poultry farm workers and ~650 federal aid workers assisted in outbreak management; over a 4.5 month period a total of 77 symptomatic persons were reported, with 55 suspected and 2 confirmed cases of H7N3 influenza. Virus was isolated from confirmed cases, but antibody could not be detected in case serum samples. Both confirmed cases were of mild conjunctivitis and had unprotected eye contact with chickens. One tested positive for high pathogenicity avian influenza (HPAI) and one tested positive for low pathogenicity avian influenza (LPAI).
+
+###H5N1 *clade 2.2* Poultry Workers, Nigeria: 2006
+In 2006, 295 poultry workers and 25 laboratory workers with suspected exposure to H5N1 (clade 2, subclade 2) had their serum tested for H5N1 antibodies by microneutralization assay[@Takekawa_2010]. The authors of this paper found no serological evidence of H5N1 infection. In accompanying surveys, 66% of workers reported never wearing masks, 76% reported never wearing gloves, and 11% said they never washed their hands with soap after touching poultry. There were no associations between household wealth and PPE use.
+
+###H10N7 Poultry Abattoir Workers, Australia: 2010
+After a confirmed outbreak of LPAI H10N7 in New South Wales in 2010, an infected flock was sent to the abattoir; in the following week, 7 abattoir workers showed signs of conjunctivitis, sore throat, or rhinorrhea [@Arzey_2012]. PCR detected influenza A RNA from nose and throat swabs from two workers; partial sequences confirmed the virus was an H10 influenza. Symptoms were mild, there was no obvious breach of biosecurity at the farm, and workers did not wear goggles or facemasks the day the infected flock was processed. 
+
+##Conclusion
+There are more case studies to examine; however, there does not seem to be a clearly identifiable 'rate' for HPAI or H5N1 infection in poultry workers. Each virus (or clade/subclade of H5N1) is likely to have a different degree of infectivity. If the goal of our model is to evaluate how poultry industry change would effect spillover *given* an HPAI which can infect humans, then it seems reasonable to examine different hypothetical transmission rates within some plausible range.   
+
+
+
+
+## References
+
+<div id="refs"></div>

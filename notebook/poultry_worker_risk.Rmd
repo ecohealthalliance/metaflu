@@ -1,6 +1,8 @@
 ---
 title: "Poultry Worker Risk"
-output: html_document
+output:
+  html_document:
+    keep_md: TRUE
 bibliography: references.bib
 csl: elsevier-with-titles.csl
 link-citations: true
@@ -30,8 +32,8 @@ In 2006, 295 poultry workers and 25 laboratory workers with suspected exposure t
 ###H10N7 Poultry Abattoir Workers, Australia: 2010
 After a confirmed outbreak of LPAI H10N7 in New South Wales in 2010, an infected flock was sent to the abattoir; in the following week, 7 abattoir workers showed signs of conjunctivitis, sore throat, or rhinorrhea `r citep('10.3201/eid1805.111852')`. PCR detected influenza A RNA from nose and throat swabs from two workers; partial sequences confirmed the virus was an H10 influenza. Symptoms were mild, there was no obvious breach of biosecurity at the farm, and workers did not wear goggles or facemasks the day the infected flock was processed. 
 
-
-
+##Conclusion
+There are more case studies to examine; however, there does not seem to be a clearly identifiable 'rate' for HPAI or H5N1 infection in poultry workers. Each virus (or clade/subclade of H5N1) is likely to have a different degree of infectivity. If the goal of our model is to evaluate how poultry industry change would effect spillover *given* an HPAI which can infect humans, then it seems reasonable to examine different hypothetical transmission rates within some plausible range.   
 
 
 ```{r, include=FALSE}

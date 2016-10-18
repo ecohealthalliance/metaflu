@@ -1,21 +1,9 @@
----
-output:
-  html_document:
-    keep_md: TRUE
-bibliography: references.bib
-csl: elsevier-with-titles.csl
-link-citations: true
----
 
-```{r setup, include=FALSE}
-library(knitcitations)
-cite_options(citation_format = 'pandoc')
-P <- rprojroot::find_rstudio_root_file
-```
+
 #Ecology of Wild Birds
 ###Victims and vectors: highly pathogenic avian influenza H5N1 and the ecology of wild birds
 
-This review paper `r citep('10.3184/175815510X12737339356701')` examines the ecology and role of wild birds in transmitting HPAI (highly pathogenic avian influenza) to poultry, and ultimately, to humans. Important points include:
+This review paper [@Takekawa_2010] examines the ecology and role of wild birds in transmitting HPAI (highly pathogenic avian influenza) to poultry, and ultimately, to humans. Important points include:
 
 - Wild birds serve as the natural reservoir for LPAI (low pathogenic avian influenza) and the authors seem to favor theory that they are primarily shuttles of LPAI (not HPAI) between poultry populations. The authors cite the lack of wild bird HPAI samples and the reduced ability to migrate or function while infected with HPAI to support this theory. Ducks are a notable exception to this, as they can have asymptomatic HPAI infections. 
 
@@ -30,7 +18,7 @@ This review paper `r citep('10.3184/175815510X12737339356701')` examines the eco
 - Great tables on key wild bird events, pathologic H5N1 exposure results in bird species, and healthy wild birds found infected with HPAI. 
 
 ###Ecology of avian influenza viruses in a changing world
-This paper discusses both the ecology of avian influenza viruses and how anthropogenic changes may affect future virus transmission `r citep('10.1111/j.1749-6632.2010.05451.x')`. Some novel points include:
+This paper discusses both the ecology of avian influenza viruses and how anthropogenic changes may affect future virus transmission [@Vandegrift_2010]. Some novel points include:
 
 - The authors suggest that shorebirds are likely responsible for distant geographical spread of HPAI. They point out that despite some literature regarding reduced migration ability for infected birds, the evidence is not definitive; additionally, infections could hop between birds in the same flock as the group migrates or be asymptomatic at first, allowing shorebirds to travel large distances. Even given much lower prevalence in these birds, only a few infected cases would allow intercontinental spread.  
 
@@ -45,7 +33,7 @@ This paper discusses both the ecology of avian influenza viruses and how anthrop
 ###Understanding the ecological drivers of avian influenze virus infection in wildfowl: a continental-scale study across Africa
 
 
-This well-sourced paper `r citep('10.1098/rspb.2011.1417')` uses data from tropical wetlands in 15 African countries to evaluate potential ecological drivers of avian influenza prevalence in wild birds. There is no consideration of the interface between wild-bird and domestic-bird, but these results might still be relevant. Their stepwise GLMM model-fitting isolated three factors:  
+This well-sourced paper [@Gaidet_2011] uses data from tropical wetlands in 15 African countries to evaluate potential ecological drivers of avian influenza prevalence in wild birds. There is no consideration of the interface between wild-bird and domestic-bird, but these results might still be relevant. Their stepwise GLMM model-fitting isolated three factors:  
 
 - Taxonomic group (*Anas* species compared to other species)
 
@@ -69,9 +57,7 @@ __(4)__ The lack of (climatic) seasonality as a factor in tropical regions may b
 The current consensus seems to be that wild birds are the reservoir for LPAI, but it is unclear the degree to which they are responsible for the movement of HPAI from one poultry community to another -- some argue HPAI is most often spread via infected poultry trade and movement. It is possible that wild birds infect poultry with LPAI, which then is converted to HPAI within poultry communities as they infect and re-infect one another. In either scenario, contact with wild birds is the catalyst and therefore remains an important risk factor for initial poultry infection. 
 
 
-```{r, include=FALSE}
-write.bibtex(file = P("notebook/references.bib"))
-```
+
 
 ## References
 
