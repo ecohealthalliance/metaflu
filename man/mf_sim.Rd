@@ -4,8 +4,7 @@
 \alias{mf_sim}
 \title{Influenza Metapopulation Simulator}
 \usage{
-mf_sim(init, parameters, times, n_sims = 1, seed = NULL, parallel = FALSE,
-  progress = FALSE, .test = FALSE)
+mf_sim(init, parameters, times, n_sims = 1)
 }
 \arguments{
 \item{init}{Intital conditions - a patches X 4 (SIRV) matrix of populations}
@@ -15,14 +14,28 @@ mf_sim(init, parameters, times, n_sims = 1, seed = NULL, parallel = FALSE,
 \item{times}{a vector of output times to report}
 
 \item{n_sims}{number of simulations to run}
-
-\item{seed}{if set, a random seed for the simulations}
-
-\item{parallel}{run the simulations in parallel?}
-
-\item{progress}{TRUE/FALSE show a progress bar?}
 }
 \description{
-Influenza Metapopulation Simulator
+The simulator uses the \strong{foreach} and \strong{doRNG} packages to ensure
+reproducible, parallelizable results.  To run code in parallel, register
+a \strong{foreach} back-end such as \code{\link[doMC]{registerDoMC}}.
+}
+\examples{
+ library(doMC)
+ registerDoMC(cores=2)
+ parms = list(
+   beta = 0.004,                     #contact rate for direct transmission
+   gamma = 0.167,                    #recovery rate
+   mu = 0,                           #base mortality rate
+   alpha = 0,                        #disease mortality rate
+   phi = 1.96e-4,                    #infectiousness of environmental virions
+   eta = 0.14,                       #degradation rate of environmental virions
+   nu =  0.001,                      #uptake rate of environmental virion
+   sigma = 0,                        #virion shedding rate
+   omega = 0,                        #movement rate
+   chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
+   )
+ initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
+ output <- mf_sim(init = initial_cond, parameters = parms, times=0:1000, n_sims = 2)
 }
 

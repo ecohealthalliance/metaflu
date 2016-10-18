@@ -1,53 +1,52 @@
 #' Influenza Metapopulation Simulator
+#'
+#' The simulator uses the \strong{foreach} and \strong{doRNG} packages to ensure
+#' reproducible, parallelizable results.  To run code in parallel, register
+#' a \strong{foreach} back-end such as \code{\link[doMC]{registerDoMC}}.
 #' @param init Intital conditions - a patches X 4 (SIRV) matrix of populations
 #' @param parameters a list of parameter values.  See below for details
 #' @param times a vector of output times to report
 #' @param n_sims number of simulations to run
-#' @param seed if set, a random seed for the simulations
-#' @param parallel run the simulations in parallel?
-#' @param progress TRUE/FALSE show a progress bar?
-#' @param .test If TRUE, runs in testing mode, allowing profiling by calling
-#' \code{lapply()} instead of \code{mclapply()}.
+#' @examples
+#'  library(doMC)
+#'  registerDoMC(cores=2)
+#'  parms = list(
+#'    beta = 0.004,                     #contact rate for direct transmission
+#'    gamma = 0.167,                    #recovery rate
+#'    mu = 0,                           #base mortality rate
+#'    alpha = 0,                        #disease mortality rate
+#'    phi = 1.96e-4,                    #infectiousness of environmental virions
+#'    eta = 0.14,                       #degradation rate of environmental virions
+#'    nu =  0.001,                      #uptake rate of environmental virion
+#'    sigma = 0,                        #virion shedding rate
+#'    omega = 0,                        #movement rate
+#'    chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
+#'    )
+#'  initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
+#'  output <- mf_sim(init = initial_cond, parameters = parms, times=0:1000, n_sims = 2)
 #' @importFrom dplyr rename_ mutate_ recode select_ arrange_ bind_rows
 #' @importFrom tibble as_tibble
-#' @importFrom parallel mclapply
+#' @importFrom foreach foreach %dopar%
+#' @importFrom doRNG %dorng%
 #' @export
-mf_sim <- function(init, parameters, times, n_sims=1, seed=NULL, parallel=FALSE, progress=FALSE, .test=FALSE) {
-  progress = progress & !parallel  #progress bars don't work in parallel
-
-  old_rng_kind = RNGkind("L'Ecuyer-CMRG")  # set a parallel-friendly RNG generator
-  on.exit(RNGkind(old_rng_kind[1], old_rng_kind[2]), add=TRUE)
-
-  if(!is.null(seed)) {
-    old_seed <- .Random.seed
-    set.seed(seed)
-    on.exit(assign(".Random.seed", old_seed, envir=globalenv()), add=TRUE)
-  }
-
-  if(parallel) n_cores = getOption("mc.cores", 2L) else n_cores = 1
+mf_sim <- function(init, parameters, times, n_sims=1) {
 
   if(!is.null(parameters[["network_type"]]) && !parameters[["stochastic_network"]]) {
     parameters[["chi"]] <- make_net(parameters[["network_type"]],
                                     parameters[["network_parms"]])
   }
 
-  if(!.test) {
-  results = mclapply(seq_len(n_sims), function(sim) {
+  sim_fun <- function() {
     if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
       parameters[["chi"]] <- make_net(parameters[["network_type"]],
                                       parameters[["network_parms"]])
     }
-    reshape2::melt(sim_gillespie(init=init, parmlist=parameters, times=times, progress=progress))
-  }, mc.set.seed=TRUE, mc.silent = FALSE)
-  } else {
-    results = lapply(seq_len(n_sims), function(sim) {
-      if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
-        parameters[["chi"]] <- make_net(parameters[["network_type"]],
-                                        parameters[["network_parms"]])
-      }
-      reshape2::melt(sim_gillespie(init=init, parmlist=parameters, times=times, progress=progress))
-    })
+    return(reshape2::melt(sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE)))
   }
+
+  suppressWarnings(suppressMessages({
+    results = foreach(i=seq_len(n_sims)) %dorng% { sim_fun() }
+  }))
 
   results = as_tibble(bind_rows(results, .id = "sim"))
   results = rename_(results, .dots = c("patch"="Var1", "class"="Var2", "time"="Var3", "population"="value"))
