@@ -34,3 +34,20 @@ Outputs:
 -  Interactive/App: (Probably) simulation is too compuationally expensive to run
    for easily distributed app.  Save lots of simulations' summary data that can
    be explored?
+   
+Optimization:
+
+Notes:
+-  Implement Cao et al 2007 without the implicit tau-leaping, just the
+  critical variables and explicity poisson leaping.  Interim idea may
+  be to approximate implicit via Runge-Kutta type correction on the
+  explicit approach.
+-  Switch the arrangement so that all matrix-specific calculations happen inside
+  the rate and update functions.  The algorithm should deal with a vector only
+-  As for parallelism, consider doing nsims inside the C++ code using OpenMP
+  (but leave multiple parameterizations outside - what about initiating? May
+  have to call the generation function in R? Initiate before simulating?)
+-  Look at the fastmvn package approach to parallel, reproducible RNG
+-  Consider an arma sparse matrix for defining actions and networks
+-  Reduction function can also occur in OpenMP, but separately
+-  Reduction functions via Xptr?
