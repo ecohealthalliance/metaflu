@@ -40,6 +40,31 @@ This paper discusses both the ecology of avian influenza viruses and how anthrop
 
 - The transit of vaccine-protected poultry may occasionally help spread disease as some vaccine-protected animals continue to shed virus.
 
+###Understanding the ecological drivers of avian influenze virus infection in wildfowl: a continental-scale study across Africa
+
+
+This well-sourced paper `r citep('10.1098/rspb.2011.1417')` uses data from tropical wetlands in 15 African countries to evaluate potential ecological drivers of avian influenza prevalence in wild birds. There is no consideration of the interface between wild-bird and domestic-bird, but these results might still be relevant. Their stepwise GLMM model-fitting isolated three factors:  
+
+- Taxonomic group (*Anas* species compared to other species)
+
+- Wildfowl density at the community level, not species level
+
+- Timing of sampling relative to arrival of Eurasian wildfowl, not connected to wet/dry season
+
+The authors discuss several interpretations based on what they found to be significant:
+
+__(1)__ The relative importance of the *Anas*/non-*Anas* dichotomy over the foraging or migratory species behavior of wildfowl suggests that intrinsic biological differences between species may be more important for their receptivity to avian influenza infection. 
+
+__(2)__ The importance of community-level density suggests interspecies mixing is more important than density of individuals; however, when the authors investigated the relationship between the proportion of Eurasian wildfowl to influenza prevalence, they found no correlation -- they conclude that bird origin may not matter as much as the increase in density during these migration times. 
+
+__(3)__ The association between local wildfowl density and influenza infection coupled with the lack of an association between any climatic variables and influenza infection suggests that direct inter-individual transmission is more important for tropical regions than indirect transmission via a persisting environmental reservoir. This contrasts with previous findings for temperate African regions, where indirect transmission is considered more impactful than density.
+
+__(4)__ The lack of (climatic) seasonality as a factor in tropical regions may be because there are extended breeding seasons that produce a gradual increase in susceptible juveniles rather than a spike in births.
+
+
+#Conclusion
+
+The current consensus seems to be that wild birds are the reservoir for LPAI, but it is unclear the degree to which they are responsible for the movement of HPAI from one poultry community to another -- some argue HPAI is most often spread via infected poultry trade and movement. It is possible that wild birds infect poultry with LPAI, which then is converted to HPAI within poultry communities as they infect and re-infect one another. In either scenario, contact with wild birds is the catalyst and therefore remains an important risk factor for initial poultry infection. 
 
 
 ```{r, include=FALSE}
