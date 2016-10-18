@@ -38,6 +38,7 @@ notifications:
 
 r_github_packages:
   - jimhester/covr
+  - MangoTheCat/goodpractice
 
 after_success:
   - Rscript -e 'options(covr.gcov = "gcov-4.9");library(covr);codecov()'
