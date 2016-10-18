@@ -1,21 +1,8 @@
----
-title: "HPAI Models"
-output:
-  html_document:
-    keep_md: TRUE
-bibliography: references.bib
-csl: elsevier-with-titles.csl
-link-citations: true
-keep_md: true
----
+# HPAI Models
 
-```{r setup, include=FALSE}
-library(knitcitations)
-cite_options(citation_format = 'pandoc')
-P <- rprojroot::find_rstudio_root_file
-```
 
-###Estimation of the basic reproductive number (R~0~) for epidemic, highly pathogenic avian influenza subtype H5N1 spread `r citep('10.1017/S0950268808000885')`  
+
+###Estimation of the basic reproductive number (R~0~) for epidemic, highly pathogenic avian influenza subtype H5N1 spread [@WARD_2008]  
 
 This paper uses data from 110 outbreaks of HPAI H5N1 in village poultry in Romania in May/June 2006. Using GIS-based nearest-neighbor counting, epidemic doubling time, and an SI model, the authors obtained estimates of R~0~ at the village level. 
 
@@ -29,7 +16,7 @@ This paper uses data from 110 outbreaks of HPAI H5N1 in village poultry in Roman
 
 - Model assumes flock-level period of infectiousness between 7-14 days, cites other studies with 11.3-12.3 and 8-13.8 days.
 
-###Assessing the Potential Impact of Avian Influenza on Poultry in West Africa: A Spatial Equilibrium Analysis `r citep('10.1111/j.1477-9552.2007.00099.x')`
+###Assessing the Potential Impact of Avian Influenza on Poultry in West Africa: A Spatial Equilibrium Analysis [@You_2007]
 
 This paper uses a spatial equilibrium model to quantify the economic losses that would result from avian influenza outbreaks in West Africa, specifically modeling Nigeria in detail. In the most serious outbreak scenario, where avian influenza is spread widely along two migratory bird pathways in Nigeria and there is local transmission of the disease, the model predicts that the country's chicken production would fall by 21.1% at a cost of around $250 million USD in lost revenue. 
 
@@ -41,7 +28,7 @@ This paper uses a spatial equilibrium model to quantify the economic losses that
 
 - This is an economic model which considers supply, demand, and income -- but not import/export of chickens. The demand parameter is "shocked" by the avian influenza outbreak, incorporating the psychological effect an outbreak would have on demand and the chicken economy.
 
-###Modeling highly pathogenic avian influenza transmission in wild birds and poultry in West Bengal, India `r citep('10.1038/srep02175')`
+###Modeling highly pathogenic avian influenza transmission in wild birds and poultry in West Bengal, India [@Pandit_2013]
 
 The authors of this paper used a stochastic continuous time model to simulate introduction of H5N1 to poultry communities in West Bengal, India. Additionally, they performed a spatial cluster analysis of outbreaks, calculated R~0~ using three methods, and performed a logistic regression to identify significant predictors of H5N1 outbreaks.
 
@@ -49,9 +36,9 @@ The authors of this paper used a stochastic continuous time model to simulate in
 
 - Every village (n = 37,945) considered to have both poultry flock and wild birds; once a flock in a village is infected it is assumed entire village is infected and will be culled. 
 
-- Transmission rate between wild birds and poultry communities ($1.00 * 10^{-8}$) was based on previous study of avian influenza dynamics in wild birds `r citep('10.3934/dcdsb.2012.17.2829')`.
+- Transmission rate between wild birds and poultry communities ($1.00 * 10^{-8}$) was based on previous study of avian influenza dynamics in wild birds [@Vaidya_2012].
 
-- Transmission rate between poultry communities was estimated from SI calculations of observations, similar to a previous paper `r citep('10.1017/S0950268808000885')`, with a mean of 0.127 and exponentially distributed ($\mu = 0.122$).
+- Transmission rate between poultry communities was estimated from SI calculations of observations, similar to a previous paper [@WARD_2008], with a mean of 0.127 and exponentially distributed ($\mu = 0.122$).
 
 - R~0~ calculations: 
     - 0.859 (0.326 SD) via  SI equations
@@ -60,7 +47,7 @@ The authors of this paper used a stochastic continuous time model to simulate in
 
 - No consideration of LPAI in model; only HPAI entering from wild bird groups.
 
-###Conceptual Framework for Avian Influenza Risk Assessment in Africa: The Case of Ethiopia `r citep('10.1637/7591-040206R.1')`
+###Conceptual Framework for Avian Influenza Risk Assessment in Africa: The Case of Ethiopia [@Goutard_2007]
 
 This paper primarily deals with a Risk Assessment model for HPAI in Ethiopia (using atRISK software). The authors specifically target two lakes: (Ziway and Awassa) to be the centerpiece of their analysis, and use SEIR modeling to evaluate the consequences of possible outbreaks in poultry
 
@@ -76,7 +63,7 @@ This paper primarily deals with a Risk Assessment model for HPAI in Ethiopia (us
 
 - Authors acknowledge that a complete model requires both environmental transmission and infected poultry trade transmission. 
 
-###Mapping the Likelihood of Introduction and Spread of Highly Pathogenic Avian Influenza Virus H5N1 in Africa, Ghana, Ethiopia, Kenya, and Nigeria using Multicriteria Decision Modeling `r citep('https://www.researchgate.net/profile/Solenne_Costard/publication/244638255_Mapping_the_Likelihood_of_Introduction_and_Spread_of_Highly_Pathogenic_Avian_Influenza_Virus_H5N1_in_Africa_Ghana_Ethiopia_Kenya_and_Nigeria_using_Multicriteria_Decision_Modelling/links/0c9605265735ca6791000000.pdf')`  
+###Mapping the Likelihood of Introduction and Spread of Highly Pathogenic Avian Influenza Virus H5N1 in Africa, Ghana, Ethiopia, Kenya, and Nigeria using Multicriteria Decision Modeling [@greycite54493]  
 
 This analysis creates disease maps using multicriteria decision modelling (MCDM) to identify regions where the relative likelihood of introduction and spread of HPAI H5N1 is high. 
 
@@ -110,9 +97,7 @@ Most compartmental models operate on the village- or flock-level; I have been un
 
 
 
-```{r, include=FALSE}
-write.bibtex(file = P("notebook/references.bib"))
-```
+
 
 ## References
 
