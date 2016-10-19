@@ -39,8 +39,9 @@ r_github_packages:
   - MangoTheCat/goodpractice
   - hadley/pkgdown
 
-before_script:
-  - if Rscript -e "pkgdown::build_site(path = '$HOME/docs')"; then PKGDOWN_BUILT=1; fi
+before_script:  #do this before the build so as to cache the vignettes
+  - if Rscript -e "pkgdown::build_site()"; then PKGDOWN_BUILT=1; fi
+  - mv -f docs $HOME/docs
 
 after_success:
   - Rscript -e 'options(covr.gcov = "gcov-4.9");library(covr);codecov()'

@@ -2,8 +2,8 @@
 output:
   md_document:
     variant: markdown_github
-bibliography: notebook/references.bib
-csl: notebook/elsevier-with-titles.csl
+bibliography: vignettes/references.bib
+csl: vignettes/elsevier-with-titles.csl
 link-citations: true
 ---
 
@@ -18,10 +18,12 @@ link-citations: true
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "README-"
+  fig.path = "README-",
+  cache.path='~/.vignette_cache/'
 )
 library(knitcitations)
 cite_options(citation_format = 'pandoc')
+P <- rprojroot::find_rstudio_root_file
 ```
 
 # African Sustainable Livestock 2050 Avian Influenza Analysis
@@ -37,7 +39,7 @@ contains interim notes and analyses. References for this project can be found in
 [this Paperpile folder](https://paperpile.com/shared/NmMQtu)
 
 ```{r bibtex, echo = FALSE, message = FALSE, cache=FALSE, results = 'asis'}
-write.bibtex(file="vignettes/references.bib")
+write.bibtex(file=P("vignettes/references.bib"))
 ```
 
 ## References
