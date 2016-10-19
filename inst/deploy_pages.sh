@@ -7,7 +7,8 @@
 # a force push off a brand new branch.  This helps keep the size of
 # the repo under control.
 echo -e "Preparing to copy generated files to gh-pages branch"
-if [ "$TRAVIS_PULL_REQUEST" == "false" & "$TRAVIS_BRANCH" == "master"  && "$TRAVIS_R_VERSION" == "release"]; then
+
+if [[ "$TRAVIS_PULL_REQUEST" == 'false' && "$TRAVIS_BRANCH" == 'master' && "$TRAVIS_R_VERSION" == 'release' ]]; then
         echo -e "Starting to update gh-pages\n"
 
         mkdir -p $HOME/docs
@@ -39,9 +40,6 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" & "$TRAVIS_BRANCH" == "master"  && "$TRAV
         git push -fq origin gh-pages > /dev/null
 
         echo -e "Uploaded generated files to gh-pages\n"
-    fi
 else
     echo -e "Not pushing pages - only do this for master branch updates"
 fi
-
-echo -e "Done"
