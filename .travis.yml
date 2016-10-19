@@ -6,10 +6,6 @@ cache: packages
 
 os:
   - linux
-r:
-  - oldrel
-  - release
-  - devel
 
 addons:
   apt:
@@ -25,10 +21,6 @@ before_install: |
   cat <<EOF > ~/.R/Makevars
   CXX1X=g++-4.9
   CXX1XSTD=-std=c++11
-
-matrix:
-  allow_failures:
-    - r: devel
 
 notifications:
   email: false
