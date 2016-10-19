@@ -37,7 +37,7 @@ contains interim notes and analyses. References for this project can be found in
 [this Paperpile folder](https://paperpile.com/shared/NmMQtu)
 
 ```{r bibtex, echo = FALSE, message = FALSE, cache=FALSE, results = 'asis'}
-write.bibtex(file="notebook/references.bib")
+write.bibtex(file="vignettes/references.bib")
 ```
 
 ## References
