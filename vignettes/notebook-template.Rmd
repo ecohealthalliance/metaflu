@@ -9,6 +9,8 @@ link-citations: true
 ---
 
 ```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(cache.path='~/.vignette_cache/')
 library(knitcitations)
 cite_options(citation_format = 'pandoc')
 P <- rprojroot::find_rstudio_root_file
@@ -20,7 +22,7 @@ A citation: `r citep('10.1371/journal.pone.0080091')`
 
 
 ```{r, include=FALSE}
-write.bibtex(file=P("notebook/references.bib"))
+write.bibtex(file=P("vignettes/references.bib"))
 ```
 
 ## References

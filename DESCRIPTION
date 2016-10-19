@@ -18,14 +18,14 @@ Imports:
     Rcpp (>= 0.12.7),
     dplyr,
     tibble,
-    parallel,
     reshape2,
     igraph,
     doRNG,
     foreach,
 Suggests:
     testthat,
-    doMC
+    doMC,
+    knitcitations
 RoxygenNote: 5.0.1.9000
 SystemRequirements: C++11
 URL: https://github.com/noamross/metaflu

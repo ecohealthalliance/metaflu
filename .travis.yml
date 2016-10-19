@@ -2,7 +2,11 @@
 
 language: r
 sudo: false
-cache: packages
+cache:
+   - packages
+   - directories:
+     - $HOME/.vignette_cache
+
 
 os:
   - linux
