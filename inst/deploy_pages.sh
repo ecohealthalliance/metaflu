@@ -14,34 +14,38 @@ if [[ "$TRAVIS_PULL_REQUEST" == 'false' && "$TRAVIS_BRANCH" == 'master' ]]; then
         echo -e "Starting to update gh-pages\n"
 
         mkdir -p $HOME/docs
-        Rscript -e "pkgdown::build_site(path = '$HOME/docs')"
 
-        #go to home and setup git
-        cd $HOME
-        git config --global user.email "ross@ecohealthalliance.org"
-        git config --global user.name "Noam Ross (bot)"
+        if Rscript -e "pkgdown::build_site(path = '$HOME/docs')"; then
 
-        echo -e "Recloning project"
-        # Reclone the project, using the secret token.  Uses /dev/null to avoid leaking decrypted key
-        git clone --quiet --branch=gh-pages --single-branch https://${GH_TOKEN}@github.com/ecohealthalliance/metaflu.git gh-pages > /dev/null
+          #go to home and setup git
+          cd $HOME
+          git config --global user.email "ross@ecohealthalliance.org"
+          git config --global user.name "Noam Ross (bot)"
 
-        cd gh-pages
+          echo -e "Recloning project"
+          # Reclone the project, using the secret token.  Uses /dev/null to avoid leaking decrypted key
+          git clone --quiet --branch=gh-pages --single-branch https://${GH_TOKEN}@github.com/ecohealthalliance/metaflu.git gh-pages > /dev/null
 
-        # Move the old branch out of the way and create a new one:
-        git branch -m gh-pages-old
-        git checkout --orphan gh-pages
+          cd gh-pages
 
-        # Delete all the files and replace with our good set
-        git rm -rf .
-        cp -Rf $HOME/docs/* .
+          # Move the old branch out of the way and create a new one:
+          git branch -m gh-pages-old
+          git checkout --orphan gh-pages
 
-        # add, commit and push files
-        git add -f .
-        git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed to gh-pages"
-        echo -e "Pushing to origin/gh-pages"
-        git push -fq origin gh-pages > /dev/null
+          # Delete all the files and replace with our good set
+          git rm -rf .
+          cp -Rf $HOME/docs/* .
 
-        echo -e "Uploaded generated files to gh-pages\n"
+          # add, commit and push files
+          git add -f .
+          git commit -m "Travis build $TRAVIS_BUILD_NUMBER pushed to gh-pages"
+          echo -e "Pushing to origin/gh-pages"
+          git push -fq origin gh-pages > /dev/null
+
+          echo -e "Uploaded generated files to gh-pages\n"
+        else;
+          echo -e "Document building failed; not uploading website."
+        fi
 else
     echo -e "Not pushing pages - only do this for master branch updates"
 fi
