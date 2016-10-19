@@ -8,12 +8,8 @@ link-citations: true
 ---
 
 [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
-<a href="https://travis-ci.org/ecohealthalliance/metaflu"> <object data="https://img.shields.io/badge/build-unknown-lightgrey.svg" type="image/png">
-    <img src="https://travis-ci.org/ecohealthalliance/metaflu.svg?branch=master" />
-  </object></a>
-  <a href="https://codecov.io/github/ecohealthalliance/metaflu?branch=master"> <object data="https://img.shields.io/badge/coverage-unknown-lightgrey.svg" type="image/png">
-    <img src="https://codecov.io/github/ecohealthalliance/metaflu/coverage.svg?branch=master" />
-  </object></a>
+[![Package build status](https://travis-ci.org/ecohealthalliance/metaflu.svg?branch=master)](https://travis-ci.org/ecohealthalliance/metaflu)
+[![Code coverage](https://codecov.io/github/ecohealthalliance/metaflu/coverage.svg?branch=master)](https://codecov.io/github/ecohealthalliance/metaflu?branch=master)
 [![MIT Licensed - Copyright 2016 EcoHealth Alliance](https://img.shields.io/badge/license-MIT-blue.svg)](https://badges.mit-license.org/)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
