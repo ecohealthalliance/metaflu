@@ -6,9 +6,9 @@ African Sustainable Livestock 2050 Avian Influenza Analysis
 
 This repository contains code and analysis for EcoHealth Alliance's Africa Sustainable Livestock 2050 project in collaboration with FAO, specifically for work related to Avian Influenza
 
-This repository is setup as an R package that implements the core model, which is based on Hosseini et al.'s 2013 metapopulation model \[[1](#ref-Hosseini_2013)\]. The `notebook/` directory contains interim notes and analyses. References for this project can be found in [this Paperpile folder](https://paperpile.com/shared/NmMQtu)
+This repository is setup as an R package that implements the core model, which is based on Hosseini et al.'s 2013 metapopulation model \[1\]. The `notebook/` directory contains interim notes and analyses. References for this project can be found in [this Paperpile folder](https://paperpile.com/shared/NmMQtu)
 
 References
 ----------
 
-\[1\] P.R. Hosseini, T. Fuller, R. Harrigan, D. Zhao, C.S. Arriola, A. Gonzalez, et al., Metapopulation Dynamics Enable Persistence of Influenza a, Including a/H5n1, in Poultry. PLoS ONE. 8 (2013) e80091. doi:[10.1371/journal.pone.0080091](https://doi.org/10.1371/journal.pone.0080091).
+Hosseini, P. R., T. Fuller, R. Harrigan, D. Zhao, C. S. Arriola, A. Gonzalez, M. J. Miller, X. Xiao, T. B. Smith, J. H. Jones, and P. Daszak. 2013. Metapopulation Dynamics Enable Persistence of Influenza A, Including A/H5N1, in Poultry. PLoS ONE 8:e80091.

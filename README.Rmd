@@ -2,8 +2,6 @@
 output:
   md_document:
     variant: markdown_github
-bibliography: vignettes/references.bib
-csl: vignettes/elsevier-with-titles.csl
 link-citations: true
 ---
 
@@ -22,7 +20,7 @@ knitr::opts_chunk$set(
   cache.path='~/.vignette_cache/'
 )
 library(knitcitations)
-cite_options(citation_format = 'pandoc')
+cite_options(citation_format = 'text', style="html", cite.style = "numeric")
 P <- rprojroot::find_rstudio_root_file
 ```
 
@@ -38,10 +36,10 @@ which is based on Hosseini et al.'s 2013 metapopulation model
 contains interim notes and analyses. References for this project can be found in
 [this Paperpile folder](https://paperpile.com/shared/NmMQtu)
 
-```{r bibtex, echo = FALSE, message = FALSE, cache=FALSE, results = 'asis'}
-write.bibtex(file=P("vignettes/references.bib"))
-```
+
 
 ## References
 
-<div id="refs"></div>
+```{r bibtex, echo = FALSE, message = FALSE, cache=FALSE, results = 'asis'}
+bibliography(style="methods-in-ecology-and-evolution")
+```
