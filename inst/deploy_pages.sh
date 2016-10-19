@@ -15,7 +15,7 @@ if [[ "$TRAVIS_PULL_REQUEST" == 'false' && "$TRAVIS_BRANCH" == 'master' ]]; then
 
         mkdir -p $HOME/docs
 
-        if Rscript -e "pkgdown::build_site(path = '$HOME/docs')"; then
+        if $PKGDOWN_BUILT; then
 
           #go to home and setup git
           cd $HOME
@@ -43,7 +43,7 @@ if [[ "$TRAVIS_PULL_REQUEST" == 'false' && "$TRAVIS_BRANCH" == 'master' ]]; then
           git push -fq origin gh-pages > /dev/null
 
           echo -e "Uploaded generated files to gh-pages\n"
-        else;
+        else
           echo -e "Document building failed; not uploading website."
         fi
 else
