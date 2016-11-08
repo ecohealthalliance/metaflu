@@ -1,5 +1,5 @@
 ---
-title: "Testing Notebook"
+title: "Paper Results Reproduction"
 author: Cale Basaraba
 date: 2016-11-7
 output: html_document
@@ -45,11 +45,11 @@ parms = list(
   chi = matrix(c(0,0,0,0), nrow=2)  #patch connectivity matrix
   )
 
-initial_cond <- matrix(c(99, 1, 0, 0), nrow=64, ncol=4, byrow=TRUE)
+initial_cond <- matrix(c(100, 0, 0, 0), nrow=64, ncol=4, byrow=TRUE)
 
-#infected_patches <- sample(seq_len(nrow(initial_cond)), 2)
-#initial_cond[infected_patches, 2] <- 1
-#initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
+infected_patches <- sample(seq_len(nrow(initial_cond)), 2)
+initial_cond[infected_patches, 2] <- 1
+initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
 
 paperparms = list(
   beta = 0.004,   #contact rate for direct transmission
@@ -63,9 +63,9 @@ paperparms = list(
   omega = 0.3,      #movement rate
   rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
   lambda = 0,    #force of infection from external sources
-  chi = matrix(c(1,0,0,1), nrow=2),
+  chi = matrix(c(1,0,0,1), nrow = 2, ncol = 2),
   network_type = "smallworld",
-  network_parms = list(dim = 6, size = 2, nei = 1, p = 0.1)
+  network_parms = list(dim = 3, size = 2, nei = 1, p = 0.1, multiple = TRUE, loops = FALSE)
 )
 
 
@@ -75,10 +75,6 @@ paperparms = list(
 Run the simulator and plot
 
 ```{r runsim, cache=TRUE}
-library(dplyr)
-
-output1 <- mf_sim(init = initial_cond, parameters = parms, times=0:1000, n_sims = 1)
-
 output2 <- mf_sim(init = initial_cond, parameters = paperparms, times=0:1000, n_sims = 100)
 
 outputs = output2 %>% 
@@ -91,10 +87,12 @@ ggplot(outputs, aes(x=time, y=infecteds, group=sim)) +
   geom_line(alpha=0.1)
 
 
+library(igraph)
 test_net <- make_net(paperparms[["network_type"]], paperparms[["network_parms"]])
 
+test_ws <- do.call(paste0("sample_",paperparms[["network_type"]]),paperparms[["network_parms"]])
 
-
+plot(test_ws, layout = layout.circle)
 
 ```
 
