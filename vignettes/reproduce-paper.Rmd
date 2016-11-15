@@ -10,7 +10,7 @@ link-citations: true
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(cache.path='~/.vignette_cache/')
+opts_chunk$set(cache.path='~/.vignette_cache/', echo = FALSE, message=FALSE, warning = FALSE, autodep=TRUE)
 library(knitcitations)
 cite_options(citation_format = 'pandoc')
 P <- rprojroot::find_rstudio_root_file
@@ -23,93 +23,250 @@ library(metaflu)
 library(ggplot2)
 library(dplyr)
 library(doMC)
+library(tidyr)
 ```
 
-Set parameters for the simulator.  For now, no real network - just two unconnected
-patches
 
-```{r}
-registerDoMC(cores=2)
-parms = list(
-  beta = 0.004,   #contact rate for direct transmission
-  gamma = 0.167,  #recovery rate
-  mu = 0,         #base mortality rate
-  alpha = 0,      #disease mortality rate
-  phi = 1.96e-4,  #infectiousness of environmental virions
-  eta = 0.14,     #degradation rate of environmental virions
-  nu =  0.001,    #uptake rate of environmental virion
-  sigma = 0,      #virion shedding rate
-  omega = 0,      #movement rate
-  rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
-  lambda = 0,    #force of infection from external sources
-  chi = matrix(c(0,0,0,0), nrow=2)  #patch connectivity matrix
-  )
+```{r functions}
 
-initial_cond <- matrix(c(100, 0, 0, 0), nrow=64, ncol=4, byrow=TRUE)
+#function to get duration of epidemic
+get_duration <- function(results){
+  duration <- results %>%  
+    filter(class == "I") %>%
+    group_by(sim, time) %>%
+    summarize(infectious = sum(population))%>%
+    group_by(sim) %>%
+    summarize(days_greater = sum(infectious > 0 ))
+  duration
+}
 
-infected_patches <- sample(seq_len(nrow(initial_cond)), 2)
-initial_cond[infected_patches, 2] <- 1
-initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
+#function to get cross-sectional infections over time
+get_infections <- function(results){
+  infections <- results %>%
+    filter(class == "I") %>%
+    group_by(sim, time) %>%
+    summarize(infectious = sum(population)) %>%
+    group_by(time) %>%
+    summarize(middle = median(infectious), lower = quantile(infectious, probs = c(0.025)), upper = quantile(infectious, probs = c(0.975)))
+  infections
+}
 
-paperparms = list(
+#function to get cross-sectional susceptible over time
+get_susceptibles<- function(results){
+  susceptibles <- results %>%
+    filter(class == "S") %>%
+    group_by(sim, time) %>%
+    summarize(susceptibles = sum(population)) %>%
+    group_by(time) %>%
+    summarize(middle = median(susceptibles), lower = quantile(susceptibles, probs = c(0.025)), upper = quantile(susceptibles, probs = c(0.975)))
+  susceptibles
+}
+
+# function to get cross-sectional recovered over time
+get_recovered<- function(results){
+  recovered <- results %>%
+    filter(class == "R") %>%
+    group_by(sim, time) %>%
+    summarize(recovereds = sum(population)) %>%
+    group_by(time) %>%
+    summarize(middle = median(recovereds), lower = quantile(recovereds, probs = c(0.025)), upper = quantile(recovereds, probs = c(0.975)))
+  recovered
+}
+
+#function to get epidemic failure rate
+get_failure<-function(results){
+  check_fails <- function(time, population, patch, class){
+    initial<- which(time == 1 & class == "I" & population > 0)  
+    all<-which(class == "I" & population > 0)
+    identical(patch[initial],unique(patch[all]))
+  }
+  failures <- results %>%
+    group_by(sim) %>%
+    summarize(failed = check_fails(time, population, patch, class))
+  failures
+}
+
+proportion_failed <- function(failure_results){
+  sum(failure_results$failed)/length(failure_results$failed)
+}
+
+#function to get total number of infections
+get_tot_infections <- function(results){
+  tot_infections <- results %>%
+    filter(class == "S") %>%
+    group_by(sim, time) %>%
+    summarize(tots = sum(population)) %>%
+    group_by(sim) %>%
+    summarize(total_i = max(tots) - min(tots))
+}
+
+
+```
+
+
+
+```{r figure2-recreate, cache = TRUE}
+set.seed(17)
+
+fig2 <- function(farm_size, farm_number){
+  initial_cond <- matrix(c(farm_size, 0, 0, 0), nrow=farm_number, ncol=4, byrow=TRUE)
+  infected_patches <- sample(seq_len(nrow(initial_cond)), 2)
+  initial_cond[infected_patches, 2] <- 1
+  initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
+
+  fig2parms = list(
+    beta = 0.004,   #contact rate for direct transmission
+    gamma = 0.167,  #recovery rate
+    mu = 0,         #base mortality rate
+    alpha = 0.1111,      #disease mortality rate
+    phi = 0,  #infectiousness of environmental virions
+    eta = 0,     #degradation rate of environmental virions
+    nu =  0.00,    #uptake rate of environmental virion
+    sigma = 0,      #virion shedding rate
+    omega = 0.03,   #movement rate
+    rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+    lambda = 0,     #force of infection from external sources
+    chi = matrix(c(1,0,0,1), nrow = 2, ncol = 2),
+    network_type = "smallworld",
+    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+    stochastic_network = TRUE
+    )
+
+  x <- mf_sim(init = initial_cond, parameters = fig2parms, times=0:1000, n_sims = 100)
+  x
+}
+
+registerDoMC(cores=35)
+
+eighty_by_fourhundred <- fig2(80, 400)
+
+onesixty_by_twohundred <- fig2(160, 200)
+
+twohundred_by_onesixty <- fig2(200, 160)
+
+threetwenty_by_onehundred <- fig2(320, 100)
+
+fivehundred_by_sixtyfour <- fig2(500, 64)
+
+fig2results <- list(eighty_by_fourhundred, onesixty_by_twohundred, twohundred_by_onesixty, threetwenty_by_onehundred, fivehundred_by_sixtyfour)
+
+saveRDS(fig2results, "fig2results.rds")
+
+```
+
+
+
+```{r graph-proportions2}
+
+proportions <- unlist(mclapply(fig2results, function(x) proportion_failed(get_failure(x))))
+
+df1 <- data.frame(id = c(1:5), fails = proportions)
+
+ggplot(data = df1) +
+  geom_line(aes(x = id, y = fails)) +
+  scale_x_continuous(name = "Chickens:Farm", labels = c("80:400", "160:200","200:160", "320:100","500:64")) + 
+  scale_y_continuous(name = "Proportion of Epidemic Failures")
+  theme_bw()
+```
+  
+  
+```{r graph-duration2}
+
+duration_list <- mclapply(fig2results, get_duration)
+lower <- sapply(duration_list,function(x) quantile(unlist(x$days_greater), probs = c(0.025)))
+upper <- sapply(duration_list, function(x) quantile(unlist(x$days_greater), probs = c(0.975)))
+median <- sapply(duration_list, function(x) quantile(unlist(x$days_greater), probs = c(0.5)))
+
+df2 <- data.frame(lower, median, upper)
+
+ggplot(data = df2) +
+  geom_line(aes(x = 1:5, y = median)) +
+  geom_line(aes(x = 1:5, y = lower), linetype = "dashed") +
+  geom_line(aes(x = 1:5, y = upper), linetype = "dashed") + 
+  scale_x_continuous(name = "Chickens:Farm", labels = c("80:400", "160:200","200:160", "320:100","500:64")) + 
+  scale_y_continuous(name = "Median Duration (days)") +
+  theme_bw()
+
+```
+
+
+
+
+```{r graph-abundance2}
+
+abundance_list <- mclapply(fig2results, get_tot_infections)
+
+lower <- sapply(abundance_list,function(x) quantile(unlist(x$total_i), probs = c(0.025)))
+upper <- sapply(abundance_list, function(x) quantile(unlist(x$total_i), probs = c(0.975)))
+median <- sapply(abundance_list, function(x) quantile(unlist(x$total_i), probs = c(0.5)))
+
+df3 <- data.frame(lower, median, upper)
+
+ggplot(data = df3) +
+  geom_line(aes(x = 1:5, y = median)) +
+  geom_line(aes(x = 1:5, y = lower), linetype = "dashed") +
+  geom_line(aes(x = 1:5, y = upper), linetype = "dashed") + 
+  scale_x_continuous(name = "Chickens:Farm", labels = c("80:400", "160:200","200:160", "320:100","500:64")) + 
+  scale_y_continuous(name = "Total Number of Infections") +
+  theme_bw()
+
+
+```
+
+The above graph shows that 
+
+
+
+```{r graph-sir2, warning = FALSE}
+infectious_list <- mclapply(fig2results, get_infections)
+recovered_list <- mclapply(fig2results, get_recovered)
+susceptible_list <- mclapply(fig2results, get_susceptibles)
+
+s160 <- susceptible_list[[2]]
+i160 <- infectious_list[[2]]
+r160 <- recovered_list[[2]]
+
+ggplot(data = s160) +
+  geom_line(aes(x = time, y = middle), color = "blue") +
+  geom_line(data = i160, aes(x = time, y = middle), color = "red") +
+  geom_line(data = r160, aes(x = time, y = middle), color = "green") +
+  scale_x_continuous(name = "Time (days)", limits = c(0, 500)) + 
+  scale_y_continuous(name = "Median Number of Chickens (100 simulations)") 
+
+```
+
+The above graph is an example median SIR graph for a small-world network of two hundred farms with one hundred and sixty chickens on each farm. Susceptible = blue, infected = red, recovered = green.
+
+Median values across simulations aren't accurately representing what's happening here, as the infectious line shows. 
+
+```{r figure8}
+
+fig8parms = list(
   beta = 0.004,   #contact rate for direct transmission
   gamma = 0.167,  #recovery rate
   mu = 0,         #base mortality rate
   alpha = 0.4,      #disease mortality rate
-  phi = 1.96e-4,  #infectiousness of environmental virions
-  eta = 0.14,     #degradation rate of environmental virions
-  nu =  0.001,    #uptake rate of environmental virion
+  phi = 0,  #infectiousness of environmental virions
+  eta = 0,     #degradation rate of environmental virions
+  nu =  0.0,    #uptake rate of environmental virion
   sigma = 0,      #virion shedding rate
-  omega = 0.3,      #movement rate
+  omega = 0.03,      #movement rate
   rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
   lambda = 0,    #force of infection from external sources
   chi = matrix(c(1,0,0,1), nrow = 2, ncol = 2),
   network_type = "smallworld",
-  network_parms = list(dim = 3, size = 2, nei = 1, p = 0.1, multiple = TRUE, loops = FALSE)
+  network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+  stochastic_network = TRUE
 )
 
 
 
-```
-
-Run the simulator and plot
-
-```{r runsim, cache=TRUE}
-output2 <- mf_sim(init = initial_cond, parameters = paperparms, times=0:1000, n_sims = 100)
-
-outputs = output2 %>% 
-  filter(class == "I") %>% 
-  group_by(sim, time) %>% 
-  summarize(infecteds = sum(population)) %>% 
-  group_by()
-
-ggplot(outputs, aes(x=time, y=infecteds, group=sim)) +
-  geom_line(alpha=0.1)
 
 
-library(igraph)
-test_net <- make_net(paperparms[["network_type"]], paperparms[["network_parms"]])
 
-test_ws <- do.call(paste0("sample_",paperparms[["network_type"]]),paperparms[["network_parms"]])
-
-plot(test_ws, layout = layout.circle)
 
 ```
 
-```{r learning-igraph}
-library(igraph)
-
-x <- list(dim = 3, size = 4, nei = 2.33, p = 0.0596)
-net <- as_adj(do.call("sample_smallworld", x),
-               sparse=FALSE)
-
-#there are size^dim vertices in base graph, with nei initial connections
-
-sw <- do.call("sample_smallworld",x)
-
-plot(sw)
-
-```
 
 
 
