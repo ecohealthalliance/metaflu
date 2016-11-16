@@ -10,7 +10,7 @@ link-citations: true
 
 ```{r setup, include=FALSE}
 library(knitr)
-opts_chunk$set(cache.path='~/.vignette_cache/', echo = FALSE, message=FALSE, warning = FALSE, autodep=TRUE)
+opts_chunk$set(cache.path='~/.vignette_cache/', echo = FALSE, message=FALSE, warning = FALSE, autodep=TRUE, cache = TRUE)
 library(knitcitations)
 cite_options(citation_format = 'pandoc')
 P <- rprojroot::find_rstudio_root_file
@@ -105,7 +105,7 @@ get_tot_infections <- function(results){
 
 
 
-```{r figure2-recreate, cache = TRUE}
+```{r figure2-recreate, cache = TRUE, eval = FALSE}
 set.seed(17)
 
 fig2 <- function(farm_size, farm_number){
@@ -158,7 +158,9 @@ saveRDS(fig2results, "fig2results.rds")
 
 ```{r graph-proportions2}
 
-proportions <- unlist(mclapply(fig2results, function(x) proportion_failed(get_failure(x))))
+fig2results <- readRDS("fig2results.rds")
+
+proportions <- unlist(lapply(fig2results, function(x) proportion_failed(get_failure(x))))
 
 df1 <- data.frame(id = c(1:5), fails = proportions)
 
@@ -172,7 +174,7 @@ ggplot(data = df1) +
   
 ```{r graph-duration2}
 
-duration_list <- mclapply(fig2results, get_duration)
+duration_list <- lapply(fig2results, get_duration)
 lower <- sapply(duration_list,function(x) quantile(unlist(x$days_greater), probs = c(0.025)))
 upper <- sapply(duration_list, function(x) quantile(unlist(x$days_greater), probs = c(0.975)))
 median <- sapply(duration_list, function(x) quantile(unlist(x$days_greater), probs = c(0.5)))
@@ -194,7 +196,7 @@ ggplot(data = df2) +
 
 ```{r graph-abundance2}
 
-abundance_list <- mclapply(fig2results, get_tot_infections)
+abundance_list <- lapply(fig2results, get_tot_infections)
 
 lower <- sapply(abundance_list,function(x) quantile(unlist(x$total_i), probs = c(0.025)))
 upper <- sapply(abundance_list, function(x) quantile(unlist(x$total_i), probs = c(0.975)))
@@ -218,9 +220,9 @@ The above graph shows that
 
 
 ```{r graph-sir2, warning = FALSE}
-infectious_list <- mclapply(fig2results, get_infections)
-recovered_list <- mclapply(fig2results, get_recovered)
-susceptible_list <- mclapply(fig2results, get_susceptibles)
+infectious_list <- lapply(fig2results, get_infections)
+recovered_list <- lapply(fig2results, get_recovered)
+susceptible_list <- lapply(fig2results, get_susceptibles)
 
 s160 <- susceptible_list[[2]]
 i160 <- infectious_list[[2]]
@@ -238,35 +240,6 @@ ggplot(data = s160) +
 The above graph is an example median SIR graph for a small-world network of two hundred farms with one hundred and sixty chickens on each farm. Susceptible = blue, infected = red, recovered = green.
 
 Median values across simulations aren't accurately representing what's happening here, as the infectious line shows. 
-
-```{r figure8}
-
-fig8parms = list(
-  beta = 0.004,   #contact rate for direct transmission
-  gamma = 0.167,  #recovery rate
-  mu = 0,         #base mortality rate
-  alpha = 0.4,      #disease mortality rate
-  phi = 0,  #infectiousness of environmental virions
-  eta = 0,     #degradation rate of environmental virions
-  nu =  0.0,    #uptake rate of environmental virion
-  sigma = 0,      #virion shedding rate
-  omega = 0.03,      #movement rate
-  rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
-  lambda = 0,    #force of infection from external sources
-  chi = matrix(c(1,0,0,1), nrow = 2, ncol = 2),
-  network_type = "smallworld",
-  network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
-  stochastic_network = TRUE
-)
-
-
-
-
-
-
-
-
-```
 
 
 
