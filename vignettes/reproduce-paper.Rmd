@@ -1,0 +1,258 @@
+---
+title: "Paper Results Reproduction"
+author: Cale Basaraba
+date: 2016-11-7
+output: html_document
+bibliography: references.bib
+csl: elsevier-with-titles.csl
+link-citations: true
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(cache.path='~/.vignette_cache/', echo = FALSE, message=FALSE, warning = FALSE, autodep=TRUE, cache = TRUE)
+library(knitcitations)
+cite_options(citation_format = 'pandoc')
+P <- rprojroot::find_rstudio_root_file
+```
+
+Model after `r citep('10.1371/journal.pone.0080091')`.
+
+```{r setup2}
+library(metaflu)
+library(ggplot2)
+library(dplyr)
+library(doMC)
+library(tidyr)
+```
+
+
+```{r functions}
+
+#function to get duration of epidemic
+get_duration <- function(results){
+  duration <- results %>%  
+    filter(class == "I") %>%
+    group_by(sim, time) %>%
+    summarize(infectious = sum(population))%>%
+    group_by(sim) %>%
+    summarize(days_greater = sum(infectious > 0 ))
+  duration
+}
+
+#function to get cross-sectional infections over time
+get_infections <- function(results){
+  infections <- results %>%
+    filter(class == "I") %>%
+    group_by(sim, time) %>%
+    summarize(infectious = sum(population)) %>%
+    group_by(time) %>%
+    summarize(middle = median(infectious), lower = quantile(infectious, probs = c(0.025)), upper = quantile(infectious, probs = c(0.975)))
+  infections
+}
+
+#function to get cross-sectional susceptible over time
+get_susceptibles<- function(results){
+  susceptibles <- results %>%
+    filter(class == "S") %>%
+    group_by(sim, time) %>%
+    summarize(susceptibles = sum(population)) %>%
+    group_by(time) %>%
+    summarize(middle = median(susceptibles), lower = quantile(susceptibles, probs = c(0.025)), upper = quantile(susceptibles, probs = c(0.975)))
+  susceptibles
+}
+
+# function to get cross-sectional recovered over time
+get_recovered<- function(results){
+  recovered <- results %>%
+    filter(class == "R") %>%
+    group_by(sim, time) %>%
+    summarize(recovereds = sum(population)) %>%
+    group_by(time) %>%
+    summarize(middle = median(recovereds), lower = quantile(recovereds, probs = c(0.025)), upper = quantile(recovereds, probs = c(0.975)))
+  recovered
+}
+
+#function to get epidemic failure rate
+get_failure<-function(results){
+  check_fails <- function(time, population, patch, class){
+    initial<- which(time == 1 & class == "I" & population > 0)  
+    all<-which(class == "I" & population > 0)
+    identical(patch[initial],unique(patch[all]))
+  }
+  failures <- results %>%
+    group_by(sim) %>%
+    summarize(failed = check_fails(time, population, patch, class))
+  failures
+}
+
+proportion_failed <- function(failure_results){
+  sum(failure_results$failed)/length(failure_results$failed)
+}
+
+#function to get total number of infections
+get_tot_infections <- function(results){
+  tot_infections <- results %>%
+    filter(class == "S") %>%
+    group_by(sim, time) %>%
+    summarize(tots = sum(population)) %>%
+    group_by(sim) %>%
+    summarize(total_i = max(tots) - min(tots))
+}
+
+
+```
+
+
+
+###DON'T RUN THIS ONE -- SCALAR ERROR
+```{r figure2-recreate, cache = TRUE, eval = FALSE}
+set.seed(17)
+
+fig2 <- function(farm_size, farm_number){
+  initial_cond <- matrix(c(farm_size, 0, 0, 0), nrow=farm_number, ncol=4, byrow=TRUE)
+  infected_patches <- sample(seq_len(nrow(initial_cond)), 2)
+  initial_cond[infected_patches, 2] <- 1
+  initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
+
+  fig2parms = list(
+    beta = 0.004,   #contact rate for direct transmission
+    gamma = 0.167,  #recovery rate
+    mu = 0,         #base mortality rate
+    alpha = 0.1111,      #disease mortality rate
+    phi = 0,  #infectiousness of environmental virions
+    eta = 0,     #degradation rate of environmental virions
+    nu =  0.00,    #uptake rate of environmental virion
+    sigma = 0,      #virion shedding rate
+    omega = 0.03,   #movement rate
+    rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+    lambda = 0,     #force of infection from external sources
+    chi = matrix(c(1,0,0,1), nrow = 2, ncol = 2),
+    network_type = "smallworld",
+    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+    stochastic_network = TRUE
+    )
+
+  x <- mf_sim(init = initial_cond, parameters = fig2parms, times=0:1000, n_sims = 100)
+  x
+}
+
+registerDoMC(cores=35)
+
+eighty_by_fourhundred <- fig2(80, 400)
+
+onesixty_by_twohundred <- fig2(160, 200)
+
+twohundred_by_onesixty <- fig2(200, 160)
+
+threetwenty_by_onehundred <- fig2(320, 100)
+
+fivehundred_by_sixtyfour <- fig2(500, 64)
+
+fig2results <- list(eighty_by_fourhundred, onesixty_by_twohundred, twohundred_by_onesixty, threetwenty_by_onehundred, fivehundred_by_sixtyfour)
+
+saveRDS(fig2results, "fig2results.rds")
+
+```
+
+
+
+```{r graph-proportions2}
+
+fig2results <- readRDS("fig2results.rds")
+
+proportions <- unlist(lapply(fig2results, function(x) proportion_failed(get_failure(x))))
+
+df1 <- data.frame(id = c(1:5), fails = proportions)
+
+ggplot(data = df1) +
+  geom_line(aes(x = id, y = fails)) +
+  scale_x_continuous(name = "Chickens:Farm", labels = c("80:400", "160:200","200:160", "320:100","500:64")) + 
+  scale_y_continuous(name = "Proportion of Epidemic Failures") +
+  theme_bw()
+```
+  The above figure is a recreation of the top graph of Figure 2, showing the 'probability' that an epidemic will fail using their model; in this context "epidemic failure" is a run where the epidemic does not propagate an originally seeded patch to any other patch. Our model shows roughly the same behavior as the published paper, with epidemic failure becoming less likely as we increase the size of farms. 
+  
+```{r graph-duration2}
+
+duration_list <- lapply(fig2results, get_duration)
+lower <- sapply(duration_list,function(x) quantile(unlist(x$days_greater), probs = c(0.025)))
+upper <- sapply(duration_list, function(x) quantile(unlist(x$days_greater), probs = c(0.975)))
+median <- sapply(duration_list, function(x) quantile(unlist(x$days_greater), probs = c(0.5)))
+
+df2 <- data.frame(lower, median, upper)
+
+ggplot(data = df2) +
+  geom_line(aes(x = 1:5, y = median)) +
+  geom_line(aes(x = 1:5, y = lower), linetype = "dashed") +
+  geom_line(aes(x = 1:5, y = upper), linetype = "dashed") + 
+  scale_x_continuous(name = "Chickens:Farm", labels = c("80:400", "160:200","200:160", "320:100","500:64")) + 
+  scale_y_continuous(name = "Median Duration (days)") +
+  theme_bw()
+
+```
+
+This graph is a recreation of the middle graph in Figure 2, and shows the median length of the epidemic in days, along with the 95% bootstrapped interval in dashed lines. This graph is considerably different from the published results, with epidemics that last far shorter and simulations with a much lower 97.5% quantile. Although Figure 2 includes environmental transmission, Figure S8 does not, and still reports a median duration in the 300/500 range for these Chickens:Farm combinations. '
+
+I have double-checked that parameters are the same, and that the paper also reports seeding the epidemic with two infectious individuals at random nodes in the network. 
+
+
+```{r graph-abundance2}
+
+abundance_list <- lapply(fig2results, get_tot_infections)
+
+lower <- sapply(abundance_list,function(x) quantile(unlist(x$total_i), probs = c(0.025)))
+upper <- sapply(abundance_list, function(x) quantile(unlist(x$total_i), probs = c(0.975)))
+median <- sapply(abundance_list, function(x) quantile(unlist(x$total_i), probs = c(0.5)))
+
+df3 <- data.frame(lower, median, upper)
+
+ggplot(data = df3) +
+  geom_line(aes(x = 1:5, y = median)) +
+  geom_line(aes(x = 1:5, y = lower), linetype = "dashed") +
+  geom_line(aes(x = 1:5, y = upper), linetype = "dashed") + 
+  scale_x_continuous(name = "Chickens:Farm", labels = c("80:400", "160:200","200:160", "320:100","500:64")) + 
+  scale_y_continuous(name = "Total Number of Infections") +
+  theme_bw()
+
+
+```
+
+The above graph shows the median total number of infections as we alter the number of chickens and number of farms. The fact that it looks like the graph of a binary variable reflects the fact that the results of each run at each combination of chickens/farms either propagate to nearly the entire population (~32000) or barely propagate at all (~5-15 infections).
+
+All of the published paper's figures display total infections using median and bootstrapped intervals, but closer inspection reveals the same epidemic / non-epidemic dichotomy, with the median / intervals jumping up and down between neglible infection numbers to infections that total the entire susceptible population. The one exception to this pattern are two graphs showing results from runs using culling / control mechanisms. For future illustration, these median / boostrapped interval graphs may not be the best choice.
+
+
+
+```{r graph-sir2, warning = FALSE}
+infectious_list <- lapply(fig2results, get_infections)
+recovered_list <- lapply(fig2results, get_recovered)
+susceptible_list <- lapply(fig2results, get_susceptibles)
+
+s160 <- susceptible_list[[2]]
+i160 <- infectious_list[[2]]
+r160 <- recovered_list[[2]]
+
+ggplot(data = s160) +
+  geom_line(aes(x = time, y = middle), color = "blue") +
+  geom_line(data = i160, aes(x = time, y = middle), color = "red") +
+  geom_line(data = r160, aes(x = time, y = middle), color = "green") +
+  scale_x_continuous(name = "Time (days)", limits = c(0, 500)) + 
+  scale_y_continuous(name = "Median Number of Chickens (100 simulations)") 
+
+```
+
+The above graph is an example median SIR graph for a small-world network of two hundred farms with one hundred and sixty chickens on each farm. Susceptible = blue, infected = red, recovered = green.
+
+Again, median values across simulations can be misleading to the viewer, as the infectious line shows. 
+
+
+
+
+```{r, include=FALSE}
+write.bibtex(file="references.bib")
+```
+
+## References
+
+<div id="refs"></div>
