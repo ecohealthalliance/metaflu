@@ -33,6 +33,8 @@
 #' @export
 mf_sim <- function(init, parameters, times, n_sims=1) {
 
+  times <- as.double(times)
+  init <- as.vector(t(init))
   if(!is.null(parameters[["network_type"]]) && !parameters[["stochastic_network"]]) {
     parameters[["chi"]] <- make_net(parameters[["network_type"]],
                                     parameters[["network_parms"]])
@@ -43,19 +45,22 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
       parameters[["chi"]] <- make_net(parameters[["network_type"]],
                                       parameters[["network_parms"]])
     }
-    return(reshape2::melt(sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE)))
+    return(tibble::as_data_frame(sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE)))
   }
 
   suppressWarnings(suppressMessages({
     results = foreach(i=seq_len(n_sims)) %dorng% { sim_fun() }
   }))
 
-  results = as_tibble(bind_rows(results, .id = "sim"))
-  results = rename_(results, .dots = c("patch"="Var1", "class"="Var2", "time"="Var3", "population"="value"))
-#  results = mutate_(results, class = ~as.character(class))
-  results = mutate_(results, class =  ~recode(class, `1`="S", `2`="I", `3`="R", `4`="V"))
+  results = bind_rows(results, .id = "sim")
+  names(results)[-1] <- c("time", paste(rep(1:nrow(parameters[["chi"]]), each=4), c("S", "I", "R", "V"),  sep="_"))
+  results <- gather(results, "class", "population", -sim, -time)
+  results <- separate(results, class, into=c("patch", "class"))
+
+
   results = mutate_(results, class =  ~factor(class, levels=(c("S", "I", "R", "V"))))
   results = select_(results, "sim", "time", "patch", "class", "population")
+
   results = arrange_(results, "sim", "time", "patch", "class")
   return(results)
 }

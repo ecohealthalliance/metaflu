@@ -24,6 +24,10 @@ struct mf_parmlist {
   arma::mat chi_cum;        //patch connectivity matrix, row-wise cumulative
   int K;                    //total number of patches
 
+  int n_actions;            // number of possible actions
+  int n_pstates;            // number of possible classes
+  arma::imat action_matrix; // action-class matrix
+
   mf_parmlist() ;  //default constructor
 
   mf_parmlist(List parmlist) {  //Creates this structure from an R list
@@ -41,7 +45,35 @@ struct mf_parmlist {
     chi = as<arma::mat>(parmlist["chi"]);
     chi_cum = cumsum(chi, 1);
     K = chi.n_rows;
+
+    n_actions = 10;
+    n_pstates = 4;
+    action_matrix = {
+      {-1,  1,  0,  0},  //0 infection
+      { 0, -1, +1,  0},  //1 recovery
+      {-1,  0,  0,  0},  //2 S mortality
+      { 0, -1,  0,  0},  //3 I mortality
+      { 0,  0, -1,  0},  //4 R mortality
+      { 0,  0,  0, +1},  //5 shedding
+      { 0,  0,  0, -1},  //6 degradation
+      {-1,  0,  0,  0},  //7 S emigration
+      { 0, -1,  0,  0},  //8 I emigration
+      { 0,  0, -1,  0},  //9 R emigration
+    };
+    action_matrix = trans(action_matrix);
+
   }
+};
+
+struct mf_vals {  //holds interim objects
+
+  arma::mat rates_mat;
+  arma::mat state_mat;
+  uword target_patch;
+  uword patch;
+  uword action;
+  mf_vals() {};
+
 };
 
 #endif
