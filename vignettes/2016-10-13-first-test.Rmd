@@ -29,7 +29,7 @@ Set parameters for the simulator.  For now, no real network - just two unconnect
 patches
 
 ```{r}
-registerDoMC(cores=2)
+#registerDoMC(cores=2)
 parms = list(
   beta = 0.004,   #contact rate for direct transmission
   gamma = 0.167,  #recovery rate
@@ -53,7 +53,10 @@ initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
 Run the simulator and plot
 
 ```{r runsim, cache=TRUE}
-output1 <- mf_sim(init = initial_cond, parameters = parms, times=0:1000, n_sims = 1000)
+
+a <- metaflu:::sim_gillespie(as.vector(t(initial_cond)), parms, 1:1000, TRUE)
+
+ output1 <- mf_sim(init = initial_cond, parameters = parms, times=0:1000, n_sims = 1000)
 
 outputs = output1 %>% 
   filter(class == "I") %>% 

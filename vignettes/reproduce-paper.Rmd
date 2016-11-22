@@ -127,17 +127,16 @@ fig2 <- function(farm_size, farm_number){
     omega = 0.03,   #movement rate
     rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
     lambda = 0,     #force of infection from external sources
-    chi = matrix(c(1,0,0,1), nrow = 2, ncol = 2),
-    network_type = "smallworld",
-    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
-    stochastic_network = TRUE
+    chi = make_net(network_type = "smallworld",
+                   network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)),
+    stochastic_network = FALSE
     )
 
-  x <- mf_sim(init = initial_cond, parameters = fig2parms, times=0:1000, n_sims = 100)
+  x <- mf_sim(init = initial_cond, parameters = fig2parms, times=0:1000, n_sims = 10)
   x
 }
 
-registerDoMC(cores=35)
+registerDoMC(cores=1)
 
 eighty_by_fourhundred <- fig2(80, 400)
 
@@ -149,6 +148,9 @@ threetwenty_by_onehundred <- fig2(320, 100)
 
 fivehundred_by_sixtyfour <- fig2(500, 64)
 
+tt <- fig2(600, 50)
+
+
 fig2results <- list(eighty_by_fourhundred, onesixty_by_twohundred, twohundred_by_onesixty, threetwenty_by_onehundred, fivehundred_by_sixtyfour)
 
 saveRDS(fig2results, "fig2results.rds")
@@ -159,7 +161,7 @@ saveRDS(fig2results, "fig2results.rds")
 
 ```{r graph-proportions2}
 
-fig2results <- readRDS("fig2results.rds")
+fig2results <- readRDS(P("vignettes/fig2results.rds"))
 
 proportions <- unlist(lapply(fig2results, function(x) proportion_failed(get_failure(x))))
 

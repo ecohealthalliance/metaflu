@@ -18,10 +18,12 @@ Imports:
     Rcpp (>= 0.12.7),
     dplyr,
     tibble,
+    tidyr,
     reshape2,
     igraph,
     doRNG,
     foreach,
+    stringi
 Suggests:
     testthat,
     doMC,

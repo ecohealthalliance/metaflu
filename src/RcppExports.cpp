@@ -7,12 +7,12 @@
 using namespace Rcpp;
 
 // sim_gillespie
-arma::cube sim_gillespie(const arma::mat& init, const List parmlist, const arma::vec& times, const bool& progress);
+arma::mat sim_gillespie(const arma::vec& init, const List parmlist, const arma::vec& times, const bool& progress);
 RcppExport SEXP metaflu_sim_gillespie(SEXP initSEXP, SEXP parmlistSEXP, SEXP timesSEXP, SEXP progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::mat& >::type init(initSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type init(initSEXP);
     Rcpp::traits::input_parameter< const List >::type parmlist(parmlistSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type times(timesSEXP);
     Rcpp::traits::input_parameter< const bool& >::type progress(progressSEXP);
