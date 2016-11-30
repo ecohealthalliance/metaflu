@@ -19,7 +19,7 @@ P <- rprojroot::find_rstudio_root_file
 Model after `r citep('10.1371/journal.pone.0080091')`.
 
 ```{r setup2}
-library(metaflu)
+devtools::load_all()
 library(ggplot2)
 library(dplyr)
 library(doMC)
@@ -34,7 +34,7 @@ parms = list(
   beta = 0.004,   #contact rate for direct transmission
   gamma = 0.167,  #recovery rate
   mu = 0,         #base mortality rate
-  alpha = 0,      #disease mortality rate
+  alpha = 0.2,      #disease mortality rate
   phi = 1.96e-4,  #infectiousness of environmental virions
   eta = 0.14,     #degradation rate of environmental virions
   nu =  0.001,    #uptake rate of environmental virion
@@ -42,7 +42,11 @@ parms = list(
   omega = 0,      #movement rate
   rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
   lambda = 0,    #force of infection from external sources
-  chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
+  chi = matrix(c(1,0,0,1), nrow=2),  #patch connectivity matrix
+  tau_crit = 1,   #critical suveillance time
+  I_crit = 5,      #threshold for reporting
+  pi_report = .9,#reporting probability
+  pi_detect = .9, #detection probability
   )
 initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
 #infected_patches <- sample(seq_len(nrow(initial_cond)), 2)
@@ -54,18 +58,18 @@ Run the simulator and plot
 
 ```{r runsim, cache=TRUE}
 
-a <- metaflu:::sim_gillespie(as.vector(t(initial_cond)), parms, 1:1000, TRUE)
+#a <- metaflu:::sim_gillespie(as.vector(t(initial_cond)), parms, 1:1000, TRUE)
 
- output1 <- mf_sim(init = initial_cond, parameters = parms, times=0:1000, n_sims = 1000)
+ output1 <- mf_sim(init = initial_cond, parameters = parms, times=0:100, n_sims = 100)
 
 outputs = output1 %>% 
-  filter(class == "I") %>% 
-  group_by(sim, time) %>% 
-  summarize(infecteds = sum(population)) %>% 
+  group_by(sim, time, patch) %>% 
+  summarize(pop = sum(population)) %>% 
   group_by()
 
-ggplot(outputs, aes(x=time, y=infecteds, group=sim)) +
-  geom_line(alpha=0.1)
+ggplot(outputs, aes(x=time, y=pop, group=sim)) +
+  facet_wrap(~patch) +
+  geom_line(alpha=0.4)
 ```
 
 ```{r, include=FALSE}

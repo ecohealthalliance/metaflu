@@ -2,6 +2,8 @@
 #define STRUCTURES  // in multiple files
 
 #include <RcppArmadillo.h>
+#include <vector>
+#include <queue>
 
 using namespace Rcpp;
 using namespace arma;
@@ -23,6 +25,11 @@ struct mf_parmlist {
   arma::mat chi;            //patch connectivity matrix
   arma::mat chi_cum;        //patch connectivity matrix, row-wise cumulative
   int K;                    //total number of patches
+  double tau_crit;          //passive surveillance period
+  int I_crit;               //number of deaths that would trigger reporting
+  double pi_report;         //probability of reporting deaths
+  double pi_detect;         //probability of detecting AI
+
 
   int n_actions;            // number of possible actions
   int n_pstates;            // number of possible classes
@@ -45,6 +52,10 @@ struct mf_parmlist {
     chi = as<arma::mat>(parmlist["chi"]);
     chi_cum = cumsum(chi, 1);
     K = chi.n_rows;
+    tau_crit = as<double>(parmlist["tau_crit"]);
+    I_crit = as<int>(parmlist["I_crit"]);
+    pi_report = as<double>(parmlist["pi_report"]);
+    pi_detect = as<double>(parmlist["pi_detect"]);
 
     n_actions = 10;
     n_pstates = 4;
@@ -72,8 +83,10 @@ struct mf_vals {  //holds interim objects
   uword target_patch;
   uword patch;
   uword action;
-  mf_vals() {};
+  std::vector<std::priority_queue<double, std::vector<double>, std::greater<double>>> deathtimes;
+  bool cull;
 
+  mf_vals() {};
 };
 
 #endif
