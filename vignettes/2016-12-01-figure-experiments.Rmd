@@ -1,0 +1,37 @@
+---
+title: "Metaflu Data Presentation Experiments"
+author: Noam Ross
+date: 2016-11-7
+output: html_document
+bibliography: references.bib
+csl: elsevier-with-titles.csl
+link-citations: true
+---
+  
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(cache.path='~/.vignette_cache/', echo = FALSE, message=FALSE, warning = FALSE, autodep=TRUE, cache = TRUE)
+library(knitcitations)
+cite_options(citation_format = 'pandoc')
+P <- rprojroot::find_rstudio_root_file
+```
+
+```{r packages}
+library(tidyverse)
+library(metaflu)
+library(igraph)
+```
+
+```{r}
+rdat <- readRDS(P('vignettes/fig2results.rds'))
+```
+
+
+
+```{r, include=FALSE}
+write.bibtex(file="references.bib")
+```
+
+## References
+
+<div id="refs"></div>
