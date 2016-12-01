@@ -1,0 +1,31 @@
+---
+title: "Network Localization"
+author: "Cale Basaraba"
+date: "12/1/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Ethiopia
+
+Number of chickens:
+  - 
+
+Flock size:
+  - ranges: ~ 7.4 adult birds (Tadelle 2002), ~8 birds (Getu 2014), 7-10 adult birds (Kebede 2016, FAO Pagani 2008) 
+  - these numbers can be doubled if we include birds of all ages
+  
+Three rings of poultry production:
+  - Large farms surrounding urban areas producing ~ 1,000,000 chickens a year
+  - Peri-urban and urban 
+  - Small flocks in families (both urban and rural) from 5-15 chickens
+  
+System types:
+  - 80% are scavenging production systems
+  - 66% used for household eating (CSA 2011)
+  - Birds/eggs mostly sold in local markets, occasionally to retail in larger towns via middlemen (Tadelle 2002)
+  - 98% or 99% (Getu 2014, Kebede 2016) of Ethiopian poultry are in small family flocks
+  - 50% of 
