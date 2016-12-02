@@ -12,20 +12,47 @@ knitr::opts_chunk$set(echo = TRUE)
 ###Ethiopia
 
 Number of chickens:
-  - 
+  - Between 49-56 million birds country-wide
 
 Flock size:
-  - ranges: ~ 7.4 adult birds (Tadelle 2002), ~8 birds (Getu 2014), 7-10 adult birds (Kebede 2016, FAO Pagani 2008) 
+  - family flock size ranges: ~ 7.4 adult birds (Tadelle 2002), ~8 birds (Getu 2014), 7-10 adult birds (Kebede 2016, FAO Pagani 2008), ~5 birds (Birol 2013)
   - these numbers can be doubled if we include birds of all ages
   
 Three rings of poultry production:
-  - Large farms surrounding urban areas producing ~ 1,000,000 chickens a year
-  - Peri-urban and urban 
-  - Small flocks in families (both urban and rural) from 5-15 chickens
+  - 4-5? Large farms surrounding urban areas producing ~ 10,000 per farm (Kebede 2016)
+  - Dozens? Peri-urban and urban medium sized flocks (50-2000)
+  - Hundreds/Thousands? Small flocks in families (both urban and rural) from 5-15 chickens
   
 System types:
   - 80% are scavenging production systems
   - 66% used for household eating (CSA 2011)
-  - Birds/eggs mostly sold in local markets, occasionally to retail in larger towns via middlemen (Tadelle 2002)
+  - Family birds/eggs mostly sold in local markets, occasionally to retail in larger towns via middlemen (Tadelle 2002)
   - 98% or 99% (Getu 2014, Kebede 2016) of Ethiopian poultry are in small family flocks
-  - 50% of 
+  - Poultry kept by both rural and urban Ethiopian households, ~40% of households (Birol 2013)
+  - Poultry Multiplication and Distribution Centers have been developed to raise parent stock and sell them to small-scale growers (creating medium-sized poultry systems) (FAO Pagani 2008), there were 14 in 2008 (likely more now)
+  
+Connectivity:
+  - PMDC are one way (to mid-scale growers) (FAO Pagani 2008)
+  - Large farms are also one way (to mid-scale growers?) (News Anecdote)
+  - Small-world network seems reasonable between family flocks
+  
+###Egypt 
+
+###Burkina Faso
+Described by Schneider 2010 as representative of West Africa: low biosecurity
+
+Number of chickens:
+  - ~24 million chickens as of FAO report 2004 (FR)
+  - Zero import of frozen chickens, low number of chicken imports overall. 
+
+Flock size:
+  - Comparative study of two village production systems found average flock to be 33.5 +- 3 birds, with ~half of these chicks (Kondombo 2003)
+  
+System types:
+  - 70% of chickens are produced in rural flock systems (Schneider 2010)
+  - 30% of chickens are produced in semi-intensive farming operations around urban markets, these are priced much higher than the rural-grown chickens and supply mainly urban restaurants and hotels (Schneider 2010)
+  
+Seven outbreaks of avian influenza resulted in death of 18,000 chickens (2,000 of these culled) in May 2015
+
+###FAO Poultry Sector Reports
+Gold mine of poultry information. Feeling ridiculous that I did not find it earlier. 

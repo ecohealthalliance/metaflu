@@ -8,7 +8,7 @@ library(tidyr)
 
 #function to get duration of epidemic
 get_duration <- function(results){
-  duration <- results %>%  
+  duration <- results %>%
     filter(class == "I") %>%
     group_by(sim, time) %>%
     summarize(infectious = sum(population))%>%
@@ -53,7 +53,7 @@ get_recovered<- function(results){
 #function to get epidemic failure rate
 get_failure<-function(results){
   check_fails <- function(time, population, patch, class){
-    initial<- which(time == 1 & class == "I" & population > 0)  
+    initial<- which(time == 1 & class == "I" & population > 0)
     all<-which(class == "I" & population > 0)
     identical(patch[initial],unique(patch[all]))
   }
@@ -85,7 +85,7 @@ figS9 <- function(farm_size, farm_number){
   infected_patches <- sample(seq_len(nrow(initial_cond)), 2)
   initial_cond[infected_patches, 2] <- 1
   initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
-  
+
   figS9parms = list(
     beta = 0.004,   #contact rate for direct transmission
     gamma = 0.167,  #recovery rate
@@ -106,8 +106,8 @@ figS9 <- function(farm_size, farm_number){
                    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)),
     stochastic_network = TRUE
   )
-  
-  x <- mf_sim(init = initial_cond, parameters = figS9parms, times=0:1000, n_sims = 10)
+
+  x <- mf_sim(init = initial_cond, parameters = figS9parms, times=0:1000, n_sims = 100)
   x
 }
 
@@ -116,48 +116,43 @@ registerDoMC(cores=4)
 recreate_data <- function(funcname){
   a <- c(40,50,64,80,100,125,160,200,256,320,400,500,640,800)
   parMat <- cbind(a, rev(a))
-  results <- apply(parMat, 1, function(x) do.call(funcname, list(x[1], x[2])))
+  results <- apply(parMat, 1, function(x) get_outputs(funcname,x))
   results
 }
 
-figS9results <- recreate_data("figS9")
+get_outputs <- function(funcname, matrow){
+  print(paste("Starting",matrow[1],"by",matrow[2],"simulation."))
+  results <- do.call(funcname, list(matrow[1], matrow[2]))
+  duration <- get_duration(results)
+  lower_d <- quantile(unlist(duration$days_greater), probs = c(0.025))
+  upper_d <- quantile(unlist(duration$days_greater), probs = c(0.975))
+  median_d <- quantile(unlist(duration$days_greater), probs = c(0.5))
+  failure <- proportion_failed(get_failure(results))
+  abundance <- get_tot_infections(results)
+  lower_a <- quantile(unlist(abundance$total_i), probs = c(0.025))
+  upper_a <- quantile(unlist(abundance$total_i), probs = c(0.975))
+  median_a <- quantile(unlist(abundance$total_i), probs = c(0.5))
+  df <- data.frame(failure, lower_d, median_d, upper_d, lower_a, median_a, upper_a)
+  df
+}
 
 
-proportions <- unlist(lapply(figS9results, function(x) proportion_failed(get_failure(x))))
+figS9results <- bind_rows(recreate_data("figS9"))
 
-df1 <- data.frame(id = c(1:7), fails = proportions)
+full_recreate_data <- function(funcname){
+  a <- c(5,8,10,16,20,25,32,40,50,64,80,100,125,160,200,256,320,400,500,640,800,1000,1280,1600,2000,3200,4000,6400)
+  parMat <- cbind(a, rev(a))
+  results <- apply(parMat, 1, function(x) get_outputs(funcname, x))
+  results
+}
 
-ggplot(data = df1) +
-  geom_line(aes(x = id, y = fails)) +
-  #scale_x_continuous(name = "Chickens:Farm", labels = c("40:800", "80:400", "160:200","200:160", "320:100","500:64","640:50")) + 
-  scale_y_continuous(name = "Proportion of Epidemic Failures") +
-  theme_bw()
+fullfigS9results <- bind_rows(full_recreate_data("figS9"))
 
-duration_list <- lapply(figS9results, get_duration)
-lower <- sapply(duration_list,function(x) quantile(unlist(x$days_greater), probs = c(0.025)))
-upper <- sapply(duration_list, function(x) quantile(unlist(x$days_greater), probs = c(0.975)))
-median <- sapply(duration_list, function(x) quantile(unlist(x$days_greater), probs = c(0.5)))
+profvis::profvis({
+  x <- figS9(200,160)
+})
 
-df2 <- data.frame(lower, median, upper)
+#longest are separate and arrange
 
-ggplot(data = df2) +
-  geom_line(aes(x = 1:7, y = median)) +
-  geom_line(aes(x = 1:7, y = lower), linetype = "dashed") +
-  geom_line(aes(x = 1:7, y = upper), linetype = "dashed") + 
-  #scale_x_continuous(name = "Chickens:Farm", labels = c("80:400", "160:200","200:160", "320:100","500:64")) + 
-  scale_y_continuous(name = "Median Duration (days)") +
-  theme_bw()
-
-
-
-
-res <- figS9(100, 3200)
-
-#recreate_data <- function(funcname){
-#  a <- c(5,8,10,16,20,25,32,40,50,64,80,100,125,160,200,256,320,400,500,640,800,1000,1280,1600,2000,3200,4000,6400)
-#  parMat <- cbind(a, rev(a))
-#  results <- apply(parMat, 1, function(x) do.call(funcname, list(x[1], x[2])))
-#  results
-#}
-
+plot(x = seq_along(fullfigS9results$median_d), y = fullfigS9results$median_d, lty = 1)
 
