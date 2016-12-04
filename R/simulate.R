@@ -31,6 +31,7 @@
 #' @importFrom stringi stri_subset_regex
 #' @importFrom foreach foreach %dopar%
 #' @importFrom doRNG %dorng%
+#' @importFrom purrr transpose
 #' @export
 mf_sim <- function(init, parameters, times, n_sims=1) {
 
@@ -41,20 +42,36 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
                                     parameters[["network_parms"]])
   }
 
+  if(!is.null(parameters[["network_parms"]])) {
+    n_patches = parameters[["network_parms"]][["size"]]
+  } else {
+    n_patches = nrow(parameters[["chi"]])
+  }
+
   sim_fun <- function() {
     if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
       parameters[["chi"]] <- make_net(parameters[["network_type"]],
                                       parameters[["network_parms"]])
+      net_gen <- parameters[["chi"]]
+    } else {
+      net_gen <- NULL
     }
-    return(tibble::as_data_frame(sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE)))
+    return(list(
+      tibble::as_data_frame(sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE)),
+      net_gen))
   }
 
   suppressWarnings(suppressMessages({
-    results = foreach(i=seq_len(n_sims)) %dorng% { sim_fun() }
+    results = foreach(i=seq_len(n_sims)) %dorng% {
+      sim_fun()
+      }
   }))
-
+  results <- purrr::transpose(results)
+  networks <- results[[2]]
+  names(networks) <- 1:n_sims
+  results <- results[[1]]
   results = bind_rows(results, .id = "sim")
-  names(results)[-1] <- c("time", paste(rep(1:nrow(parameters[["chi"]]), each=4), c("S", "I", "R", "V"),  sep="_"))
+  names(results)[-1] <- c("time", paste(rep(1:n_patches, each=4), c("S", "I", "R", "V"),  sep="_"))
   results <- gather_(results, "class", "population", gather_cols = stri_subset_regex(names(results), "\\d_\\w"))
   results <- separate_(results, "class", into=c("patch", "class"))
 
@@ -62,6 +79,11 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
   results = select_(results, "sim", "time", "patch", "class", "population")
 
   results = arrange_(results, "sim", "time", "patch", "class")
+  if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
+    attr(results, "networks") <- networks
+  } else {
+    attr(results, "network") <- parameters[["chi"]]
+  }
   return(results)
 }
 
