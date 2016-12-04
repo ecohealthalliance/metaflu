@@ -85,6 +85,7 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
 }
 
 #' @importFrom igraph as_adj
+#' @export
 make_net <- function(network_type, network_parms) {
   net_fun <- get(paste0("sample_", network_type), asNamespace("igraph"))
 
