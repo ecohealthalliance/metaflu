@@ -14,6 +14,7 @@ opts_chunk$set(cache.path='~/.vignette_cache/', echo = FALSE, message=FALSE, war
 library(knitcitations)
 cite_options(citation_format = 'pandoc')
 P <- rprojroot::find_rstudio_root_file
+source(P("R/summarizing_functions.R"))
 ```
 
 Model after `r citep('10.1371/journal.pone.0080091')`.
@@ -55,7 +56,7 @@ fig2 <- function(farm_size, farm_number){
   initial_cond[infected_patches, 2] <- 1
   initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
 
-  figS9parms = list(
+  fig2parms = list(
     beta = 0.004,   #contact rate for direct transmission
     gamma = 0.167,  #recovery rate
     mu = 0,         #base mortality rate
@@ -76,11 +77,11 @@ fig2 <- function(farm_size, farm_number){
     stochastic_network = TRUE
   )
 
-  x <- mf_sim(init = initial_cond, parameters = figS9parms, times=0:1000, n_sims = 100)
+  x <- mf_sim(init = initial_cond, parameters = fig2parms, times=0:1000, n_sims = 100)
   x
 }
 
-registerDoMC(cores=4)
+registerDoMC(cores=34)
 
 recreate_data <- function(funcname){
   a <- c(40,50,64,80,100,125,160,200,256,320,400,500,640,800)
@@ -93,14 +94,14 @@ fig2results <- bind_rows(recreate_data("fig2"))
 
 saveRDS(fig2results, "fig2results.rds")
 
-full_recreate_data <- function(funcname){
-  a <- c(5,8,10,16,20,25,32,40,50,64,80,100,125,160,200,256,320,400,500,640,800,1000,1280,1600,2000,3200,4000,6400)
-  parMat <- cbind(a, rev(a))
-  results <- apply(parMat, 1, function(x) get_outputs(funcname, x))
-  results
-}
+#full_recreate_data <- function(funcname){
+ # a <- c(5,8,10,16,20,25,32,40,50,64,80,100,125,160,200,256,320,400,500,640,800,1000,1280,1600,2000,3200,4000,6400)
+#  parMat <- cbind(a, rev(a))
+#  results <- apply(parMat, 1, function(x) get_outputs(funcname, x))
+#  results
+#}
 
-fullfig2results <- bind_rows(full_recreate_data("figS9"))
+#fullfig2results <- bind_rows(full_recreate_data("fig2"))
 
 
 ```
@@ -115,7 +116,8 @@ ggplot(data = fig2results) +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
-  The above figure is a recreation of the top graph of Figure 2, showing the 'probability' that an epidemic will fail using their model; in this context "epidemic failure" is a run where the epidemic does not propagate an originally seeded patch to any other patch. Our model shows roughly the same behavior as the published paper, with epidemic failure becoming less likely as we increase the size of farms. 
+
+The above figure is a recreation of the top graph of Figure 2, showing the 'probability' that an epidemic will fail using their model; in this context "epidemic failure" is a run where the epidemic does not propagate an originally seeded patch to any other patch. Our model shows roughly the same behavior as the published paper, with epidemic failure becoming less likely as we increase the size of farms. 
   
 ```{r graph-duration2}
 
@@ -133,8 +135,6 @@ ggplot(data = fig2results) +
 
 This graph is a recreation of the middle graph in Figure 2, and shows the median length of the epidemic in days, along with the 95% bootstrapped interval in dashed lines. This graph is considerably different from the published results, with epidemics that last far shorter and simulations with a much lower 97.5% quantile. Although Figure 2 includes environmental transmission, Figure S8 does not, and still reports a median duration in the 300/500 range for these Chickens:Farm combinations. '
 
-I have double-checked that parameters are the same, and that the paper also reports seeding the epidemic with two infectious individuals at random nodes in the network. 
-
 
 ```{r graph-abundance2}
 
@@ -150,10 +150,7 @@ ggplot(data = fig2results) +
 
 ```
 
-The above graph shows the median total number of infections as we alter the number of chickens and number of farms. The fact that it looks like the graph of a binary variable reflects the fact that the results of each run at each combination of chickens/farms either propagate to nearly the entire population (~32000) or barely propagate at all (~5-15 infections).
-
-All of the published paper's figures display total infections using median and bootstrapped intervals, but closer inspection reveals the same epidemic / non-epidemic dichotomy, with the median / intervals jumping up and down between neglible infection numbers to infections that total the entire susceptible population. The one exception to this pattern are two graphs showing results from runs using culling / control mechanisms. For future illustration, these median / boostrapped interval graphs may not be the best choice.
-
+The above graph shows the median total number of infections as we alter the number of chickens and number of farms. The fact that it looks a bit like the graph of a binary variable reflects the fact that the results of each run at each combination of chickens/farms either propagate to nearly the entire population (~32000) or barely propagate at all (~5-15 infections).
 
 
 ```{r, include=FALSE}
