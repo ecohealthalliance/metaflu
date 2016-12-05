@@ -26,11 +26,12 @@
 #'    )
 #'  initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
 #'  output <- mf_sim(init = initial_cond, parameters = parms, times=0:1000, n_sims = 2)
-#' @importFrom dplyr mutate_ select_ arrange_ bind_rows as_data_frame
-#' @importFrom tidyr separate_ gather_
+#' @importFrom dplyr as_data_frame lst_
+#' @importFrom tidyr crossing_
 #' @importFrom stringi stri_subset_regex
 #' @importFrom foreach foreach %dopar%
 #' @importFrom doRNG %dorng%
+#' @importFrom purrr transpose
 #' @export
 mf_sim <- function(init, parameters, times, n_sims=1) {
 
@@ -41,31 +42,50 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
                                     parameters[["network_parms"]])
   }
 
+  if(!is.null(parameters[["network_parms"]])) {
+    n_patches = parameters[["network_parms"]][["size"]]
+  } else {
+    n_patches = nrow(parameters[["chi"]])
+  }
+
   sim_fun <- function() {
     if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
       parameters[["chi"]] <- make_net(parameters[["network_type"]],
                                       parameters[["network_parms"]])
+      net_gen <- parameters[["chi"]]
+    } else {
+      net_gen <- NULL
     }
-    return(tibble::as_data_frame(sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE)))
+    return(list(
+      sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE),
+      net_gen))
   }
 
   suppressWarnings(suppressMessages({
-    results = foreach(i=seq_len(n_sims)) %dorng% { sim_fun() }
+    outputs = foreach(i=seq_len(n_sims)) %dorng% {
+      sim_fun()
+      }
   }))
-
-  results = bind_rows(results, .id = "sim")
-  names(results)[-1] <- c("time", paste(rep(1:nrow(parameters[["chi"]]), each=4), c("S", "I", "R", "V"),  sep="_"))
-  results <- gather_(results, "class", "population", gather_cols = stri_subset_regex(names(results), "\\d_\\w"))
-  results <- separate_(results, "class", into=c("patch", "class"))
-
-  results = mutate_(results, class =  ~factor(class, levels=(c("S", "I", "R", "V"))))
-  results = select_(results, "sim", "time", "patch", "class", "population")
-
-  results = arrange_(results, "sim", "time", "patch", "class")
+  outputs <- purrr::transpose(outputs)
+  networks <- outputs[[2]]
+  names(networks) <- 1:n_sims
+  results <- crossing_(list(
+    sim = seq_len(n_sims),
+    time = times,
+    patch = seq_len(n_patches),
+    class = factor(c("S", "I", "R", "V"), levels = c("S", "I", "R", "V"))
+  ))
+  results[["population"]] <- unlist(outputs[[1]], recursive = FALSE, use.names = FALSE)
+  if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
+    attr(results, "networks") <- networks
+  } else {
+    attr(results, "network") <- parameters[["chi"]]
+  }
   return(results)
 }
 
 #' @importFrom igraph as_adj
+#' @export
 make_net <- function(network_type, network_parms) {
   net_fun <- get(paste0("sample_", network_type), asNamespace("igraph"))
 

@@ -16,6 +16,7 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
   arma::vec cumrates = cumsum(rates);
   double sum_rates = cumrates(cumrates.n_elem - 1);
   arma::mat results = zeros<arma::mat>(init.n_elem, times.n_elem);
+  arma::vec results_vec = arma::vec(results.memptr(), results.n_elem, false, true);
 
   double time = times(0);
   double time_next;
@@ -59,5 +60,5 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
     time = time_next;
   }
 
-  return join_rows(times, trans(results));
+  return results_vec;
 };
