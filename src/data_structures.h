@@ -83,10 +83,15 @@ struct mf_vals {  //holds interim objects
   uword target_patch;
   uword patch;
   uword action;
+  uword min_patch;
   std::vector<std::priority_queue<double, std::vector<double>, std::greater<double>>> deathtimes;
   bool cull;
 
-  mf_vals() {};
+  mf_vals() {
+    patch = 0;
+    target_patch = 0;
+    min_patch = 0;
+  };
 };
 
 #endif
