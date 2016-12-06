@@ -42,17 +42,21 @@ void update_state(arma::vec &state, const mf_parmlist &parms, const double &time
     //  Rcout << "test: " << vals.deathtimes[vals.patch].size() << std::endl;
     vals.deathtimes[vals.patch].push(time);                          //record the time
 
-    while(vals.deathtimes[vals.patch].top() < (time - parms.tau_crit)) {
+
+    while(vals.deathtimes[vals.patch].top() < (time - parms.tau_crit[vals.patch])) {
       vals.deathtimes[vals.patch].pop();
     }  //drop any deaths further back than tau_crit
 
     //Rcout << "test: " << vals.deathtimes[vals.patch].size() << "; " << vals.deathtimes[vals.patch].top() << std::endl;
-
-    if(vals.deathtimes[vals.patch].size() >= parms.I_crit &&   //if I_crit deaths have occurred in the past tau_crit time...
-       R::runif(0,1) < parms.pi_report                 &&   //and the deaths are reported
-       R::runif(0,1) < (1 - pow((1 - parms.pi_detect), state(vals.patch + 1)))) {   //and disease is detected
+    //Rcout << vals.patch << "; " << parms.tau_crit[vals.patch] << "; " << vals.deathtimes[vals.patch].size() << "; " << parms.I_crit[vals.patch] << std::endl;
+    if(vals.deathtimes[vals.patch].size() >= parms.I_crit[vals.patch] &&   //if I_crit deaths have occurred in the past tau_crit time...
+       R::runif(0,1) < parms.pi_report[vals.patch]                 &&   //and the deaths are reported
+       R::runif(0,1) < (1 - pow((1 - parms.pi_detect[vals.patch]), state(vals.patch * 4 + 1)))) {   //and disease is detected
       state.subvec(vals.patch * 4, vals.patch * 4 + 3) = zeros<vec>(4);
       vals.cull = true;
+      while(vals.deathtimes[vals.patch].size() > 0) {
+        vals.deathtimes[vals.patch].pop();
+      }
     } else {
       state.subvec(vals.patch * 4, vals.patch * 4 + 3) = state.subvec(vals.patch * 4, vals.patch * 4 + 3) + parms.action_matrix.col(vals.action);  //Apply the given action to the patch
     }
@@ -80,7 +84,7 @@ void update_rates(arma::vec &rates, const arma::vec &state, const mf_parmlist &p
     vals.rates_mat(0, vals.patch) = vals.state_mat(0, vals.patch) *
       (parms.beta *  vals.state_mat(1, vals.patch) / pow(accu(vals.state_mat.submat(0, vals.patch, 2, vals.patch)), parms.rho)) + //infection events (contact)
       parms.nu * ( 1 - exp(-parms.phi * vals.state_mat(3, vals.patch))) + //virion uptake
-      parms.lambda; //external infection
+      parms.lambda(vals.patch); //external infection
     vals.rates_mat(1, vals.patch) = vals.state_mat(1, vals.patch) * parms.gamma; //recovery events
     vals.rates_mat(2, vals.patch) = vals.state_mat(0, vals.patch) * parms.mu;    //susceptible mortality
     vals.rates_mat(3, vals.patch) = vals.state_mat(1, vals.patch) * (parms.mu + parms.alpha); //infected mortality
@@ -93,7 +97,7 @@ void update_rates(arma::vec &rates, const arma::vec &state, const mf_parmlist &p
       vals.rates_mat(0, vals.target_patch) = vals.state_mat(0, vals.target_patch) *
         (parms.beta *  vals.state_mat(1, vals.target_patch) / pow(accu(vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch)), parms.rho)) + //infection events (contact)
         parms.nu * ( 1 - exp(-parms.phi * vals.state_mat(3, vals.target_patch))) + //virion uptake
-        parms.lambda; //external infection
+        parms.lambda(vals.patch); //external infection
       vals.rates_mat(1, vals.target_patch) = vals.state_mat(1, vals.target_patch) * parms.gamma; //recovery events
       vals.rates_mat(2, vals.target_patch) = vals.state_mat(0, vals.target_patch) * parms.mu;    //susceptible mortality
       vals.rates_mat(3, vals.target_patch) = vals.state_mat(1, vals.target_patch) * (parms.mu + parms.alpha); //infected mortality

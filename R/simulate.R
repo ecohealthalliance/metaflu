@@ -37,16 +37,26 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
 
   times <- as.double(times)
   init <- as.vector(t(init))
-  if(!is.null(parameters[["network_type"]]) && !parameters[["stochastic_network"]]) {
-    parameters[["chi"]] <- make_net(parameters[["network_type"]],
-                                    parameters[["network_parms"]])
-  }
 
+  #Get number of patches
   if(!is.null(parameters[["network_parms"]])) {
     n_patches = parameters[["network_parms"]][["size"]]
   } else {
     n_patches = nrow(parameters[["chi"]])
   }
+
+  #Convert scalar parameters to vectors
+  parms_to_extend <- c("lambda", "tau_crit", "I_crit", "pi_report", "pi_detect")
+  for(parm in parms_to_extend) {
+    parameters[[parm]] = rep_len(parameters[[parm]], n_patches)
+  }
+
+  if(!is.null(parameters[["network_type"]]) && !parameters[["stochastic_network"]]) {
+    parameters[["chi"]] <- make_net(parameters[["network_type"]],
+                                    parameters[["network_parms"]])
+  }
+
+
 
   sim_fun <- function() {
     if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
