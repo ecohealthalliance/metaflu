@@ -8,7 +8,6 @@ using namespace arma;
 
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
-
 void sample_cumrates(uword &event, const arma::vec &cumrates, const double &sum_rates) {
 
   double rnum = R::runif(0, sum_rates);
@@ -69,64 +68,75 @@ void update_state(arma::vec &state, const mf_parmlist &parms, const double &time
     //Rcout << vals.patch << "; " << parms.tau_crit[vals.patch] << "; " << vals.deathtimes[vals.patch].size() << "; " << parms.I_crit[vals.patch] << std::endl;
     if(vals.deathtimes[vals.patch].size() >= parms.I_crit[vals.patch] &&   //if I_crit deaths have occurred in the past tau_crit time...
        R::runif(0,1) < parms.pi_report[vals.patch]                 &&   //and the deaths are reported
-       R::runif(0,1) < (1 - pow((1 - parms.pi_detect[vals.patch]), state(vals.patch * 4 + 1)))) {   //and disease is detected
+       R::runif(0,1) < (1 - pow((1 - parms.pi_detect[vals.patch]), state[vals.patch * 4 + 1]))) {   //and disease is detected
       state.subvec(vals.patch * 4, vals.patch * 4 + 3) = zeros<vec>(4);
       vals.cull = true;
       while(vals.deathtimes[vals.patch].size() > 0) {
         vals.deathtimes[vals.patch].pop();
       }
     } else {
-      state.subvec(vals.patch * 4, vals.patch * 4 + 3) = state.subvec(vals.patch * 4, vals.patch * 4 + 3) + parms.action_matrix.col(vals.action);  //Apply the given action to the patch
+      for(uword i = 0; i < 4; i++) {
+        state[vals.patch * 4 + i] += parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
+      }
     }
   } else {
-    state.subvec(vals.patch * 4, vals.patch * 4 + 3) = state.subvec(vals.patch * 4, vals.patch * 4 + 3) + parms.action_matrix.col(vals.action);  //Apply the given action to the patch
+    for(uword i = 0; i < 4; i++) {
+      state[vals.patch * 4 + i] += parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
+    }
 
     //Rcout << state.row(patch)<< std::endl;
     if(vals.action >= 7) {
       //double rand_value = R::runif(0,1);
       //vals.target_patch = as_scalar(find(parms.chi_cum.row(vals.patch) > rand_value, 1, "first"));
       sample_cumrates_row(vals.target_patch, parms.chi_cum.row(vals.patch), 1);
-      state.subvec(vals.target_patch * 4, vals.target_patch * 4 + 3) = state.subvec(vals.target_patch * 4, vals.target_patch * 4 + 3) - parms.action_matrix.col(vals.action);
-    }
+      for(uword i = 0; i < 4; i++) {
+        state[vals.target_patch * 4 + i] -= parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
+      }}
   }
 };
 
-void update_rates(arma::vec &rates, const arma::vec &state, const mf_parmlist &parms, mf_vals &vals, arma::uword event) {
+void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state, const mf_parmlist &parms, mf_vals &vals, arma::uword event) {
 
   // Rcout << vals.patch << ";  " << vals.action<< std::endl;
-
+  vals.min_patch = vals.patch*10;
   if(vals.cull) {
     vals.rates_mat.col(vals.patch) = zeros<vec>(10);
     vals.cull = false;
   } else {
-    vals.rates_mat(0, vals.patch) = vals.state_mat(0, vals.patch) *
-      (parms.beta *  vals.state_mat(1, vals.patch) / pow(accu(vals.state_mat.submat(0, vals.patch, 2, vals.patch)), parms.rho)) + //infection events (contact)
-      parms.nu * ( 1 - exp(-parms.phi * vals.state_mat(3, vals.patch))) + //virion uptake
+    vals.rates_mat.at(0, vals.patch) = vals.state_mat.at(0, vals.patch) *
+      (parms.beta *  vals.state_mat.at(1, vals.patch) / pow(accu(vals.state_mat.submat(0, vals.patch, 2, vals.patch)), parms.rho)) + //infection events (contact)
+      parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.patch))) + //virion uptake
       parms.lambda(vals.patch); //external infection
-    vals.rates_mat(1, vals.patch) = vals.state_mat(1, vals.patch) * parms.gamma; //recovery events
-    vals.rates_mat(2, vals.patch) = vals.state_mat(0, vals.patch) * parms.mu;    //susceptible mortality
-    vals.rates_mat(3, vals.patch) = vals.state_mat(1, vals.patch) * (parms.mu + parms.alpha); //infected mortality
-    vals.rates_mat(4, vals.patch) = vals.state_mat(2, vals.patch) * parms.mu;     //recovered mortality
-    vals.rates_mat(5, vals.patch) = vals.state_mat(1, vals.patch) * parms.sigma;   //virion shedding
-    vals.rates_mat(6, vals.patch) = vals.state_mat(3, vals.patch) * parms.eta;     //viron degradation
+    vals.rates_mat.at(1, vals.patch) = vals.state_mat.at(1, vals.patch) * parms.gamma; //recovery events
+    vals.rates_mat.at(2, vals.patch) = vals.state_mat.at(0, vals.patch) * parms.mu;    //susceptible mortality
+    vals.rates_mat.at(3, vals.patch) = vals.state_mat.at(1, vals.patch) * (parms.mu + parms.alpha); //infected mortality
+    vals.rates_mat.at(4, vals.patch) = vals.state_mat.at(2, vals.patch) * parms.mu;     //recovered mortality
+    vals.rates_mat.at(5, vals.patch) = vals.state_mat.at(1, vals.patch) * parms.sigma;   //virion shedding
+    vals.rates_mat.at(6, vals.patch) = vals.state_mat.at(3, vals.patch) * parms.eta;     //viron degradation
     vals.rates_mat.submat(7, vals.patch, 9, vals.patch) = vals.state_mat.submat(0, vals.patch, 2, vals.patch) * parms.omega; // emigration of all classes
 
     if(vals.action >= 7) {    //If an emigration action, send the individual to another patch
-      vals.rates_mat(0, vals.target_patch) = vals.state_mat(0, vals.target_patch) *
-        (parms.beta *  vals.state_mat(1, vals.target_patch) / pow(accu(vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch)), parms.rho)) + //infection events (contact)
-        parms.nu * ( 1 - exp(-parms.phi * vals.state_mat(3, vals.target_patch))) + //virion uptake
+      vals.rates_mat.at(0, vals.target_patch) = vals.state_mat.at(0, vals.target_patch) *
+        (parms.beta *  vals.state_mat.at(1, vals.target_patch) / pow(accu(vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch)), parms.rho)) + //infection events (contact)
+        parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.target_patch))) + //virion uptake
         parms.lambda(vals.patch); //external infection
-      vals.rates_mat(1, vals.target_patch) = vals.state_mat(1, vals.target_patch) * parms.gamma; //recovery events
-      vals.rates_mat(2, vals.target_patch) = vals.state_mat(0, vals.target_patch) * parms.mu;    //susceptible mortality
-      vals.rates_mat(3, vals.target_patch) = vals.state_mat(1, vals.target_patch) * (parms.mu + parms.alpha); //infected mortality
-      vals.rates_mat(4, vals.target_patch) = vals.state_mat(2, vals.target_patch) * parms.mu;     //recovered mortality
-      vals.rates_mat(5, vals.target_patch) = vals.state_mat(1, vals.target_patch) * parms.sigma;   //virion shedding
-      vals.rates_mat(6, vals.target_patch) = vals.state_mat(3, vals.target_patch) * parms.eta;     //viron degradation
+      vals.rates_mat.at(1, vals.target_patch) = vals.state_mat.at(1, vals.target_patch) * parms.gamma; //recovery events
+      vals.rates_mat.at(2, vals.target_patch) = vals.state_mat.at(0, vals.target_patch) * parms.mu;    //susceptible mortality
+      vals.rates_mat.at(3, vals.target_patch) = vals.state_mat.at(1, vals.target_patch) * (parms.mu + parms.alpha); //infected mortality
+      vals.rates_mat.at(4, vals.target_patch) = vals.state_mat.at(2, vals.target_patch) * parms.mu;     //recovered mortality
+      vals.rates_mat.at(5, vals.target_patch) = vals.state_mat.at(1, vals.target_patch) * parms.sigma;   //virion shedding
+      vals.rates_mat.at(6, vals.target_patch) = vals.state_mat.at(3, vals.target_patch) * parms.eta;     //viron degradation
       vals.rates_mat.submat(7, vals.target_patch, 9, vals.target_patch) = vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch) * parms.omega; // emigration of all classes
+      vals.min_patch = std::min(vals.target_patch*10, vals.min_patch);
     }
   }
-
-
-
+  if(vals.min_patch == 0) {
+    cumrates[0] = rates[0];
+    vals.min_patch++;
+  }
+  for( ; vals.min_patch < cumrates.size(); vals.min_patch++) {
+    cumrates[vals.min_patch] = cumrates[vals.min_patch-1] + rates[vals.min_patch];
+  }
 }
+
 #endif

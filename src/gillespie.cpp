@@ -6,7 +6,6 @@
 using namespace Rcpp;
 using namespace arma;
 
-
 // [[Rcpp::export]]
 arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::vec &times, const bool &progress) {
   mf_parmlist parms(parmlist);
@@ -47,12 +46,12 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
     }
 
     if(sum_rates == 0) break;
-
+    //Rcout << time << "; " << vals.patch << "; " << vals.action << std::endl << state.t() << rates.t() << cumrates.t();
     //event = as_scalar(find(cumrates >= R::runif(0, sum_rates), 1, "first"));
     sample_cumrates(event, cumrates, sum_rates);
     update_state(state, parms, time, vals, event);
-    update_rates(rates, state, parms, vals, event);
-    cumrates = cumsum(rates);
+    update_rates(rates, cumrates, state, parms, vals, event);
+    //cumrates = cumsum(rates);
     sum_rates = cumrates(cumrates.n_elem - 1);
 
     //Rcout << time << "; " << event << "; " << vals.action << "; " << vals.patch << "; " << cumrates.t();
