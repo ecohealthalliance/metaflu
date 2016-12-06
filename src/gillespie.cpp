@@ -6,13 +6,6 @@
 using namespace Rcpp;
 using namespace arma;
 
-void new_event(uword &event, const arma::vec &cumrates, const double &sum_rates) {
-  double rnum = R::runif(0, sum_rates);
-  event = 0;
-  while(cumrates[event] < rnum) {
-    event++;
-  }
-};
 
 // [[Rcpp::export]]
 arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::vec &times, const bool &progress) {
@@ -55,8 +48,8 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
 
     if(sum_rates == 0) break;
 
-    event = as_scalar(find(cumrates >= R::runif(0, sum_rates), 1, "first"));
-    //new_event(event, cumrates, sum_rates);
+    //event = as_scalar(find(cumrates >= R::runif(0, sum_rates), 1, "first"));
+    sample_cumrates(event, cumrates, sum_rates);
     update_state(state, parms, time, vals, event);
     update_rates(rates, state, parms, vals, event);
     cumrates = cumsum(rates);

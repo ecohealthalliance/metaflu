@@ -9,6 +9,24 @@ using namespace arma;
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::plugins(cpp11)]]
 
+void sample_cumrates(uword &event, const arma::vec &cumrates, const double &sum_rates) {
+
+  double rnum = R::runif(0, sum_rates);
+  event = 0;
+  while(cumrates[event] < rnum) {
+    event++;
+  }
+};
+
+void sample_cumrates_row(uword &event, const arma::rowvec &cumrates, const double &sum_rates) {
+  double rnum = R::runif(0, sum_rates);
+  event = 0;
+  while(cumrates[event] < rnum) {
+    event++;
+  }
+};
+
+
 arma::vec set_rates(arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
   arma::vec rates(parms.K * parms.n_actions);
   vals.rates_mat = arma::mat(rates.memptr(), parms.n_actions, parms.K, false, false);
@@ -65,9 +83,9 @@ void update_state(arma::vec &state, const mf_parmlist &parms, const double &time
 
     //Rcout << state.row(patch)<< std::endl;
     if(vals.action >= 7) {
-      double rand_value = R::runif(0,1);
-      vals.target_patch = as_scalar(find(parms.chi_cum.row(vals.patch) > rand_value, 1, "first"));
-      //   Rcout << vals.patch << " " << vals.target_patch <<  " " << vals.action << " " << std::endl;
+      //double rand_value = R::runif(0,1);
+      //vals.target_patch = as_scalar(find(parms.chi_cum.row(vals.patch) > rand_value, 1, "first"));
+      sample_cumrates_row(vals.target_patch, parms.chi_cum.row(vals.patch), 1);
       state.subvec(vals.target_patch * 4, vals.target_patch * 4 + 3) = state.subvec(vals.target_patch * 4, vals.target_patch * 4 + 3) - parms.action_matrix.col(vals.action);
     }
   }
