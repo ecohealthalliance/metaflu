@@ -46,7 +46,7 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
   }
 
   #Convert scalar parameters to vectors
-  parms_to_extend <- c("lambda")
+  parms_to_extend <- c("lambda", "tau_crit", "I_crit", "pi_report", "pi_detect")
   for(parm in parms_to_extend) {
     parameters[[parm]] = rep_len(parameters[[parm]], n_patches)
   }

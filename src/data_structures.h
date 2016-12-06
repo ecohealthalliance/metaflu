@@ -25,10 +25,10 @@ struct mf_parmlist {
   arma::mat chi;            //patch connectivity matrix
   arma::mat chi_cum;        //patch connectivity matrix, row-wise cumulative
   int K;                    //total number of patches
-  double tau_crit;          //passive surveillance period
-  int I_crit;               //number of deaths that would trigger reporting
-  double pi_report;         //probability of reporting deaths
-  double pi_detect;         //probability of detecting AI
+  arma::rowvec tau_crit;          //passive surveillance period
+  arma::irowvec I_crit;               //number of deaths that would trigger reporting
+  arma::rowvec pi_report;         //probability of reporting deaths
+  arma::rowvec pi_detect;         //probability of detecting AI
 
 
   int n_actions;            // number of possible actions
@@ -52,10 +52,10 @@ struct mf_parmlist {
     chi = as<arma::mat>(parmlist["chi"]);
     chi_cum = cumsum(chi, 1);
     K = chi.n_rows;
-    tau_crit = as<double>(parmlist["tau_crit"]);
-    I_crit = as<int>(parmlist["I_crit"]);
-    pi_report = as<double>(parmlist["pi_report"]);
-    pi_detect = as<double>(parmlist["pi_detect"]);
+    tau_crit = as<arma::rowvec>(parmlist["tau_crit"]);
+    I_crit = as<arma::irowvec>(parmlist["I_crit"]);
+    pi_report = as<arma::rowvec>(parmlist["pi_report"]);
+    pi_detect = as<arma::rowvec>(parmlist["pi_detect"]);
 
     n_actions = 10;
     n_pstates = 4;

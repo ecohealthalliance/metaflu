@@ -42,17 +42,21 @@ void update_state(arma::vec &state, const mf_parmlist &parms, const double &time
     //  Rcout << "test: " << vals.deathtimes[vals.patch].size() << std::endl;
     vals.deathtimes[vals.patch].push(time);                          //record the time
 
-    while(vals.deathtimes[vals.patch].top() < (time - parms.tau_crit)) {
+
+    while(vals.deathtimes[vals.patch].top() < (time - parms.tau_crit[vals.patch])) {
       vals.deathtimes[vals.patch].pop();
     }  //drop any deaths further back than tau_crit
 
     //Rcout << "test: " << vals.deathtimes[vals.patch].size() << "; " << vals.deathtimes[vals.patch].top() << std::endl;
-
-    if(vals.deathtimes[vals.patch].size() >= parms.I_crit &&   //if I_crit deaths have occurred in the past tau_crit time...
-       R::runif(0,1) < parms.pi_report                 &&   //and the deaths are reported
-       R::runif(0,1) < (1 - pow((1 - parms.pi_detect), state(vals.patch + 1)))) {   //and disease is detected
+    //Rcout << vals.patch << "; " << parms.tau_crit[vals.patch] << "; " << vals.deathtimes[vals.patch].size() << "; " << parms.I_crit[vals.patch] << std::endl;
+    if(vals.deathtimes[vals.patch].size() >= parms.I_crit[vals.patch] &&   //if I_crit deaths have occurred in the past tau_crit time...
+       R::runif(0,1) < parms.pi_report[vals.patch]                 &&   //and the deaths are reported
+       R::runif(0,1) < (1 - pow((1 - parms.pi_detect[vals.patch]), state(vals.patch * 4 + 1)))) {   //and disease is detected
       state.subvec(vals.patch * 4, vals.patch * 4 + 3) = zeros<vec>(4);
       vals.cull = true;
+      while(vals.deathtimes[vals.patch].size() > 0) {
+        vals.deathtimes[vals.patch].pop();
+      }
     } else {
       state.subvec(vals.patch * 4, vals.patch * 4 + 3) = state.subvec(vals.patch * 4, vals.patch * 4 + 3) + parms.action_matrix.col(vals.action);  //Apply the given action to the patch
     }
