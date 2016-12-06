@@ -21,7 +21,7 @@ struct mf_parmlist {
   double sigma;             //virion shedding rate
   double omega;             //movement rate
   double rho;               //contact rate nonlinearity 0=density-dependent, 1=frequency-dependent
-  double lambda;           //force of infection from external sources
+  arma::rowvec lambda;           //force of infection from external sources
   arma::mat chi;            //patch connectivity matrix
   arma::mat chi_cum;        //patch connectivity matrix, row-wise cumulative
   int K;                    //total number of patches
@@ -48,7 +48,7 @@ struct mf_parmlist {
     sigma = as<double>(parmlist["sigma"]);
     omega = as<double>(parmlist["omega"]);
     rho = as<double>(parmlist["rho"]);
-    lambda = as<double>(parmlist["lambda"]);
+    lambda = as<arma::rowvec>(parmlist["lambda"]);
     chi = as<arma::mat>(parmlist["chi"]);
     chi_cum = cumsum(chi, 1);
     K = chi.n_rows;

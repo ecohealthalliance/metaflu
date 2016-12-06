@@ -80,7 +80,7 @@ void update_rates(arma::vec &rates, const arma::vec &state, const mf_parmlist &p
     vals.rates_mat(0, vals.patch) = vals.state_mat(0, vals.patch) *
       (parms.beta *  vals.state_mat(1, vals.patch) / pow(accu(vals.state_mat.submat(0, vals.patch, 2, vals.patch)), parms.rho)) + //infection events (contact)
       parms.nu * ( 1 - exp(-parms.phi * vals.state_mat(3, vals.patch))) + //virion uptake
-      parms.lambda; //external infection
+      parms.lambda(vals.patch); //external infection
     vals.rates_mat(1, vals.patch) = vals.state_mat(1, vals.patch) * parms.gamma; //recovery events
     vals.rates_mat(2, vals.patch) = vals.state_mat(0, vals.patch) * parms.mu;    //susceptible mortality
     vals.rates_mat(3, vals.patch) = vals.state_mat(1, vals.patch) * (parms.mu + parms.alpha); //infected mortality
@@ -93,7 +93,7 @@ void update_rates(arma::vec &rates, const arma::vec &state, const mf_parmlist &p
       vals.rates_mat(0, vals.target_patch) = vals.state_mat(0, vals.target_patch) *
         (parms.beta *  vals.state_mat(1, vals.target_patch) / pow(accu(vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch)), parms.rho)) + //infection events (contact)
         parms.nu * ( 1 - exp(-parms.phi * vals.state_mat(3, vals.target_patch))) + //virion uptake
-        parms.lambda; //external infection
+        parms.lambda(vals.patch); //external infection
       vals.rates_mat(1, vals.target_patch) = vals.state_mat(1, vals.target_patch) * parms.gamma; //recovery events
       vals.rates_mat(2, vals.target_patch) = vals.state_mat(0, vals.target_patch) * parms.mu;    //susceptible mortality
       vals.rates_mat(3, vals.target_patch) = vals.state_mat(1, vals.target_patch) * (parms.mu + parms.alpha); //infected mortality
