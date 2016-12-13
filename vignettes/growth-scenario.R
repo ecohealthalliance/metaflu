@@ -51,13 +51,13 @@ basic <- function(farm_size, farm_number){
                    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)),
     stochastic_network = TRUE
   )
-  x <- mf_sim(init = initial_cond, parameters = parms, times=0:1825, n_sims = 100)
+  x <- mf_sim(init = initial_cond, parameters = parms, times=0:100, n_sims = 2, cube=TRUE)
   x
 }
 
-registerDoMC(cores=34)
+#registerDoMC(cores=20)
 
-basic_results <- basic(15, 1000)
+basic_results <- basic(15, 100)
 
 saveRDS(basic_results, "basic_results.rds")
 
@@ -87,8 +87,9 @@ grown <- function(farm_size, farm_number){
                    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)),
     stochastic_network = TRUE
   )
-  x <- mf_sim(init = initial_cond, parameters = parms, times=0:1825, n_sims = 100)
+  x <- mf_sim(init = initial_cond, parameters = parms, times=0:1825, n_sims = 100, cube=TRUE)
   x
 }
 
 grown_results <- grown(15,1000)
+saveRDS(basic_results, "basic_results.rds")

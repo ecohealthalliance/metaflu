@@ -33,7 +33,7 @@
 #' @importFrom doRNG %dorng%
 #' @importFrom purrr transpose
 #' @export
-mf_sim <- function(init, parameters, times, n_sims=1) {
+mf_sim <- function(init, parameters, times, n_sims=1, cube=FALSE) {
 
   times <- as.double(times)
   init <- as.vector(t(init))
@@ -79,6 +79,15 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
   outputs <- purrr::transpose(outputs)
   networks <- outputs[[2]]
   names(networks) <- 1:n_sims
+
+  if(cube) {
+    results <- tbl_cube(dimensions = list(class = factor(c("S", "I", "R", "V"), levels = c("S", "I", "R", "V")),
+                                          patch = seq_len(n_patches),
+                                          time = times,
+                                          sim = seq_len(n_sims)),
+                        measures = list(population = array(data = unlist(outputs[[1]], recursive = FALSE, use.names = FALSE),
+                                                           dim = c(4, n_patches, length(times), n_sims))))
+  } else {
   results <- crossing_(list(
     sim = seq_len(n_sims),
     time = times,
@@ -86,6 +95,7 @@ mf_sim <- function(init, parameters, times, n_sims=1) {
     class = factor(c("S", "I", "R", "V"), levels = c("S", "I", "R", "V"))
   ))
   results[["population"]] <- unlist(outputs[[1]], recursive = FALSE, use.names = FALSE)
+  }
   if(!is.null(parameters[["network_type"]]) && parameters[["stochastic_network"]]) {
     attr(results, "networks") <- networks
   } else {
