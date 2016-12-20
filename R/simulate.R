@@ -33,7 +33,7 @@
 #' @importFrom doRNG %dorng%
 #' @importFrom purrr transpose
 #' @export
-mf_sim <- function(init, parameters, times, n_sims=1, cube=FALSE) {
+mf_sim <- function(init, parameters, times, n_sims=1, return_array=FALSE) {
 
   times <- as.double(times)
   init <- as.vector(t(init))
@@ -80,13 +80,13 @@ mf_sim <- function(init, parameters, times, n_sims=1, cube=FALSE) {
   networks <- outputs[[2]]
   names(networks) <- 1:n_sims
 
-  if(cube) {
-    results <- tbl_cube(dimensions = list(class = factor(c("S", "I", "R", "V"), levels = c("S", "I", "R", "V")),
-                                          patch = seq_len(n_patches),
-                                          time = times,
-                                          sim = seq_len(n_sims)),
-                        measures = list(population = array(data = unlist(outputs[[1]], recursive = FALSE, use.names = FALSE),
-                                                           dim = c(4, n_patches, length(times), n_sims))))
+  if(return_array) {
+    results <- array(data = unlist(outputs[[1]], recursive = FALSE, use.names = FALSE),
+                     dim = c(4, n_patches, length(times), n_sims),
+                     dimnames =  list(c("S", "I", "R", "V"),
+                                      seq_len(n_patches),
+                                      times,
+                                      seq_len(n_sims)))
   } else {
   results <- crossing_(list(
     sim = seq_len(n_sims),
