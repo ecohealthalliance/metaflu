@@ -72,7 +72,8 @@ mf_sim <- function(init, parameters, times, n_sims=1, return_array=FALSE) {
   }
 
   suppressWarnings(suppressMessages({
-    outputs = foreach(i=seq_len(n_sims)) %dorng% {
+    outputs = foreach(i=seq_len(n_sims),
+                      .options.multicore=list(preschedule= FALSE)) %dorng% {
       sim_fun()
       }
   }))
