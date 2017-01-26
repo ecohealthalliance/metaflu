@@ -12,6 +12,7 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
 
   mf_vals vals;
   arma::vec state = init;
+  //Rcout << state << std::endl;
   arma::vec rates = set_rates(state, parms, vals);
   arma::vec cumrates = cumsum(rates);
   double sum_rates = cumrates(cumrates.n_elem - 1);
@@ -46,16 +47,12 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
     }
 
     if(sum_rates == 0) break;
-    //Rcout << time << "; " << vals.patch << "; " << vals.action << std::endl << state.t() << rates.t() << cumrates.t();
-    //event = as_scalar(find(cumrates >= R::runif(0, sum_rates), 1, "first"));
+
     sample_cumrates(event, cumrates, sum_rates);
     update_state(state, parms, time, vals, event);
-    update_rates(rates, cumrates, state, parms, vals, event);
-    //cumrates = cumsum(rates);
+    update_rates(rates, cumrates, state, parms, vals, event, time);
     sum_rates = cumrates(cumrates.n_elem - 1);
 
-    //Rcout << time << "; " << event << "; " << vals.action << "; " << vals.patch << "; " << cumrates.t();
-    //Rcout << state.t();
 
     time = time_next;
   }

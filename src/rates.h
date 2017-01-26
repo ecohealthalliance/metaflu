@@ -3,6 +3,7 @@
 
 
 #include "includes.h"
+#include <sstream>
 using namespace Rcpp;
 using namespace arma;
 
@@ -93,9 +94,22 @@ void update_state(arma::vec &state, const mf_parmlist &parms, const double &time
         state[vals.target_patch * 4 + i] -= parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
       }}
   }
+
+  // if(any(vals.rates_mat.col(vals.patch) < 0) || any(vals.state_mat.col(vals.patch) < 0)) {
+  //   std::stringstream err_string;
+  //   err_string << "Negative states or rates " << time << "; " << event << "; " << vals.patch <<  "; " << vals.action << "; " <<  std::endl << std::endl <<
+  //     vals.state_mat << std::endl <<
+  //       vals.rates_mat << std::endl;
+  //   err_string << vals.state_mat << std::endl;
+  //   Rcpp::stop(err_string.str());
+  // }
 };
 
-void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state, const mf_parmlist &parms, mf_vals &vals, arma::uword event) {
+void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state, const mf_parmlist &parms, mf_vals &vals, arma::uword event, const double &time) {
+
+  // if(time < 2) {
+  //   Rcout << time << "; " << event << "; " << vals.patch <<  "; " << vals.action << "; " <<  std::endl << vals.rates_mat << vals.state_mat << std::endl;
+  // }
 
   // Rcout << vals.patch << ";  " << vals.action<< std::endl;
   vals.min_patch = vals.patch*10;
@@ -103,10 +117,10 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
     vals.rates_mat.col(vals.patch) = zeros<vec>(10);
     vals.cull = false;
   } else {
-    vals.rates_mat.at(0, vals.patch) = vals.state_mat.at(0, vals.patch) *
+    vals.rates_mat.at(0, vals.patch) = vals.state_mat.at(0, vals.patch) * (
       (parms.beta *  vals.state_mat.at(1, vals.patch) / pow(accu(vals.state_mat.submat(0, vals.patch, 2, vals.patch)), parms.rho)) + //infection events (contact)
       parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.patch))) + //virion uptake
-      parms.lambda(vals.patch); //external infection
+      parms.lambda(vals.patch)); //external infection
     vals.rates_mat.at(1, vals.patch) = vals.state_mat.at(1, vals.patch) * parms.gamma; //recovery events
     vals.rates_mat.at(2, vals.patch) = vals.state_mat.at(0, vals.patch) * parms.mu;    //susceptible mortality
     vals.rates_mat.at(3, vals.patch) = vals.state_mat.at(1, vals.patch) * (parms.mu + parms.alpha); //infected mortality
@@ -116,10 +130,10 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
     vals.rates_mat.submat(7, vals.patch, 9, vals.patch) = vals.state_mat.submat(0, vals.patch, 2, vals.patch) * parms.omega; // emigration of all classes
 
     if(vals.action >= 7) {    //If an emigration action, send the individual to another patch
-      vals.rates_mat.at(0, vals.target_patch) = vals.state_mat.at(0, vals.target_patch) *
+      vals.rates_mat.at(0, vals.target_patch) = vals.state_mat.at(0, vals.target_patch) * (
         (parms.beta *  vals.state_mat.at(1, vals.target_patch) / pow(accu(vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch)), parms.rho)) + //infection events (contact)
         parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.target_patch))) + //virion uptake
-        parms.lambda(vals.patch); //external infection
+        parms.lambda(vals.patch)); //external infection
       vals.rates_mat.at(1, vals.target_patch) = vals.state_mat.at(1, vals.target_patch) * parms.gamma; //recovery events
       vals.rates_mat.at(2, vals.target_patch) = vals.state_mat.at(0, vals.target_patch) * parms.mu;    //susceptible mortality
       vals.rates_mat.at(3, vals.target_patch) = vals.state_mat.at(1, vals.target_patch) * (parms.mu + parms.alpha); //infected mortality
@@ -130,6 +144,9 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
       vals.min_patch = std::min(vals.target_patch*10, vals.min_patch);
     }
   }
+
+  //Rcout << vals.state_mat.col(vals.patch).t() << std::endl;
+
   if(vals.min_patch == 0) {
     cumrates[0] = rates[0];
     vals.min_patch++;
