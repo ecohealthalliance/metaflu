@@ -46,10 +46,7 @@ mf_sim <- function(init, parameters, times, n_sims=1, return_array=FALSE) {
   }
 
   #Convert scalar parameters to vectors
-  parms_to_extend <- c("lambda", "tau_crit", "I_crit", "pi_report", "pi_detect")
-  for(parm in parms_to_extend) {
-    parameters[[parm]] = rep_len(parameters[[parm]], n_patches)
-  }
+  parameters <-  repeat_parms(parameters, n_patches, c("lambda", "tau_crit", "I_crit", "pi_report", "pi_detect"))
 
   if(!is.null(parameters[["network_type"]]) && !parameters[["stochastic_network"]]) {
     parameters[["chi"]] <- make_net(parameters[["network_type"]],
@@ -114,4 +111,12 @@ make_net <- function(network_type, network_parms) {
                sparse=FALSE)
   net = net/rowSums(net)
 
+}
+
+
+repeat_parms <- function(parameters, n_patches, parms_to_extend) {
+  for(parm in parms_to_extend) {
+    parameters[[parm]] = rep_len(parameters[[parm]], n_patches)
+  }
+  return(parameters)
 }
