@@ -15,11 +15,23 @@ try_parms = list(
   sigma = 0,                        #virion shedding rate
   omega = 0,                        #movement rate
   rho = 0,                          #contact rate nonlinearity 0=density-dependent, 1=frequency-dependent
-  lambda = 0,                      #force of infection from external sources
-  chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
+  lambda = 0,                       #force of infection from external sources
+  tau_crit = 0,                     #critical suveillance time
+  I_crit = 0,                       #threshold for reporting
+  pi_report = 0,                    #reporting probability
+  pi_detect = 0,                    #detection probability
+  chi = NULL,
+  network_type = "smallworld",
+  network_parms = list(dim = 1, size = 20, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+  stochastic_network = TRUE
 )
 
-initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
+set.seed(123)
+initial_cond <- matrix(c(100, 0, 0, 0), nrow=20, ncol=4, byrow=TRUE)
+infected_patches <- sample(seq_len(nrow(initial_cond)), 2)
+initial_cond[infected_patches, 2] <- 1
+initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
+
 # registerDoSEQ()
 # set.seed(123)
 # rdsOutput <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
@@ -30,10 +42,10 @@ context("Reproducibility")
 test_that("outputs with same seed are identical regardless of parallelism", {
   registerDoSEQ()
   set.seed(123)
-  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  output1 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 5)
   registerDoMC(cores = 2)
   set.seed(123)
-  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 5)
   expect_identical(output1, output2)
 })
 
@@ -63,6 +75,10 @@ test_that("patches are not identical", {
     omega = 0,                        #movement rate
     rho = 0,                          #contact rate nonlinearity 0=density-dependent, 1=frequency-dependent
     lambda = 0,                      #force of infection from external sources
+    tau_crit = 0,                     #critical suveillance time
+    I_crit = 0,                       #threshold for reporting
+    pi_report = 0,                    #reporting probability
+    pi_detect = 0,                    #detection probability
     chi = matrix(c(1,0,0,0,1,0,0,0,1), nrow=3)  #patch connectivity matrix
   )
   initial_cond_patch3 <- matrix(c(99, 1, 0, 0), nrow=3, ncol=4, byrow=TRUE)
@@ -99,7 +115,7 @@ test_that("non-seeded runs after same-seeded runs are not identical", {
 
 test_that("RDS-saved model same as model created with same settings", {
   set.seed(123)
-  output2 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
+  output3 <- mf_sim(init = initial_cond, parameters = try_parms, times=0:1000, n_sims = 2)
   load1 <- readRDS("stored_sim_results.rds")
-  expect_identical(output2, load1)
+  expect_identical(output3, load1)
 })
