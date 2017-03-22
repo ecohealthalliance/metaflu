@@ -32,7 +32,7 @@ basic <- function(farm_size, farm_number){
   initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
 
   parms = list(
-    beta = 0.0081,   #contact rate for direct transmission
+    beta = 1.44456,   #contact rate for direct transmission
     gamma = 0.167,  #recovery rate
     mu = 0,         #base mortality rate
     alpha = 0.4,      #disease mortality rate
@@ -41,7 +41,7 @@ basic <- function(farm_size, farm_number){
     nu =  0.00,    #uptake rate of environmental virion
     sigma = 0,      #virion shedding rate
     omega = 0.03,   #movement rate
-    rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+    rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
     lambda = 0,     #force of infection from external sources
     tau_crit = 0,   #critical suveillance time
     I_crit = 0,     #threshold for reporting
@@ -51,8 +51,8 @@ basic <- function(farm_size, farm_number){
                    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)),
     stochastic_network = TRUE
   )
-  x <- mf_sim(init = initial_cond, parameters = parms, times=0:100, n_sims = 2, cube=TRUE)
-  x
+  x <- mf_sim(init = initial_cond, parameters = parms, times=0:100, n_sims = 20, return_array=TRUE)
+  return(x)
 }
 
 #registerDoMC(cores=20)
@@ -62,6 +62,7 @@ basic_results <- basic(15, 100)
 saveRDS(basic_results, "basic_results.rds")
 
 grown <- function(farm_size, farm_number){
+  set.seed(123)
   initial_cond <- growth_nodes(farm_size, farm_number)
   infected_patches <- sample(seq_len(nrow(initial_cond)), 1)
   initial_cond[infected_patches, 2] <- 1
@@ -87,9 +88,9 @@ grown <- function(farm_size, farm_number){
                    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)),
     stochastic_network = TRUE
   )
-  x <- mf_sim(init = initial_cond, parameters = parms, times=0:1825, n_sims = 100, cube=TRUE)
-  x
+  x <- mf_sim(init = initial_cond, parameters = parms, times=0:100, n_sims = 100, return_array=FALSE)
+  return(x)
 }
 
-grown_results <- grown(15,1000)
-saveRDS(basic_results, "basic_results.rds")
+grown_results2 <- grown(15,100)
+saveRDS(grown_results, "grown_results.rds")

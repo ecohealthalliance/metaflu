@@ -1,5 +1,17 @@
 
 #function to get duration of epidemic
+get_duration_array <- function(results){
+  sims <- seq_len(dim(results)[4])
+  durations <- lapply(sims, function(x) {
+  infections <- results["I", , , x]    #gets matrix of patches by times
+  i_by_time <- colSums(infections)       #gets total infections by time
+  zero_i_col <- min(which(i_by_time == 0)) #gets first column there are zero infections
+  duration <- as.numeric(attr(i_by_time, "names")[zero_i_col])
+  return(duration - 1)
+  })
+  return(unlist(durations))
+}
+
 get_duration <- function(results){
   duration <- results %>%
     filter(class == "I") %>%
