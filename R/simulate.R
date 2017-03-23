@@ -29,7 +29,7 @@
 #' @importFrom dplyr as_data_frame lst_
 #' @importFrom tidyr crossing_
 #' @importFrom stringi stri_subset_regex
-#' @importFrom foreach foreach %dopar%
+#' @importFrom foreach foreach
 #' @importFrom doRNG %dorng%
 #' @importFrom purrr transpose
 #' @export
@@ -76,7 +76,7 @@ mf_sim <- function(init, parameters, times, n_sims=1, return_array=FALSE) {
   }))
   outputs <- purrr::transpose(outputs)
   networks <- outputs[[2]]
-  names(networks) <- 1:n_sims
+  names(networks) <- seq_len(n_sims)
 
   if(return_array) {
     results <- array(data = unlist(outputs[[1]], recursive = FALSE, use.names = FALSE),
