@@ -117,10 +117,12 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
     vals.rates_mat.col(vals.patch) = zeros<vec>(10);
     vals.cull = false;
   } else {
-    vals.rates_mat.at(0, vals.patch) = vals.state_mat.at(0, vals.patch) * (
-      (parms.beta *  vals.state_mat.at(1, vals.patch) / pow(accu(vals.state_mat.submat(0, vals.patch, 2, vals.patch)), parms.rho)) + //infection events (contact)
-      parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.patch))) + //virion uptake
-      parms.lambda(vals.patch)); //external infection
+    vals.rates_mat.at(0, vals.patch) =
+      vals.state_mat.at(0, vals.patch) == 0 ? 0 :
+    vals.state_mat.at(0, vals.patch) * (
+        (parms.beta *  vals.state_mat.at(1, vals.patch) / pow(accu(vals.state_mat.submat(0, vals.patch, 2, vals.patch)), parms.rho)) + //infection events (contact)
+          parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.patch))) + //virion uptake
+          parms.lambda(vals.patch)); //external infection
     vals.rates_mat.at(1, vals.patch) = vals.state_mat.at(1, vals.patch) * parms.gamma; //recovery events
     vals.rates_mat.at(2, vals.patch) = vals.state_mat.at(0, vals.patch) * parms.mu;    //susceptible mortality
     vals.rates_mat.at(3, vals.patch) = vals.state_mat.at(1, vals.patch) * (parms.mu + parms.alpha); //infected mortality
@@ -132,8 +134,8 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
     if(vals.action >= 7) {    //If an emigration action, send the individual to another patch
       vals.rates_mat.at(0, vals.target_patch) = vals.state_mat.at(0, vals.target_patch) * (
         (parms.beta *  vals.state_mat.at(1, vals.target_patch) / pow(accu(vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch)), parms.rho)) + //infection events (contact)
-        parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.target_patch))) + //virion uptake
-        parms.lambda(vals.patch)); //external infection
+          parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.target_patch))) + //virion uptake
+          parms.lambda(vals.patch)); //external infection
       vals.rates_mat.at(1, vals.target_patch) = vals.state_mat.at(1, vals.target_patch) * parms.gamma; //recovery events
       vals.rates_mat.at(2, vals.target_patch) = vals.state_mat.at(0, vals.target_patch) * parms.mu;    //susceptible mortality
       vals.rates_mat.at(3, vals.target_patch) = vals.state_mat.at(1, vals.target_patch) * (parms.mu + parms.alpha); //infected mortality
