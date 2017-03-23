@@ -12,6 +12,7 @@ library(ggplot2)
 library(dplyr)
 library(doMC)
 library(tidyr)
+library(purrr)
 ```
 
 ```{r patch-functions}
@@ -28,11 +29,34 @@ growth_nodes <- function(farm_size, farm_number){
   return(total)
 }
 
-grow_patches <- function(basic_condition){
-  s_num <- round(nrow(basic_condition)*1/11)
-  grow_rows <- sample.int(nrow(basic_condition), s_num)
-  
+grow_patches <- function(basic_cond){
+  s_num <- round(nrow(basic_cond)*1/11)
+  new_cond <- basic_cond
+  grow_rows <- sample.int(nrow(new_cond), s_num)
+  walk(grow_rows, function(row){
+    new_cond[row,1] <- new_cond[row,1]*10
+  })
+  return(new_cond)
 }
+
+```
+
+```{r network-setup}
+#Set number of farms and ~ number of chickens per farm
+farm_number <- 100
+farm_size <- 15
+
+#Make network connections
+set.seed(123)
+network_type <- "smallworld"
+network_parms <- list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)
+nw <- make_net(network_type, network_parms)
+
+#Set up patch size
+initial_cond <- basic_patches(farm_size, farm_number)
+  infected_patches <- sample(seq_len(nrow(initial_cond)), 1)
+  initial_cond[infected_patches, 2] <- 1
+  initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
 
 ```
 
@@ -53,40 +77,39 @@ grow_patches <- function(basic_condition){
     I_crit = 0,     #threshold for reporting
     pi_report = 0, #reporting probability
     pi_detect = 0, #detection probability
-    chi = NULL,
-    network_type = "smallworld",
-    network_parms = list(dim = 1, size = NULL, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
-    stochastic_network = TRUE
-  )
+    chi = nw       #network connections created in above step
+    )
 ```
 
-
-```{r basic-initial}
-
-
-```
 
 ```{r basic-run}
+basic_results <- mf_sim(init = initial_cond, parameters = parms, times=0:100, n_sims = 100, return_array=FALSE)
+durations <- get_duration(basic_results)
 
+s <- get_susceptibles(basic_results)
+i <- get_infections(basic_results)
+r <- get_recovered(basic_results)
 
+spread_failures <- get_failure(basic_results)
 
-```
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+tot_i <- get_tot_infections(basic_results)
 ```
 
-## Including Plots
+```{r growth-run}
+#Grow a random number of patches to get double total chicken population
+grown_cond <- grow_patches(initial_cond)
 
-You can also embed plots, for example:
+grown_results <- mf_sim(init = grown_cond, parameters = parms, times = 0:100, n_sims = 100, return_array= FALSE)
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+g_durations <- get_duration(grown_results)
+
+g_s <- get_susceptibles(grown_results)
+g_i <- get_infections(grown_results)
+g_r <- get_recovered(grown_results)
+
+g_spread_failures <- get_failure(grown_results)
+
+g_tot_i <- get_tot_infections(grown_results)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
