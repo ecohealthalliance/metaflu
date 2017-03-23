@@ -37,7 +37,6 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
     } else {
       time_next = time + R::rexp(1/sum_rates);
     }
-
     while(time_next > *(next_record_time) && *(next_record_time) < time_max) {  //only store times on the grid
       Progress::check_abort();
       p.update(time);
@@ -47,15 +46,20 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
     }
 
     if(sum_rates == 0) break;
+    if(!is_finite(time)) {
+      std::stringstream err_msg;
+      err_msg<< "Time has an invalid value: " << time << std::endl;
+      stop(err_msg.str());
+    }
 
     sample_cumrates(event, cumrates, sum_rates);
     update_state(state, parms, time, vals, event);
     update_rates(rates, cumrates, state, parms, vals, event, time);
     sum_rates = cumrates(cumrates.n_elem - 1);
 
-
+    //Rcout << std::endl;
     time = time_next;
   }
 
-  return results_vec;
+    return results_vec;
 };
