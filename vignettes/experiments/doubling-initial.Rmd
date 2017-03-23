@@ -1,0 +1,92 @@
+---
+title: "Doubling Scenario - Initial Infection"
+author: "Cale Basaraba"
+date: "3/23/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE)
+library(metaflu)
+library(ggplot2)
+library(dplyr)
+library(doMC)
+library(tidyr)
+```
+
+```{r patch-functions}
+
+basic_patches <- function(farm_size, farm_number){
+  initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 3, nrow = farm_number))
+  return(initial_cond)
+}
+
+growth_nodes <- function(farm_size, farm_number){
+  nodes <- c(rpois(round(farm_number*8/9,0), farm_size), rpois(round(farm_number/9, 0), farm_size*10))
+  total <- cbind(nodes, matrix(0, ncol = 3, nrow = length(nodes)))
+  total <- total[sample(nrow(total)),]
+  return(total)
+}
+
+grow_patches <- function(basic_condition){
+  s_num <- round(nrow(basic_condition)*1/11)
+  grow_rows <- sample.int(nrow(basic_condition), s_num)
+  
+}
+
+```
+
+```{r parameter-setup}
+  parms = list(
+    beta = 0.004,   #contact rate for direct transmission
+    gamma = 0.167,  #recovery rate
+    mu = 0,         #base mortality rate
+    alpha = 0.4,      #disease mortality rate
+    phi = 0,  #infectiousness of environmental virions
+    eta = 0,     #degradation rate of environmental virions
+    nu =  0.00,    #uptake rate of environmental virion
+    sigma = 0,      #virion shedding rate
+    omega = 0.03,   #movement rate
+    rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+    lambda = 0,     #force of infection from external sources
+    tau_crit = 0,   #critical suveillance time
+    I_crit = 0,     #threshold for reporting
+    pi_report = 0, #reporting probability
+    pi_detect = 0, #detection probability
+    chi = NULL,
+    network_type = "smallworld",
+    network_parms = list(dim = 1, size = NULL, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+    stochastic_network = TRUE
+  )
+```
+
+
+```{r basic-initial}
+
+
+```
+
+```{r basic-run}
+
+
+
+```
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
