@@ -4,7 +4,7 @@
 \alias{mf_sim}
 \title{Influenza Metapopulation Simulator}
 \usage{
-mf_sim(init, parameters, times, n_sims = 1)
+mf_sim(init, parameters, times, n_sims = 1, return_array = FALSE)
 }
 \arguments{
 \item{init}{Intital conditions - a patches X 4 (SIRV) matrix of populations}
@@ -40,4 +40,3 @@ a \strong{foreach} back-end such as \code{\link[doMC:registerDoMC]{doMC::registe
  initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
  output <- mf_sim(init = initial_cond, parameters = parms, times=0:1000, n_sims = 2)
 }
-

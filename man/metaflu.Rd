@@ -8,4 +8,3 @@
 \description{
 metaflu.- Stochastic simulator for avian influenza metapopulation dynaimics
 }
-

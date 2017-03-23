@@ -1,5 +1,5 @@
 library(metaflu)
-library(doMC)
+library(foreach)
 
 
 basic_nodes <- function(farm_size, farm_number){
@@ -7,8 +7,8 @@ basic_nodes <- function(farm_size, farm_number){
   return(initial_cond)
 }
 
-set.seed(17)
 
+set.seed(12)
 
 basic <- function(farm_size, farm_number){
   initial_cond <- basic_nodes(farm_size, farm_number)
@@ -36,10 +36,13 @@ basic <- function(farm_size, farm_number){
                    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)),
     stochastic_network = TRUE
   )
-  x <- mf_sim(init = initial_cond, parameters = parms, times=0:100, n_sims = 3, return_array=TRUE)
+  x <- mf_sim(init = initial_cond, parameters = parms, times=0:100, n_sims = 1, return_array=TRUE)
   return(x)
 }
 
-registerDoMC(cores=3)
 
-basic_results <- basic(15, 100)
+#registerDoMC(cores=3)
+
+  basic_results <- basic(15, 100)
+
+#saveRDS(basic_results, "basic_results_endless.RDS")
