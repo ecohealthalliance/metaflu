@@ -33,7 +33,7 @@
 #' @importFrom doRNG %dorng%
 #' @importFrom purrr transpose
 #' @export
-mf_sim <- function(init, parameters, times, n_sims=1, return_array=FALSE) {
+mf_sim <- function(init, parameters, times, n_sims=1, return_array=TRUE) {
 
   times <- as.double(times)
   init <- as.vector(t(init))
