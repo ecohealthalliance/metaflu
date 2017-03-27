@@ -113,7 +113,7 @@ sir <- ggplot() +
   theme_minimal()
 
 total_i <- ggplot() +
-  geom_histogram(data = tot_i, aes(x = total_i), binwidth = 0.5) +
+  geom_histogram(data = tot_i, aes(x = total_i), bins = 100) +
   labs(title = paste0("Total Infections in ", l," Simulations"), x = "Total Infections", y = "Number of Simulations") +
   theme_minimal()
 

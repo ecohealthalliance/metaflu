@@ -13,17 +13,6 @@ library(tidyr)
 set.seed(17)
 
 
-basic_nodes <- function(farm_size, farm_number){
-  initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 3, nrow = farm_number))
-  return(initial_cond)
-}
-
-growth_nodes <- function(farm_size, farm_number){
-  nodes <- c(rpois(round(farm_number*8/9,0), farm_size), rpois(round(farm_number/9, 0), farm_size*10))
-  total <- cbind(nodes, matrix(0, ncol = 3, nrow = length(nodes)))
-  total <- total[sample(nrow(total)),]
-  return(total)
-}
 
 basic <- function(farm_size, farm_number){
   initial_cond <- basic_nodes(farm_size, farm_number)

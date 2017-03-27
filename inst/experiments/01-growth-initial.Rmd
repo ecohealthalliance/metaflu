@@ -1,11 +1,11 @@
 ---
-title: "Growth Scenario - One Initial Infection Seeded"
+title: "Basic Growth Scenario"
 author: "Cale Basaraba"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache = TRUE, fig.width=10, fig.height=6)
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, fig.width=10, fig.height=6, warning = FALSE)
 devtools::load_all()
 library(metaflu)
 library(ggplot2)
@@ -24,7 +24,7 @@ basic_patches <- function(farm_size, farm_number){
 }
 
 grow_patches <- function(basic_cond){
-  s_num <- round(nrow(basic_cond)*1/11)
+  s_num <- round(nrow(basic_cond)*1/9)
   new_cond <- basic_cond
   grow_rows <- sample.int(nrow(new_cond), s_num)
   walk(grow_rows, function(row){
@@ -36,18 +36,20 @@ grow_patches <- function(basic_cond){
 ```
 
 ### Introduction
-Text here
+This is a bare bones run of the metaflu simulator. 
+
+- ~15 Chickens (Poisson distribution with 15 as mean)
+
+- 100 Farms
+
+- One initial seeded infection
+
 
 ```{r network-setup}
+set.seed(123)
 #Set number of farms and ~ number of chickens per farm
 farm_number <- 100
 farm_size <- 15
-
-#Make network connections
-set.seed(123)
-network_type <- "smallworld"
-network_parms <- list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)
-nw <- make_net(network_type, network_parms)
 
 #Set up patch size
 initial_cond <- basic_patches(farm_size, farm_number)
@@ -74,12 +76,14 @@ initial_cond <- basic_patches(farm_size, farm_number)
     I_crit = 0,     #threshold for reporting
     pi_report = 0, #reporting probability
     pi_detect = 0, #detection probability
-    chi = nw       #network connections created in above step
+    network_type = "smallworld",
+    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+    stochastic_network = TRUE
     )
 ```
 
 ### Initial Run
-Text here
+
 ```{r basic-run, cache = TRUE}
 set.seed(123)
 basic_results <- mf_sim(init = initial_cond, parameters = parms, times=0:365, n_sims = 1000)
@@ -104,12 +108,13 @@ l <- length(tot_i$total_i)
 sir <- ggplot() +
   geom_line(data = s, aes(x = time, y = median, color = "S")) +
   geom_line(data = i, aes(x = time, y = median, color = "I")) +
-  geom_line(data = r, aes(x = time, y = median, color = "R")) +  
-  geom_ribbon(data = s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.3) +
-  geom_ribbon(data = i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.3) +
-  geom_ribbon(data = r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.3) +
+  geom_line(data = r, aes(x = time, y = median, color = "R")) +
+  geom_ribbon(data = s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.2) +
+  geom_ribbon(data = i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.2) +
+  geom_ribbon(data = r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
   labs(title = "S-I-R", x = "Time", y = paste0("Median: ", l, " Sims")) +
   scale_colour_manual(name = "Compartment", values=c(S = "blue", I = "red", R = "green")) +
+  scale_x_continuous(limits = c(0, max(durations$duration)+10)) +
   theme_minimal()
 
 total_i <- ggplot() +
@@ -139,7 +144,7 @@ grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
 
 ### Growth Run
 
-The only change made to this run is that approximately 9% of the original farms grow to ten-times their original size (~15 to ~150), resulting in twice as many chickens in the entire network. For this experiment, the growing farms are chosen at random.
+The only change made to this run is that approximately 11% of the original farms grow to ten-times their original size (~15 to ~150), resulting in twice as many chickens in the entire network. For this experiment, the growing farms are chosen at random.
 
 ```{r growth-run, cache = TRUE}
 #Grow a random number of patches to get double total chicken population
@@ -165,30 +170,31 @@ rm(grown_results)
 ```{r plots-growth, message = FALSE}
 l <- length(g_tot_i$total_i)
 
-sir <- ggplot() +
+g_sir <- ggplot() +
   geom_line(data = g_s, aes(x = time, y = median, color = "S")) +
   geom_line(data = g_i, aes(x = time, y = median, color = "I")) +
   geom_line(data = g_r, aes(x = time, y = median, color = "R")) +
-  geom_ribbon(data = s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.3) +
-  geom_ribbon(data = i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.3) +
-  geom_ribbon(data = r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.3) +
+  geom_ribbon(data = g_s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.2) +
+  geom_ribbon(data = g_i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.2) +
+  geom_ribbon(data = g_r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
   labs(title = "S-I-R", x = "Time", y = paste0("Median: ", l, " Sims")) +
   scale_colour_manual(name = "Compartment", values=c(S = "blue", I = "red", R = "green")) +
+  scale_x_continuous(limits = c(0, max(g_durations$duration)+10)) +
   theme_minimal()
 
-total_i <- ggplot() +
-  geom_histogram(data = g_tot_i, aes(x = total_i), binwidth = 0.5) +
+g_total_i <- ggplot() +
+  geom_histogram(data = g_tot_i, aes(x = total_i), bins = 100) +
   labs(title = paste0("Total Infections in ", l," Simulations"), x = "Total Infections", y = "Number of Simulations") +
   theme_minimal()
 
-failures <- ggplot() +
+g_failures <- ggplot() +
   geom_bar(data = g_spread_failures, aes(x = 1, fill = failed), width = 0.1) +
   theme_minimal() +
   labs(title = "Failure to Spread", y = "Number of Simulations") +
   theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
   scale_fill_manual(name = "Failed to Spread", values = c("black", "grey")) 
 
-duration <- ggplot() +
+g_duration <- ggplot() +
   geom_histogram(data = g_durations, aes(x = durations$duration), binwidth = 0.5) +
   theme_minimal() +
   labs(title = paste0("Duration of Epidemic in ", l, " Simulations"), x = "Duration in Days", y = "Number of Simulations")
@@ -197,7 +203,7 @@ lay <- rbind(c(1,1,1,4),
              c(1,1,1,4),
              c(2,2,3,3))
 
-grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
+grid.arrange(g_sir,g_total_i,g_duration,g_failures, layout_matrix = lay)
 
 
 ```

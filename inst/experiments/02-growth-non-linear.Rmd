@@ -36,8 +36,16 @@ grow_patches <- function(basic_cond){
 ```
 
 ### Introduction
-Text here
 
+This run of the simulator includes the implementation of a non-linear contact rate. 
+
+- Non-linear Contact rate ($\rho, \beta$)
+
+- ~15 Chickens (Poisson distribution with 15 as mean)
+
+- 100 Farms
+
+- One initial seeded infection
 ```{r network-setup}
 #Set number of farms and ~ number of chickens per farm
 farm_number <- 100
@@ -79,7 +87,6 @@ initial_cond <- basic_patches(farm_size, farm_number)
 ```
 
 ### Initial Run
-Text here
 ```{r basic-run, cache = TRUE}
 set.seed(123)
 basic_results <- mf_sim(init = initial_cond, parameters = parms, times=0:365, n_sims = 1000)
@@ -139,7 +146,7 @@ grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
 
 ### Growth Run
 
-The only change made to this run is that approximately 9% of the original farms grow to ten-times their original size (~15 to ~150), resulting in twice as many chickens in the entire network. For this experiment, the growing farms are chosen at random.
+The only change made to this run is that approximately 11% of the original farms grow to ten-times their original size (~15 to ~150), resulting in twice as many chickens in the entire network. For this experiment, the growing farms are chosen at random.
 
 ```{r growth-run, cache = TRUE}
 #Grow a random number of patches to get double total chicken population

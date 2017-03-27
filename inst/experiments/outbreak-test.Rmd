@@ -4,8 +4,9 @@ author: "Cale Basaraba"
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache = TRUE, fig.width=10, fig.height=6)
+knitr::opts_chunk$set(echo = FALSE, cache = TRUE, fig.width=10, fig.height=6, warning = FALSE)
 devtools::load_all()
 library(metaflu)
 library(ggplot2)
@@ -36,7 +37,8 @@ grow_patches <- function(basic_cond){
 ```
 
 ### Introduction
-Text here
+
+This document generates a guaranteed outbreak scenario, with __100 farms__ of __200 chickens__ each. The current simulation includes non-linear contact rate implemented via $\rho$ and $\beta$, along with clustered intensification: 9% of farms whose population increases are clustered together. There is no environmental transmission, background mortality rate, or surveillance / culling modeled in these simulations.
 
 ```{r network-setup}
 #Set number of farms and ~ number of chickens per farm
@@ -56,6 +58,38 @@ initial_cond <- basic_patches(farm_size, farm_number)
   initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
 
 ```
+
+#### Parameters
+
+$\beta$ = 1.4456 -- Contact rate implemented alongside $\rho$
+
+$\gamma$ = 0.167 -- Recovery rate
+
+$\mu$ = 0.0 -- Base mortality rate
+
+$\alpha$ = 0.4 -- Disease mortality rate
+
+$\phi$ = 0.0 -- Infectiousness of environmental virions
+
+$\eta$ = 0.0 -- Degradation of environmental virions
+
+$\nu$ = 0.0 -- Update rate of environmental virions
+
+$\sigma$ = 0.0 -- Virion shedding rate
+
+$\omega$ = 0.03 -- Inter-patch movement rate
+
+$\rho$ = 0.8526 -- Contact non-linearity parameter
+
+$\lambda$ = 0.0 -- External force of infection
+
+$\tau$-crit = 0.0 -- Critical surveillance time
+
+$I$-crit = 0.0 -- Threshold for reporting
+
+$\pi$-report = 0.0 -- Reporting probability
+
+$\pi$-detect = 0.0 -- Detection probability
 
 ```{r parameter-setup}
   parms = list(
@@ -79,7 +113,7 @@ initial_cond <- basic_patches(farm_size, farm_number)
 ```
 
 ### Initial Run
-Text here
+
 ```{r basic-run, cache = TRUE}
 set.seed(123)
 basic_results <- mf_sim(init = initial_cond, parameters = parms, times=0:365, n_sims = 1000)
@@ -105,15 +139,16 @@ sir <- ggplot() +
   geom_line(data = s, aes(x = time, y = median, color = "S")) +
   geom_line(data = i, aes(x = time, y = median, color = "I")) +
   geom_line(data = r, aes(x = time, y = median, color = "R")) +
-  geom_ribbon(data = s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.3) +
-  geom_ribbon(data = i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.3) +
-  geom_ribbon(data = r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.3) +
+  geom_ribbon(data = s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.2) +
+  geom_ribbon(data = i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.2) +
+  geom_ribbon(data = r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
   labs(title = "S-I-R", x = "Time", y = paste0("Median: ", l, " Sims")) +
   scale_colour_manual(name = "Compartment", values=c(S = "blue", I = "red", R = "green")) +
+  scale_x_continuous(limits = c(0, max(durations$duration)+10)) +
   theme_minimal()
 
 total_i <- ggplot() +
-  geom_histogram(data = tot_i, aes(x = total_i), binwidth = 0.5) +
+  geom_histogram(data = tot_i, aes(x = total_i), bins = 100) +
   labs(title = paste0("Total Infections in ", l," Simulations"), x = "Total Infections", y = "Number of Simulations") +
   theme_minimal()
 
@@ -139,17 +174,15 @@ grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
 
 ### Growth Run
 
-Approximately 9% of the original farms grow to ten-times their original size (~15 to ~150), and these farms are all in one neighborhood in this experiment. 
+Eleven percent of farms have grown in size by an order of magnititude, resulting in the doubling of total chicken population in the system. This intensification occurs in the same region.
 
 ```{r growth-run, cache = TRUE}
 #Grow an adjacent set of patches to get double total chicken population
 set.seed(123)
 
-s_num <- round(nrow(initial_cond)*1/11)
+s_num <- round(nrow(initial_cond)*1/9)
 new_cond <- initial_cond
-walk(seq_len(s_num), function(row){
-    new_cond[row,1] <- new_cond[row,1]*10
-  })
+new_cond[1:s_num,1] <- new_cond[1:s_num,1]*10
 grown_cond <- new_cond
 
 grown_results <- mf_sim(init = grown_cond, parameters = parms, times = 0:365, n_sims = 1000)
@@ -171,30 +204,31 @@ rm(grown_results)
 ```{r plots-growth, message = FALSE}
 l <- length(g_tot_i$total_i)
 
-sir <- ggplot() +
+g_sir <- ggplot() +
   geom_line(data = g_s, aes(x = time, y = median, color = "S")) +
   geom_line(data = g_i, aes(x = time, y = median, color = "I")) +
   geom_line(data = g_r, aes(x = time, y = median, color = "R")) +
-  geom_ribbon(data = s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.3) +
-  geom_ribbon(data = i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.3) +
-  geom_ribbon(data = r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.3) +
+  geom_ribbon(data = g_s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.2) +
+  geom_ribbon(data = g_i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.2) +
+  geom_ribbon(data = g_r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
   labs(title = "S-I-R", x = "Time", y = paste0("Median: ", l, " Sims")) +
   scale_colour_manual(name = "Compartment", values=c(S = "blue", I = "red", R = "green")) +
+  scale_x_continuous(limits = c(0, max(g_durations$duration)+10)) +
   theme_minimal()
 
-total_i <- ggplot() +
-  geom_histogram(data = g_tot_i, aes(x = total_i), binwidth = 0.5) +
+g_total_i <- ggplot() +
+  geom_histogram(data = g_tot_i, aes(x = total_i), bins = 100) +
   labs(title = paste0("Total Infections in ", l," Simulations"), x = "Total Infections", y = "Number of Simulations") +
   theme_minimal()
 
-failures <- ggplot() +
+g_failures <- ggplot() +
   geom_bar(data = g_spread_failures, aes(x = 1, fill = failed), width = 0.1) +
   theme_minimal() +
   labs(title = "Failure to Spread", y = "Number of Simulations") +
   theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
   scale_fill_manual(name = "Failed to Spread", values = c("black", "grey")) 
 
-duration <- ggplot() +
+g_duration <- ggplot() +
   geom_histogram(data = g_durations, aes(x = durations$duration), binwidth = 0.5) +
   theme_minimal() +
   labs(title = paste0("Duration of Epidemic in ", l, " Simulations"), x = "Duration in Days", y = "Number of Simulations")
@@ -203,7 +237,7 @@ lay <- rbind(c(1,1,1,4),
              c(1,1,1,4),
              c(2,2,3,3))
 
-grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
+grid.arrange(g_sir,g_total_i,g_duration,g_failures, layout_matrix = lay)
 
 
 ```
