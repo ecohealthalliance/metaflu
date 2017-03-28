@@ -5,7 +5,7 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache = TRUE, fig.width=10, fig.height=6, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
 devtools::load_all()
 library(metaflu)
 library(ggplot2)
@@ -14,6 +14,7 @@ library(doMC)
 library(tidyr)
 library(purrr)
 library(gridExtra)
+set.seed(123)
 ```
 
 ```{r patch-functions}
@@ -24,12 +25,10 @@ basic_patches <- function(farm_size, farm_number){
 }
 
 grow_patches <- function(basic_cond){
-  s_num <- round(nrow(basic_cond)*1/9)
+  s_num <- round(nrow(basic_cond)*1/11)
   new_cond <- basic_cond
   grow_rows <- sample.int(nrow(new_cond), s_num)
-  walk(grow_rows, function(row){
-    new_cond[row,1] <- new_cond[row,1]*10
-  })
+  new_cond[grow_rows,1] <- new_cond[grow_rows,1]*10
   return(new_cond)
 }
 
@@ -46,7 +45,6 @@ This is a bare bones run of the metaflu simulator.
 
 
 ```{r network-setup}
-set.seed(123)
 #Set number of farms and ~ number of chickens per farm
 farm_number <- 100
 farm_size <- 15
@@ -58,6 +56,38 @@ initial_cond <- basic_patches(farm_size, farm_number)
   initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
 
 ```
+
+#### Parameters
+
+$\beta$ = 0.004 -- Contact rate
+
+$\gamma$ = 0.167 -- Recovery rate
+
+$\mu$ = 0.0 -- Base mortality rate
+
+$\alpha$ = 0.4 -- Disease mortality rate
+
+$\phi$ = 0.0 -- Infectiousness of environmental virions
+
+$\eta$ = 0.0 -- Degradation of environmental virions
+
+$\nu$ = 0.0 -- Update rate of environmental virions
+
+$\sigma$ = 0.0 -- Virion shedding rate
+
+$\omega$ = 0.03 -- Inter-patch movement rate
+
+$\rho$ = 0 -- Contact non-linearity parameter
+
+$\lambda$ = 0.0 -- External force of infection
+
+$\tau$-crit = 0.0 -- Critical surveillance time
+
+$I$-crit = 0.0 -- Threshold for reporting
+
+$\pi$-report = 0.0 -- Reporting probability
+
+$\pi$-detect = 0.0 -- Detection probability
 
 ```{r parameter-setup}
   parms = list(
@@ -84,8 +114,7 @@ initial_cond <- basic_patches(farm_size, farm_number)
 
 ### Initial Run
 
-```{r basic-run, cache = TRUE}
-set.seed(123)
+```{r basic-run}
 basic_results <- mf_sim(init = initial_cond, parameters = parms, times=0:365, n_sims = 1000)
 
 durations <- get_duration_array(basic_results)
@@ -118,7 +147,7 @@ sir <- ggplot() +
   theme_minimal()
 
 total_i <- ggplot() +
-  geom_histogram(data = tot_i, aes(x = total_i), binwidth = 0.5) +
+  geom_histogram(data = tot_i, aes(x = total_i), bins = 100) +
   labs(title = paste0("Total Infections in ", l," Simulations"), x = "Total Infections", y = "Number of Simulations") +
   theme_minimal()
 
@@ -146,9 +175,8 @@ grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
 
 The only change made to this run is that approximately 11% of the original farms grow to ten-times their original size (~15 to ~150), resulting in twice as many chickens in the entire network. For this experiment, the growing farms are chosen at random.
 
-```{r growth-run, cache = TRUE}
+```{r growth-run}
 #Grow a random number of patches to get double total chicken population
-set.seed(123)
 grown_cond <- grow_patches(initial_cond)
 
 grown_results <- mf_sim(init = grown_cond, parameters = parms, times = 0:365, n_sims = 1000)
@@ -195,7 +223,7 @@ g_failures <- ggplot() +
   scale_fill_manual(name = "Failed to Spread", values = c("black", "grey")) 
 
 g_duration <- ggplot() +
-  geom_histogram(data = g_durations, aes(x = durations$duration), binwidth = 0.5) +
+  geom_histogram(data = g_durations, aes(x = g_durations$duration), binwidth = 0.5) +
   theme_minimal() +
   labs(title = paste0("Duration of Epidemic in ", l, " Simulations"), x = "Duration in Days", y = "Number of Simulations")
 

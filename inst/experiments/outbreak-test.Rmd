@@ -6,7 +6,7 @@ output: html_document
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, cache = TRUE, fig.width=10, fig.height=6, warning = FALSE)
+knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
 devtools::load_all()
 library(metaflu)
 library(ggplot2)
@@ -15,6 +15,7 @@ library(doMC)
 library(tidyr)
 library(purrr)
 library(gridExtra)
+set.seed(123)
 ```
 
 ```{r patch-functions}
@@ -46,7 +47,6 @@ farm_number <- 100
 farm_size <- 200
 
 #Make network connections
-set.seed(123)
 network_type <- "smallworld"
 network_parms <- list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)
 nw <- make_net(network_type, network_parms)
@@ -114,8 +114,7 @@ $\pi$-detect = 0.0 -- Detection probability
 
 ### Initial Run
 
-```{r basic-run, cache = TRUE}
-set.seed(123)
+```{r basic-run}
 basic_results <- mf_sim(init = initial_cond, parameters = parms, times=0:365, n_sims = 1000)
 
 durations <- get_duration_array(basic_results)
@@ -176,9 +175,8 @@ grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
 
 Eleven percent of farms have grown in size by an order of magnititude, resulting in the doubling of total chicken population in the system. This intensification occurs in the same region.
 
-```{r growth-run, cache = TRUE}
+```{r growth-run}
 #Grow an adjacent set of patches to get double total chicken population
-set.seed(123)
 
 s_num <- round(nrow(initial_cond)*1/9)
 new_cond <- initial_cond
@@ -229,7 +227,7 @@ g_failures <- ggplot() +
   scale_fill_manual(name = "Failed to Spread", values = c("black", "grey")) 
 
 g_duration <- ggplot() +
-  geom_histogram(data = g_durations, aes(x = durations$duration), binwidth = 0.5) +
+  geom_histogram(data = g_durations, aes(x = g_durations$duration), binwidth = 0.5) +
   theme_minimal() +
   labs(title = paste0("Duration of Epidemic in ", l, " Simulations"), x = "Duration in Days", y = "Number of Simulations")
 
