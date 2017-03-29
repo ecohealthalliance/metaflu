@@ -144,3 +144,42 @@ get_tot_infections <- function(results){
   return(tot_infections)
 }
 
+get_all_sims <- function(compartment, results){
+  c.results <- lapply(seq_len(dim(results)[4]), function(x) results[compartment,,,x])
+  c.reduced <- t(sapply(c.results, function(x) colSums(x)))
+  df <- data.frame(c.reduced)
+  colnames(df) <- seq_len(dim(df)[2])
+  df$sim <- seq_len(dim(df)[1])
+  c.df <- gather(df, time, pop, -sim, convert= TRUE)
+  return(c.df)
+}
+
+get_epi_begin <- function(results){
+  epi_begin <- sapply(seq_len(dim(results)[4]), function(x){
+    tot_i <- colSums(results["I",,,x])
+    non_z <- which(tot_i > 0)
+    starts <- min(non_z)
+    if (starts == Inf) starts <- dim(results)[3]
+    return(starts)
+  })
+  return(epi_begin)
+}
+
+get_epi_end <- function(results){
+  epi_end <- sapply(seq_len(dim(results)[4]), function(x){
+    tot_i <- colSums(results["I",,,x])
+    non_z <- which(tot_i > 0)
+    z <- which(tot_i == 0)
+    starts <- min(non_z)
+    if (starts == Inf) starts <- dim(results)[3]
+    z <- z[z > starts]
+    end <- min(z)
+    return(end)
+  })
+  return(epi_end)
+}
+
+get_duration_lambda <- function(results){
+  dur <- get_epi_end(results) - get_epi_begin(results)
+  return(dur)
+}
