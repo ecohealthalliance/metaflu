@@ -183,3 +183,10 @@ get_duration_lambda <- function(results){
   dur <- get_epi_end(results) - get_epi_begin(results)
   return(dur)
 }
+
+truncate_data <- function(start, df){
+  bind_rows(purrr::map2(start, seq_along(start), function(x,y){
+    filter(df, sim == y, time >= x) %>%
+      mutate(new_time = time - x)
+  }))
+}
