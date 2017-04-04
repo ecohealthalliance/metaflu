@@ -154,51 +154,10 @@ get_all_sims <- function(compartment, results){
   return(c.df)
 }
 
-get_epi_begin <- function(results){
-  epi_begin <- sapply(seq_len(dim(results)[4]), function(x){
-    tot_i <- colSums(results["I",,,x])
-    non_z <- which(tot_i > 0)
-    starts <- min(non_z)
-    if (starts == Inf) starts <- dim(results)[3]
-    return(starts)
+get_number_farms <- function(results){
+  farms <- sapply(seq_len(dim(results)[4]), function(x){
+    tot_i <- rowSums(results["I",,,x])
+    return(sum(tot_i > 0))
   })
-  return(epi_begin)
-}
-
-get_epi_end <- function(results){
-  epi_end <- sapply(seq_len(dim(results)[4]), function(x){
-    tot_i <- colSums(results["I",,,x])
-    non_z <- which(tot_i > 0)
-    z <- which(tot_i == 0)
-    starts <- min(non_z)
-    if (starts == Inf) starts <- dim(results)[3]
-    z <- z[z > starts]
-    end <- min(z)
-    return(end)
-  })
-  return(epi_end)
-}
-
-get_duration_lambda <- function(results){
-  dur <- get_epi_end(results) - get_epi_begin(results)
-  return(dur)
-}
-
-truncate_data <- function(start, df){
-  bind_rows(purrr::map2(start, seq_along(start), function(x,y){
-    filter(df, sim == y, time >= x) %>%
-      mutate(new_time = time - x)
-  }))
-}
-
-get_failure_specific <- function(results, start){
-  sims <- seq_len(dim(results)[4])
-  f_info <- sapply(sims, function(x){
-    i <- results["I",,,x]
-    initials <- which(i[,start[x]] > 0)
-    new_i <- i[-initials,]
-    failure <- max(colSums(new_i)) == 0
-  })
-  df <- data.frame(sim = sims, failed = f_info)
-  return(df)
+  return(farms)
 }
