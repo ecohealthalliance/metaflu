@@ -144,3 +144,20 @@ get_tot_infections <- function(results){
   return(tot_infections)
 }
 
+get_all_sims <- function(compartment, results){
+  c.results <- lapply(seq_len(dim(results)[4]), function(x) results[compartment,,,x])
+  c.reduced <- t(sapply(c.results, function(x) colSums(x)))
+  df <- data.frame(c.reduced)
+  colnames(df) <- seq_len(dim(df)[2])
+  df$sim <- seq_len(dim(df)[1])
+  c.df <- gather(df, time, pop, -sim, convert= TRUE)
+  return(c.df)
+}
+
+get_number_farms <- function(results){
+  farms <- sapply(seq_len(dim(results)[4]), function(x){
+    tot_i <- rowSums(results["I",,,x])
+    return(sum(tot_i > 0))
+  })
+  return(farms)
+}
