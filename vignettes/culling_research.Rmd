@@ -1,0 +1,58 @@
+---
+title: "Culling research"
+author: "Kate Royce"
+date: "April 4, 2017"
+bibliography: references.bib
+csl: elsevier-with-titles.csl
+link-citations: true
+output:
+  html_document:
+    keep_md: TRUE
+---
+
+```{r setup, include=FALSE}
+library(knitcitations)
+cite_options(citation_format = 'pandoc')
+P <- rprojroot::find_rstudio_root_file
+```
+
+A summary of the available research on poultry culling rates.
+
+###From the literature
+Hosseini's model `r citep('10.1371/journal.pone.0080091')` gives base values for number of dead birds in a given period ($\tau$ = 1), a threshold value ($\iota$ = 5), and a probability of reporting and detecting ($\pi$~Report~ = 0.1, $\pi$~Detect~ = 0.9).
+
+- Total probability of culling = $\pi$~Report~ * $\pi$~Detect~ = 0.09
+
+Pandit's model `r citep('10.1038/srep02175')` uses a culling probability of 1/7 due to assumption that infected poultry were either culled or dead within 7 days of the infection. 
+
+Dent's model `r citep('10.1186/1746-6148-7-59')` sets a culling parameter for each simulation (see Table 1) depending on whether the farm with the initial infection is in a surveillance zone or not.
+
+- This approach allows them to calculate a time to detection of 2 to 6 days 
+
+There is some data available: Additional File 1 in `r citep('10.1186/1476-072X-8-47')` gives the number of poultry influenza cases and number of poultry culled per country.
+
+Loth et al. `r citep('10.1016/j.prevetmed.2010.05.013')` give data regarding AI in Bangladesh: 1.6 million poultry have been culled out of 220 million total (0.73%).
+
+Bridges' paper `r citep('10.1086/340044')` uses the culling event after the 1997 Hong Kong epidemic to show that workers occupationally exposed to poultry are at higher risk of flu, but has no hard data about the poultry culled.
+
+To contrast with our approach, Bourouiba's model `r citep('10.1137/100803110')` includes culling in its per capita mortality parameter, not as a separate event.
+
+### Other resources
+
+FAO's manual `r citep('http://www.fao.org/3/a-a1521e.pdf')` shows that  >230 million chickens worldwide have died due to flu since 2003, but is vague on whether this figure represents culling (as some papers have cited it) or mortality due to influenza.
+
+
+The [CDC](https://www.cdc.gov/flu/avianflu/outbreaks.htm) summarizes the recognized outbreaks in North America.
+
+
+#Summary 
+While there is data available about culling numbers (although not as a percentage of total population), and other models have given rates for culling based on assumptions or knowledge about surveillance, there is little synthesis of the two types of reports. The proposed model can use data such as that in `r citep('10.1186/1476-072X-8-47')` to obtain a more accurate culling rate.
+
+
+```{r, include=FALSE}
+write.bibtex(file = P("vignettes/references.bib"))
+```
+
+## References
+
+<div id="refs"></div>
