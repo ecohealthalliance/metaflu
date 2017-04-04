@@ -46,7 +46,7 @@ The following simulation includes the following scenario options:
 
 - Paired Networks: Initial / Growth Scenarios have same set of stochastic networks
 
-- Poisson distribution with 15 as mean number of chickens per farm
+- Poisson distribution with 40 as mean number of chickens per farm
 
 - 100 Farms
 
@@ -56,7 +56,7 @@ The following simulation includes the following scenario options:
 ```{r network-setup}
 #Set number of farms and ~ number of chickens per farm
 farm_number <- 100
-farm_size <- 15
+farm_size <- 40
 
 #Set up patch size
 initial_cond <- basic_patches(farm_size, farm_number)

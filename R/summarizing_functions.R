@@ -190,3 +190,15 @@ truncate_data <- function(start, df){
       mutate(new_time = time - x)
   }))
 }
+
+get_failure_specific <- function(results, start){
+  sims <- seq_len(dim(results)[4])
+  f_info <- sapply(sims, function(x){
+    i <- results["I",,,x]
+    initials <- which(i[,start[x]] > 0)
+    new_i <- i[-initials,]
+    failure <- max(colSums(new_i)) == 0
+  })
+  df <- data.frame(sim = sims, failed = f_info)
+  return(df)
+}
