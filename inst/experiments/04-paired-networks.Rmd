@@ -25,15 +25,6 @@ basic_patches <- function(farm_size, farm_number){
   initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 3, nrow = farm_number))
   return(initial_cond)
 }
-
-grow_patches <- function(basic_cond){
-  s_num <- round(nrow(basic_cond)*1/11)
-  new_cond <- basic_cond
-  grow_rows <- sample.int(nrow(new_cond), s_num)
-  new_cond[grow_rows,1] <- new_cond[grow_rows,1]*10
-  return(new_cond)
-}
-
 ```
 
 ### Introduction
@@ -124,15 +115,15 @@ $\pi$-detect = 0.0 -- Detection probability
 ### Initial Run
 
 ```{r basic-run}
-basic_results <- mf_sim(init = initial_cond, parameters = parms, times=0:365, n_sims = 1000)
+basic_results <- mf_sim(init = initial_cond, parameters = parms, times=1:365, n_sims = 1000)
 
 durations <- get_duration_array(basic_results)
 
-s <- get_susceptibles_array(basic_results)
-i <- get_infectious_array(basic_results)
-r <- get_recovered_array(basic_results)
+s.df <- get_all_sims("S", basic_results)
+i.df <- get_all_sims("I", basic_results)
+r.df <- get_all_sims("R", basic_results)
 
-spread_failures <- get_failure_array(basic_results)
+farm_no <- get_number_farms(basic_results)
 
 tot_i <- get_tot_infections_array(basic_results)
 
@@ -145,40 +136,35 @@ rm(basic_results)
 ```{r plots-basic, message = FALSE}
 l <- length(tot_i$total_i)
 
-sir <- ggplot() +
-  geom_line(data = s, aes(x = time, y = median, color = "S")) +
-  geom_line(data = i, aes(x = time, y = median, color = "I")) +
-  geom_line(data = r, aes(x = time, y = median, color = "R")) +
-  geom_ribbon(data = s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.2) +
-  geom_ribbon(data = i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.2) +
-  geom_ribbon(data = r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
-  labs(title = "S-I-R", x = "Time", y = paste0("Median: ", l, " Sims")) +
+sir.df <- ggplot() +
+  geom_line(data = s.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "blue") +
+  geom_line(data = i.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "red") +
+  geom_line(data = r.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "green") +
+  labs(title = paste0("Results from ", l," Simulations"), x = "Time", y = "Population") +
   scale_colour_manual(name = "Compartment", values=c(S = "blue", I = "red", R = "green")) +
-  scale_x_continuous(limits = c(0, max(durations$duration)+10)) +
   theme_minimal()
 
 total_i <- ggplot() +
   geom_histogram(data = tot_i, aes(x = total_i), bins = 100) +
-  labs(title = paste0("Total Infections in ", l," Simulations"), x = "Total Infections", y = "Number of Simulations") +
+  labs(title = "Infections", x = "Infections", y = "Number of Simulations") +
   theme_minimal()
 
-failures <- ggplot() +
-  geom_bar(data = spread_failures, aes(x = 1, fill = failed), width = 0.1) +
-  theme_minimal() +
-  labs(title = "Failure to Spread", y = "Number of Simulations") +
-  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
-  scale_fill_manual(name = "Failed to Spread", values = c("black", "grey")) 
+farm_numbers <- ggplot() +
+  geom_histogram(aes(x = farm_no), bins = 100) +
+  labs(title = "Farm Spread", x = "Farms Infected", y = "Number of Simulations") +
+  coord_flip() +
+  theme_minimal()
 
 duration <- ggplot() +
-  geom_histogram(data = durations, aes(x = durations$duration), binwidth = 0.5) +
+  geom_histogram(data = durations, aes(x = duration), bins = 100) +
   theme_minimal() +
-  labs(title = paste0("Duration of Epidemic in ", l, " Simulations"), x = "Duration in Days", y = "Number of Simulations")
+  labs(title = "Duration of Epidemic", x = "Duration in Days", y = "Number of Simulations")
 
 lay <- rbind(c(1,1,1,4),
              c(1,1,1,4),
              c(2,2,3,3))
 
-grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
+grid.arrange(sir.df,total_i,duration,farm_numbers, layout_matrix = lay)
 
 ```
 
@@ -200,63 +186,58 @@ g_list <- map2(1:1000,nets,function(num, net){
   g_parms["network_parms"] <- NULL
   g_parms["stochastic_network"] = FALSE
   g_parms$chi <- net
-  return(mf_sim(init = initial_cond, parameters = g_parms, times=0:365, n_sims = 1))
+  return(mf_sim(init = grown_cond, parameters = g_parms, times=1:365, n_sims = 1))
 } )
 
 grown_results <- do.call("abind", g_list)
 
-g_durations <- get_duration_array(grown_results)
+gdurations <- get_duration_array(grown_results)
 
-g_s <- get_susceptibles_array(grown_results)
-g_i <- get_infectious_array(grown_results)
-g_r <- get_recovered_array(grown_results)
 
-g_spread_failures <- get_failure_array(grown_results)
+gs.df <- get_all_sims("S", grown_results)
+gi.df <- get_all_sims("I", grown_results)
+gr.df <- get_all_sims("R", grown_results)
 
-g_tot_i <- get_tot_infections_array(grown_results)
+gfarm_no <- get_number_farms(grown_results)
+
+gtot_i <- get_tot_infections_array(grown_results)
 
 rm(grown_results)
 
 ```
 
 ```{r plots-growth, message = FALSE}
-l <- length(g_tot_i$total_i)
+l <- length(gtot_i$total_i)
 
-g_sir <- ggplot() +
-  geom_line(data = g_s, aes(x = time, y = median, color = "S")) +
-  geom_line(data = g_i, aes(x = time, y = median, color = "I")) +
-  geom_line(data = g_r, aes(x = time, y = median, color = "R")) +
-  geom_ribbon(data = g_s, aes(x = time, ymin = lower, ymax = upper), fill = "blue", alpha = 0.2) +
-  geom_ribbon(data = g_i, aes(x = time, ymin = lower, ymax = upper), fill = "red", alpha = 0.2) +
-  geom_ribbon(data = g_r, aes(x = time, ymin = lower, ymax = upper), fill = "green", alpha = 0.2) +
-  labs(title = "S-I-R", x = "Time", y = paste0("Median: ", l, " Sims")) +
+gsir.df <- ggplot() +
+  geom_line(data = gs.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "blue") +
+  geom_line(data = gi.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "red") +
+  geom_line(data = gr.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "green") +
+  labs(title = paste0("Results from ", l," Simulations"), x = "Time", y = "Population") +
   scale_colour_manual(name = "Compartment", values=c(S = "blue", I = "red", R = "green")) +
-  scale_x_continuous(limits = c(0, max(g_durations$duration)+10)) +
   theme_minimal()
 
-g_total_i <- ggplot() +
-  geom_histogram(data = g_tot_i, aes(x = total_i), bins = 100) +
-  labs(title = paste0("Total Infections in ", l," Simulations"), x = "Total Infections", y = "Number of Simulations") +
+gtotal_i <- ggplot() +
+  geom_histogram(data = gtot_i, aes(x = total_i), bins = 100) +
+  labs(title = "Infections", x = "Infections", y = "Number of Simulations") +
   theme_minimal()
 
-g_failures <- ggplot() +
-  geom_bar(data = g_spread_failures, aes(x = 1, fill = failed), width = 0.1) +
-  theme_minimal() +
-  labs(title = "Failure to Spread", y = "Number of Simulations") +
-  theme(axis.title.x = element_blank(), axis.text.x = element_blank(), axis.ticks.x = element_blank()) +
-  scale_fill_manual(name = "Failed to Spread", values = c("black", "grey")) 
+gfarm_numbers <- ggplot() +
+  geom_histogram(aes(x = gfarm_no), bins = 100) +
+  labs(title = "Farm Spread", x = "Farms Infected", y = "Number of Simulations") +
+  coord_flip() +
+  theme_minimal()
 
-g_duration <- ggplot() +
-  geom_histogram(data = g_durations, aes(x = g_durations$duration), binwidth = 0.5) +
+gduration <- ggplot() +
+  geom_histogram(data = gdurations, aes(x = duration), bins = 100) +
   theme_minimal() +
-  labs(title = paste0("Duration of Epidemic in ", l, " Simulations"), x = "Duration in Days", y = "Number of Simulations")
+  labs(title = "Duration of Epidemic", x = "Duration in Days", y = "Number of Simulations")
 
 lay <- rbind(c(1,1,1,4),
              c(1,1,1,4),
              c(2,2,3,3))
 
-grid.arrange(g_sir,g_total_i,g_duration,g_failures, layout_matrix = lay)
-
+grid.arrange(gsir.df,gtotal_i,gduration,gfarm_numbers, layout_matrix = lay)
 
 ```
 
