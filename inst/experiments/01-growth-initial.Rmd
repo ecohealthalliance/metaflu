@@ -20,7 +20,7 @@ set.seed(123)
 ```{r patch-functions}
 
 basic_patches <- function(farm_size, farm_number){
-  initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 3, nrow = farm_number))
+  initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 4, nrow = farm_number))
   return(initial_cond)
 }
 
@@ -89,6 +89,8 @@ $\pi$-report = 0.0 -- Reporting probability
 
 $\pi$-detect = 0.0 -- Detection probability
 
+$t_c$-detect = 1  -- Mean time (days) to culling after detection
+
 ```{r parameter-setup}
   parms = list(
     beta = 0.004,   #contact rate for direct transmission
@@ -106,6 +108,7 @@ $\pi$-detect = 0.0 -- Detection probability
     I_crit = 0,     #threshold for reporting
     pi_report = 0, #reporting probability
     pi_detect = 0, #detection probability
+    cull_time = 1, #culling time
     network_type = "smallworld",
     network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
     stochastic_network = TRUE
@@ -168,7 +171,6 @@ lay <- rbind(c(1,1,1,4),
              c(2,2,3,3))
 
 grid.arrange(sir,total_i,duration,failures, layout_matrix = lay)
-
 ```
 
 ### Growth Run
