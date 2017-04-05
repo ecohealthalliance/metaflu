@@ -1,5 +1,4 @@
 # SETUP
-knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
 devtools::load_all()
 library(metaflu)
 library(ggplot2)
@@ -9,6 +8,7 @@ library(tidyr)
 library(purrr)
 library(gridExtra)
 library(abind)
+
 set.seed(123)
 registerDoMC(cores = 20)
 
@@ -42,10 +42,10 @@ parms = list(
   omega = 0.03,   #movement rate
   rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
   lambda = 0,     #force of infection from external sources
-  tau_crit = 0,   #critical suveillance time
-  I_crit = 0,     #threshold for reporting
+  tau_crit = 1,   #critical suveillance time
+  I_crit = 5,     #threshold for reporting
   pi_report = 0, #reporting probability
-  pi_detect = 0, #detection probability
+  pi_detect = .9, #detection probability
   network_type = "smallworld",
   network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
   stochastic_network = TRUE
@@ -55,10 +55,11 @@ sims <- 1000
 
 get_medians <- function(val){
 parms["pi_report"] <- val
-sim_list <- mclapply(seq_len(sims), function(num){
+#change to mclapply if you feel daring
+sim_list <- lapply(seq_len(sims), function(num){
   conditions <- create_initial_condition(basic_patches(farm_size, farm_number))
   return(mf_sim(init = conditions, parameters = parms, times=1:365, n_sims = 1))
-}, mc.cores = 20 )
+}) #delete the parenthesis and then - > ,mc.cores = 20 )
 basic_results <- do.call("abind", sim_list)
 
 # RETURNS
@@ -80,7 +81,10 @@ return(df)
 
 param_values <- seq(from = 0.1, to = 1.0, by = 0.05)
 
+param_values <- c(0.3, 0.4, 0.5)
+
 list_of_medians <- lapply(param_values, function(x) get_medians(x))
 
 median_df <- bind_rows(list_of_medians)
 
+x <- get_medians(0.5)
