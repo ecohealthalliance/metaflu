@@ -25,6 +25,14 @@ basic_patches <- function(farm_size, farm_number){
   initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 3, nrow = farm_number))
   return(initial_cond)
 }
+  
+create_initial_condition <- function(patches){
+  infected_patches <- sample(seq_len(nrow(patches)), 1)
+  patches[infected_patches, 2] <- 1
+  patches[infected_patches, 1] <- patches[infected_patches, 1] - 1
+  return(patches)
+}
+
 ```
 
 ### Introduction
@@ -48,12 +56,6 @@ The following simulation includes the following scenario options:
 #Set number of farms and ~ number of chickens per farm
 farm_number <- 100
 farm_size <- 40
-
-#Set up patch size
-initial_cond <- basic_patches(farm_size, farm_number)
-  infected_patches <- sample(seq_len(nrow(initial_cond)), 1)
-  initial_cond[infected_patches, 2] <- 1
-  initial_cond[infected_patches, 1] <- initial_cond[infected_patches, 1] - 1
 
 ```
 
@@ -115,7 +117,7 @@ $\pi$-detect = 0.0 -- Detection probability
 ### Initial Run
 
 ```{r basic-run}
-basic_results <- mf_sim(init = initial_cond, parameters = parms, times=1:365, n_sims = 1000)
+basic_results <- mf_sim(init = create_initial_condition(basic_patches(40,100)), parameters = parms, times=1:365, n_sims = 1000)
 
 durations <- get_duration_array(basic_results)
 
@@ -129,7 +131,9 @@ tot_i <- get_tot_infections_array(basic_results)
 
 nets <- attr(basic_results, "network")
 
-rm(basic_results)
+inits <- basic_results[,,1,]
+
+#rm(basic_results)
   
 ```
 
@@ -175,18 +179,28 @@ Eleven percent of farms have grown in size by an order of magnititude, resulting
 ```{r growth-run}
 #Grow an adjacent set of patches to get double total chicken population
 
-s_num <- round(nrow(initial_cond)*1/9)
-new_cond <- initial_cond
-new_cond[1:s_num,1] <- new_cond[1:s_num,1]*10
-grown_cond <- new_cond
+grow_patches <- function(old_condition){
+  s_num <- round(nrow(old_condition)*1/9)
+  old_condition[1:s_num,1] <- old_condition[1:s_num,1]*10
+  return(old_condition)
+}
 
-g_list <- map2(1:1000,nets,function(num, net){
+gp <-t(inits[,,1])
+
+gp <- cbind(gp, cumsum(gp[,1]))
+
+rando <- sample.int(dim(gp)[1],1)
+
+min(which(gp[,5] >= rando))
+
+sims <- 1000
+g_list <- map3(seq_len(sims),nets,inits, function(num, net, init){
   g_parms <- parms
   g_parms["network_type"] <- NULL
   g_parms["network_parms"] <- NULL
   g_parms["stochastic_network"] = FALSE
   g_parms$chi <- net
-  return(mf_sim(init = grown_cond, parameters = g_parms, times=1:365, n_sims = 1))
+  return(mf_sim(init = init, parameters = g_parms, times=1:365, n_sims = 1))
 } )
 
 grown_results <- do.call("abind", g_list)
