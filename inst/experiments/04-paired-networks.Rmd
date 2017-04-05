@@ -16,6 +16,7 @@ library(tidyr)
 library(purrr)
 library(gridExtra)
 library(abind)
+library(doRNG)
 set.seed(123)
 ```
 
