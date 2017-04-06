@@ -66,21 +66,22 @@ get_plots <- function(val){
   durations <- get_duration_array(basic_results)
   dur_plot <- ggplot() + geom_histogram(data = durations, aes(x = duration), bins = 100) +
     labs(x = "Duration in Days", y = "Number of Simulations") +
-    theme_minimal()
+    theme_classic()
 
   farm_no <- get_number_farms(basic_results)
   farm_plot <- ggplot() + geom_histogram(aes(x = farm_no), bins = 100) +
-    labs(x = "Number of Farms Infected", y = "Number of Simulations")
+    labs(x = "Number of Farms Infected", y = "Number of Simulations") +
+    theme_classic()
 
   tot_i <- get_tot_infections_array(basic_results)
   i_plot <- ggplot() + geom_histogram(aes(x = tot_i$total_i), bins = 100) +
     labs(x = "Number of Farms Infected", y = "Number of Simulations") + 
-    theme_minimal()
+    theme_classic()
   
   tot_culls <- get_number_culls(basic_results)
   cull_plot <- ggplot() + geom_histogram(aes(x = tot_culls), bins = 100) +
         labs(x = "Number of Farms Culled", y = "Number of Simulations") + 
-    theme_minimal()
+    theme_classic()
   
   lay <- rbind(c(1,1,2,2),
                c(3,3,4,4))
@@ -143,4 +144,23 @@ $t_c$-detect = *1 to 10, by 1  -- Mean time (days) to culling after detection*
 
 ```{r plots}
 plot_test <- lapply(vals, function(x) get_plots(x))
+```
+
+
+```{r five-day}
+set.seed(123)
+parms["cull_time"] <- 3
+conditions <- create_initial_condition(basic_patches(farm_size, farm_number))
+res1 <- mf_sim(init = conditions, parameters = parms, times=1:365, n_sims = 100)
+
+culls <- res1["C",,,]
+
+list_culls <- lapply(seq_len(dim(culls)[3]), function(x) rowSums(culls[,,x]))
+
+non_zeros <- culls[which(list_culls[[1]] > 1),,1]
+
+sbs <- function(results){
+  rbind(res1["I",,,1][8,],res1["R",,,1][8,], res1["C",,,1][8,])
+}
+
 ```
