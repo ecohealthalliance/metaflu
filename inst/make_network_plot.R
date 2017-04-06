@@ -5,7 +5,8 @@ library(ggforce)
 library(magrittr)
 #library(tidyverse)
 #net_adj <- readRDS("epinetwork.rds")$network
-#net <- graph_from_adjacency_matrix(net_adj > 0)
+#net <- graph_from_adjacency_matrix(net_adj > 0) # Use this to generate a graph
+                                                 # from simulation network outputs
 
 set.seed(20)
 net <- sample_smallworld(dim = 1, size = 200, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE)
