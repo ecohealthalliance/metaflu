@@ -18,7 +18,7 @@ P <- rprojroot::find_rstudio_root_file
 
 A summary of the available research on poultry culling rates.
 
-###From the literature
+###From Paperpile
 Hosseini's model `r citep('10.1371/journal.pone.0080091')` gives base values for number of dead birds in a given period ($\tau$ = 1), a threshold value ($\iota$ = 5), and a probability of reporting and detecting ($\pi$~Report~ = 0.1, $\pi$~Detect~ = 0.9).
 
 - Total probability of culling = $\pi$~Report~ * $\pi$~Detect~ = 0.09
@@ -37,12 +37,22 @@ Bridges' paper `r citep('10.1086/340044')` uses the culling event after the 1997
 
 To contrast with our approach, Bourouiba's model `r citep('10.1137/100803110')` includes culling in its per capita mortality parameter, not as a separate event.
 
+###From the literature
+
+EHA has looked at the lack of wild bird surveillance strategies `r citep('10.3201/eid2104.141415')` as an obstacle to understanding the virus, but this paper was limited to wild birds, not poultry.
+
+
+
 ### Other resources
 
 FAO's manual `r citep('http://www.fao.org/3/a-a1521e.pdf')` shows that  >230 million chickens worldwide have died due to flu since 2003, but is vague on whether this figure represents culling (as some papers have cited it) or mortality due to influenza.
 
 
 The [CDC](https://www.cdc.gov/flu/avianflu/outbreaks.htm) summarizes the recognized outbreaks in North America.
+
+[OIE](http://www.oie.int/index.php?id=169&L=0&htmfile=chapitre_avian_influenza_viruses.htm) gives guidelines for surveillance, namely that detection should be as rapid as possible, but does not  look at the frequency of reporting (Article 10.4.29).
+
+- The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) mentions the importance of reporting and culling, suggests that culling be limited to the infected farm or a small radius around it, and implies that countries which don't compensate affected farmers can see smaller reporting rates, but does not investigate what a normal reporting rate is.
 
 
 #Summary 
