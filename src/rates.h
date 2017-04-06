@@ -86,8 +86,9 @@ void update_state(arma::vec &state, mf_parmlist &parms, const double &time, mf_v
     }
     if(vals.action == 10) { //for culling, in addition to updating the cull state (done via action matrix)
       state.subvec(vals.patch * parms.n_pstates, vals.patch * parms.n_pstates + 3) = zeros<vec>(4);  //kill 'em all
-      parms.chi.col(vals.patch) = 0;  //remove patch from the marix
-      parms.chi_cum = cumsum(parms.chi, 1); //recalculate network probabilities
+      parms.chi.col(vals.patch) = 0;  //remove patch from the marix by setting its column to zero.
+      parms.chi.each_col() /= sum(parms.chi, 1); //renormalize the rows - divide each column element-wise by the row sums
+      parms.chi_cum = cumsum(parms.chi, 1) / sum(parms.chi, 1); //recalculate cumulative probabilities
     }
 
     //Rcout << state.row(patch)<< std::endl;
