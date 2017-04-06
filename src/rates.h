@@ -52,7 +52,7 @@ arma::vec set_rates(arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
 
 };
 
-void update_state(arma::vec &state, const mf_parmlist &parms, const double &time, mf_vals &vals, arma::uword event) {
+void update_state(arma::vec &state, mf_parmlist &parms, const double &time, mf_vals &vals, arma::uword event) {
 
   vals.patch = event / parms.n_actions;
   vals.action = event % parms.n_actions;
@@ -84,8 +84,10 @@ void update_state(arma::vec &state, const mf_parmlist &parms, const double &time
     for(uword i = 0; i < parms.n_pstates; i++) {
       state[vals.patch * parms.n_pstates + i] += parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
     }
-    if(vals.action == 10) { //for culling
+    if(vals.action == 10) { //for culling, in addition to updating the cull state (done via action matrix)
       state.subvec(vals.patch * parms.n_pstates, vals.patch * parms.n_pstates + 3) = zeros<vec>(4);  //kill 'em all
+      parms.chi.col(vals.patch) = 0;  //remove patch from the marix
+      parms.chi_cum = cumsum(parms.chi, 1); //recalculate network probabilities
     }
 
     //Rcout << state.row(patch)<< std::endl;
