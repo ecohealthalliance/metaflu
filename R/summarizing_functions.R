@@ -144,3 +144,29 @@ get_tot_infections <- function(results){
   return(tot_infections)
 }
 
+get_number_farms <- function(results){
+  farms <- sapply(seq_len(dim(results)[4]), function(x){
+    tot_i <- rowSums(results["I",,,x])
+    return(sum(tot_i > 0))
+  })
+  return(farms)
+}
+
+get_number_culls <- function(results){
+  farms <- sapply(seq_len(dim(results)[4]), function(x){
+    tot_culls <- rowSums(results["C",,,x])
+    return(sum(tot_culls > 0))
+  })
+}
+
+basic_patches <- function(farm_size, farm_number){
+  initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 4, nrow = farm_number))
+  return(initial_cond)
+}
+
+create_initial_condition <- function(patches){
+  infected_patches <- sample(seq_len(nrow(patches)), 1)
+  patches[infected_patches, 2] <- 1
+  patches[infected_patches, 1] <- patches[infected_patches, 1] - 1
+  return(patches)
+}
