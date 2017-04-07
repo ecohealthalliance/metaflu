@@ -52,7 +52,7 @@ parms = list(
 
 
 ```{r sims}
-sims <- 1000
+sims <- 100
 
 get_plots <- function(val){
   parms["cull_time"] <- val
