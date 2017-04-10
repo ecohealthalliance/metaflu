@@ -94,25 +94,24 @@ move_list <- mclapply(seq_len(sims), function(num){
   conditions <- create_initial_condition(basic_patches(farm_size, farm_number))
   return(mf_sim(init = conditions, parameters = move_parms, times=1:365, n_sims = 1))
 }, mc.cores = detectCores())
+
 move_results <- do.call("abind", sim_list)
 
-move_non_zeros <- apply(move_results,4, function(x) {
-  culled <- rowSums(x["C",,])
-  patches <- which(culled > 0)
-  return(x[,patches,])
+test_that("Chickens are not disappearing", {
+  truths <- apply(move_results, 4, function(x){
+    total_r <- colSums(x["R",,])
+    inconsistencies <- which(total_r < dplyr::lag(total_r,1))
+    if (!length(inconsistencies)){
+      return(TRUE)
+    }
+    culled <- rowSums(x["C",,])
+    patch_nums <- as.numeric(names(which(culled > 0)))
+    culled_patches <- x["C",patch_nums,]
+    if (is.null(dim(culled_patches)[1])){
+      return(TRUE)
+    }
+    times <- apply(culled_patches, 1, function(y) which.max(y == 2))
+    return(inconsistencies %in% times)
+  })
+  expect_true(all(unlist(truths)))
 })
-
-cull_move <- do.call("abind",list(move_non_zeros, along = 2))
-
-#INCOMPLETE
-#test_that("Chickens are not disappearing", {
-#  truths <- apply(move_results, 4, function(x){
-#    total_r <- colSums(x["R",,])
-#    inconsistencies <- which(total_r != cummax(total_r))
-#    culled <- rowSums(x["C",,])
-#    patch_nums <- as.numeric(names(which(culled > 0)))
-#
-#
-#  })
-#  expect_true(all(truths))
-#})
