@@ -1,0 +1,74 @@
+---
+title: "Culling research"
+author: "Kate Royce"
+date: "April 4, 2017"
+output:
+  html_document:
+bibliography: references.bib
+csl: elsevier-with-titles.csl
+link-citations: true
+keep_md: true
+---
+
+```{r setup, include=FALSE}
+library(knitcitations)
+cite_options(citation_format = 'pandoc')
+P <- rprojroot::find_rstudio_root_file
+```
+
+A summary of the available research on poultry culling rates.
+
+###From Paperpile
+Hosseini's model `r citep('10.1371/journal.pone.0080091')` gives base values for number of dead birds in a given period ($\tau$ = 1), a threshold value ($\iota$ = 5), and a probability of reporting and detecting ($\pi$~Report~ = 0.1, $\pi$~Detect~ = 0.9).
+
+- Total probability of culling = $\pi$~Report~ * $\pi$~Detect~ = 0.09
+
+Pandit's model `r citep('10.1038/srep02175')` uses a culling probability of 1/7 due to assumption that infected poultry were either culled or dead within 7 days of the infection. 
+
+Dent's model `r citep('10.1186/1746-6148-7-59')` sets a culling parameter for each simulation (see Table 1) depending on whether the farm with the initial infection is in a surveillance zone or not.
+
+- This approach allows them to calculate a time to detection of 2 to 6 days 
+
+There is some data available: Additional File 1 in `r citep('10.1186/1476-072X-8-47')` gives the number of poultry influenza cases and number of poultry culled per country.
+
+Loth et al. `r citep('10.1016/j.prevetmed.2010.05.013')` give data regarding AI in Bangladesh: 1.6 million poultry have been culled out of 220 million total (0.73%).
+
+Bridges' paper `r citep('10.1086/340044')` uses the culling event after the 1997 Hong Kong epidemic to show that workers occupationally exposed to poultry are at higher risk of flu, but has no hard data about the poultry culled.
+
+To contrast with our approach, Bourouiba's model `r citep('10.1137/100803110')` includes culling in its per capita mortality parameter, not as a separate event.
+
+###From the literature
+
+This paper `r citep('10.3201/eid1812.120616')` on the relationship between vaccination and reporting gives a rate of 0.46 to 0.69 for poultry surveillance ($\pi$-report) in the absence of vaccination efforts. (The reporting rate was about twice what it was when vaccination was ongoing, which the authors believe to be a result of the disproportionate trust in the benefits of vaccination.)
+
+EHA has indentified the lack of wild bird surveillance strategies `r citep('10.3201/eid2104.141415')` as an obstacle to understanding the virus, but this paper was limited to wild birds, not poultry.
+
+- The paper this cites `r citep('10.3201/eid1612.100589')` suggests surveillance improvements such as sampling according to age-dependent, temporal, or spatial patterns, sampling different sites of infection, and screening for multiple strains at once; however, this paper also considers only wild birds.
+
+Looking at other livestock, `r citep('10.1111/zph.12049')` advocates pig surveillance to improve our understanding of influenza's ecology and impact on human health, mostly on a laboratory (rather than farm or individual) level. (I was only allowed access to the abstract--I'm going to check with Dartmouth to see why--but this paper seems like an interesting extension idea.)
+
+
+### Other resources
+
+FAO's manual `r citep('http://www.fao.org/3/a-a1521e.pdf')` shows that  >230 million chickens worldwide have died due to flu since 2003, but is vague on whether this figure represents culling (as some papers have cited it) or mortality due to influenza.
+
+- Their [FAQs](http://www.fao.org/avianflu/en/qanda.html) just say that farmers should always report bird deaths, but don't give rates of compliance
+
+The [CDC](https://www.cdc.gov/flu/avianflu/outbreaks.htm) summarizes the recognized outbreaks in North America.
+
+[OIE](http://www.oie.int/index.php?id=169&L=0&htmfile=chapitre_avian_influenza_viruses.htm) gives guidelines for surveillance, namely that detection should be as rapid as possible, but does not  look at the frequency of reporting (Article 10.4.29).
+
+- The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) mentions the importance of reporting and culling, suggests that culling be limited to the infected farm or a small radius around it, and implies that countries which don't compensate affected farmers can see smaller reporting rates, but does not investigate what a normal reporting rate is.
+
+
+#Summary 
+While there is data available about culling numbers (although not as a percentage of total population), and other models have given rates for culling based on assumptions or knowledge about surveillance, there is little synthesis of the two types of reports. The proposed model can use data such as that in `r citep('10.1186/1476-072X-8-47')` to obtain a more accurate culling rate.
+
+
+```{r, include=FALSE}
+write.bibtex(file = P("vignettes/references.bib"))
+```
+
+## References
+
+<div id="refs"></div>
