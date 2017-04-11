@@ -162,17 +162,15 @@ count_ones <- apply(res1,4, function(x){
 ones <- as.vector(count_ones)
 only_ones <- ones[which(ones > 0)]
 
-c_plot <- ggplot() + geom_histogram(aes(x = only_ones), bins = 20) +
+ggplot() + geom_histogram(aes(x = only_ones), binwidth = 0.5) +
   labs(x = "Number of Days from Reported to Culled State", y = "Number of Patches", title = "Time to Culling", subtitle = paste("Mean =", round(mean(only_ones),2), "Parameter =", val)) +
   theme_minimal()
-
-return(c_plot)
 
 }
 
 ```
 
 ```{r time_plots}
-time_to_cull <- lapply(cull_time_vals, function(x) cull_time_plots(x))
+lapply(cull_time_vals, function(x) cull_time_plots(x))
 
 ```
