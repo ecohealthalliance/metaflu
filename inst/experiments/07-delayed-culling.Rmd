@@ -19,7 +19,7 @@ library(abind)
 library(grid)
 source(rprojroot::find_rstudio_root_file("R/summarizing_functions.R"))
 set.seed(123)
-registerDoMC(cores = 20)
+registerDoMC(cores = detectCores())
 ```
 
 
@@ -51,7 +51,7 @@ parms = list(
 ```
 
 
-```{r sims}
+```{r sims, include = FALSE}
 sims <- 100
 
 get_plots <- function(val){
@@ -59,7 +59,7 @@ get_plots <- function(val){
   sim_list <- mclapply(seq_len(sims), function(num){
     conditions <- create_initial_condition(basic_patches(farm_size, farm_number))
     return(mf_sim(init = conditions, parameters = parms, times=1:365, n_sims = 1))
-  }, mc.cores = 20)
+  }, mc.cores = detectCores())
   basic_results <- do.call("abind", sim_list)
 
   # RETURNS
@@ -93,9 +93,6 @@ get_plots <- function(val){
 }
 vals <- seq_len(10)
 
-set.seed(123)
-conditions <- create_initial_condition(basic_patches(farm_size, farm_number))
-res1 <- mf_sim(init = conditions, parameters = parms, times=1:365, n_sims = 1)
 
 ```
 
@@ -142,25 +139,40 @@ $t_c$-detect = *1 to 10, by 1  -- Mean time (days) to culling after detection*
 
 
 
-```{r plots}
+```{r plots, include = FALSE, eval = FALSE}
 plot_test <- lapply(vals, function(x) get_plots(x))
 ```
 
 
-```{r five-day}
-set.seed(123)
-parms["cull_time"] <- 3
+```{r per-day}
+cull_time_vals <- seq_len(10)
+
+cull_time_plots <- function(val){
+parms["cull_time"] <- val
 conditions <- create_initial_condition(basic_patches(farm_size, farm_number))
-res1 <- mf_sim(init = conditions, parameters = parms, times=1:365, n_sims = 100)
+res1 <- mf_sim(init = conditions, parameters = parms, times=1:365, n_sims = 1000)
 
-culls <- res1["C",,,]
+count_ones <- apply(res1,4, function(x){
+  c <- x["C",,]
+  ones <- apply(c, 1, function(y){
+    sum(y == 1)
+  })
+})
 
-list_culls <- lapply(seq_len(dim(culls)[3]), function(x) rowSums(culls[,,x]))
+ones <- as.vector(count_ones)
+only_ones <- ones[which(ones > 0)]
 
-non_zeros <- culls[which(list_culls[[1]] > 1),,1]
+c_plot <- ggplot() + geom_histogram(aes(x = only_ones), bins = 20) +
+  labs(x = "Number of Days from Reported to Culled State", y = "Number of Patches", title = "Time to Culling", subtitle = paste("Mean =", round(mean(only_ones),2), "Parameter =", val)) +
+  theme_minimal()
 
-sbs <- function(results){
-  rbind(res1["I",,,1][8,],res1["R",,,1][8,], res1["C",,,1][8,])
+return(c_plot)
+
 }
+
+```
+
+```{r time_plots}
+time_to_cull <- lapply(cull_time_vals, function(x) cull_time_plots(x))
 
 ```
