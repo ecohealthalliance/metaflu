@@ -1,5 +1,5 @@
 
-#function to get duration of epidemic
+#' @export
 get_duration_array <- function(results){
   sims <- seq_len(dim(results)[4])
   durations <- lapply(sims, function(x) {
@@ -12,6 +12,7 @@ get_duration_array <- function(results){
   return(data.frame(sim = sims, duration = unlist(durations)))
 }
 
+#' @export
 get_duration <- function(results){
   duration <- results %>%
     filter(class == "I") %>%
@@ -22,7 +23,7 @@ get_duration <- function(results){
   duration
 }
 
-#function to get cross-sectional infections over time
+#' @export
 get_infectious_array <- function(results){
   times <- seq_len(dim(results)[3])
   summaries <- sapply(times, function(x){
@@ -35,6 +36,7 @@ get_infectious_array <- function(results){
   return(df)
 }
 
+#' @export
 get_infectious <- function(results){
   infections <- results %>%
     filter(class == "I") %>%
@@ -45,7 +47,7 @@ get_infectious <- function(results){
   infections
 }
 
-#function to get cross-sectional susceptible over time
+#' @export
 get_susceptibles_array <- function(results){
   times <- seq_len(dim(results)[3])
   summaries <- sapply(times, function(x){
@@ -58,6 +60,7 @@ get_susceptibles_array <- function(results){
   return(df)
 }
 
+#' @export
 get_susceptibles<- function(results){
   susceptibles <- results %>%
     filter(class == "S") %>%
@@ -68,7 +71,7 @@ get_susceptibles<- function(results){
   susceptibles
 }
 
-# function to get cross-sectional recovered over time
+#' @export
 get_recovered_array <- function(results){
   times <- seq_len(dim(results)[3])
   summaries <- sapply(times, function(x){
@@ -81,6 +84,7 @@ get_recovered_array <- function(results){
   return(df)
 }
 
+#' @export
 get_recovered<- function(results){
   recovered <- results %>%
     filter(class == "R") %>%
@@ -91,7 +95,7 @@ get_recovered<- function(results){
   recovered
 }
 
-#function to get epidemic failure T/F -- true if infectious do not spread beyond one patch (when seeded)
+#' @export
 get_failure_array <- function(results){
   sims <- seq_len(dim(results)[4])
   f_info <- sapply(sims, function(x){
@@ -104,7 +108,7 @@ get_failure_array <- function(results){
   return(df)
 }
 
-
+#' @export
 get_failure<-function(results){
   check_fails <- function(time, population, patch, class){
     initial<- which(time == 1 & class == "I" & population > 0)
@@ -117,11 +121,13 @@ get_failure<-function(results){
   failures
 }
 
+
+#' @export
 proportion_failed <- function(failure_results){
   sum(failure_results$failed)/length(failure_results$failed)
 }
 
-#function to get total number of infections per simulation
+#' @export
 get_tot_infections_array <- function(results){
   sims <- seq_len(dim(results)[4])
   tot_i <- sapply(sims, function(x){
@@ -134,6 +140,7 @@ get_tot_infections_array <- function(results){
   return(df)
 }
 
+#' @export
 get_tot_infections <- function(results){
   tot_infections <- results %>%
     filter(class == "S") %>%
@@ -145,6 +152,7 @@ get_tot_infections <- function(results){
 }
 
 
+#' @export
 get_all_sims <- function(compartment, results){
   c.results <- lapply(seq_len(dim(results)[4]), function(x) results[compartment,,,x])
   c.reduced <- t(sapply(c.results, function(x) colSums(x)))
@@ -155,6 +163,7 @@ get_all_sims <- function(compartment, results){
   return(c.df)
 }
 
+#' @export
 get_number_farms <- function(results){
   farms <- sapply(seq_len(dim(results)[4]), function(x){
     tot_i <- rowSums(results["I",,,x])
@@ -163,6 +172,7 @@ get_number_farms <- function(results){
   return(farms)
 }
 
+#' @export
 get_number_culls <- function(results){
   farms <- sapply(seq_len(dim(results)[4]), function(x){
     tot_culls <- rowSums(results["C",,,x])
@@ -170,11 +180,13 @@ get_number_culls <- function(results){
   })
 }
 
+#' @export
 basic_patches <- function(farm_size, farm_number){
   initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 4, nrow = farm_number))
   return(initial_cond)
 }
 
+#' @export
 create_initial_condition <- function(patches){
   infected_patches <- sample(seq_len(nrow(patches)), 1)
   patches[infected_patches, 2] <- 1
