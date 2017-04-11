@@ -26,12 +26,10 @@ basic_patches <- function(farm_size, farm_number){
 }
 
 grow_patches <- function(basic_cond){
-  s_num <- round(nrow(basic_cond)*1/11)
+  s_num <- round(nrow(basic_cond)*1/9)
   new_cond <- basic_cond
   grow_rows <- sample.int(nrow(new_cond), s_num)
-  walk(grow_rows, function(row){
-    new_cond[row,1] <- new_cond[row,1]*10
-  })
+  new_cond[grow_rows,1] <- new_cond[grow_rows,1]*10
   return(new_cond)
 }
 
@@ -39,12 +37,12 @@ grow_patches <- function(basic_cond){
 
 ### Introduction
 
-This document generates a guaranteed outbreak scenario, with __100 farms__ of __200 chickens__ each. The current simulation includes non-linear contact rate implemented via $\rho$ and $\beta$, along with clustered intensification: 9% of farms whose population increases are clustered together. There is no environmental transmission, background mortality rate, or surveillance / culling modeled in these simulations.
+This document generates a guaranteed outbreak scenario, with __100 farms__ of __200 chickens__ each. The current simulation includes non-linear contact rate implemented via $\rho$ and $\beta$, along with clustered intensification: 11% of farms whose population increases are clustered together. There is no environmental transmission, background mortality rate, or surveillance / culling modeled in these simulations.
 
 ```{r network-setup}
 #Set number of farms and ~ number of chickens per farm
-farm_number <- 100
-farm_size <- 200
+farm_number <- 500
+farm_size <- 15
 
 #Make network connections
 network_type <- "smallworld"
