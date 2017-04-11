@@ -1,0 +1,176 @@
+---
+title: "Delayed Culling Check"
+author: "Cale Basaraba"
+date: "4/6/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
+#devtools::load_all()
+library(metaflu)
+library(ggplot2)
+library(dplyr)
+library(doMC)
+library(tidyr)
+library(purrr)
+library(gridExtra)
+library(abind)
+library(grid)
+source(rprojroot::find_rstudio_root_file("R/summarizing_functions.R"))
+set.seed(123)
+registerDoMC(cores = detectCores())
+```
+
+
+```{r param-setup}
+farm_number <- 100
+farm_size <- 40
+
+parms = list(
+  beta = 1.44456,   #contact rate for direct transmission
+  gamma = 0.167,  #recovery rate
+  mu = 0,         #base mortality rate
+  alpha = 0.4,      #disease mortality rate
+  phi = 0,  #infectiousness of environmental virions
+  eta = 0,     #degradation rate of environmental virions
+  nu =  0.00,    #uptake rate of environmental virion
+  sigma = 0,      #virion shedding rate
+  omega = 0.03,   #movement rate
+  rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+  lambda = 0,     #force of infection from external sources
+  tau_crit = 1,   #critical suveillance time
+  I_crit = 5,     #threshold for reporting
+  pi_report = 0.9, #reporting probability
+  pi_detect = 0.9, #detection probability
+  cull_time = 1, #detection cull time
+  network_type = "smallworld",
+  network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+  stochastic_network = TRUE
+)
+```
+
+
+```{r sims, include = FALSE}
+sims <- 100
+
+get_plots <- function(val){
+  parms["cull_time"] <- val
+  sim_list <- mclapply(seq_len(sims), function(num){
+    conditions <- create_initial_condition(basic_patches(farm_size, farm_number))
+    return(mf_sim(init = conditions, parameters = parms, times=1:365, n_sims = 1))
+  }, mc.cores = detectCores())
+  basic_results <- do.call("abind", sim_list)
+
+  # RETURNS
+  durations <- get_duration_array(basic_results)
+  dur_plot <- ggplot() + geom_histogram(data = durations, aes(x = duration), bins = 100) +
+    labs(x = "Duration in Days", y = "Number of Simulations") +
+    theme_classic()
+
+  farm_no <- get_number_farms(basic_results)
+  farm_plot <- ggplot() + geom_histogram(aes(x = farm_no), bins = 100) +
+    labs(x = "Number of Farms Infected", y = "Number of Simulations") +
+    theme_classic()
+
+  tot_i <- get_tot_infections_array(basic_results)
+  i_plot <- ggplot() + geom_histogram(aes(x = tot_i$total_i), bins = 100) +
+    labs(x = "Number of Farms Infected", y = "Number of Simulations") + 
+    theme_classic()
+  
+  tot_culls <- get_number_culls(basic_results)
+  cull_plot <- ggplot() + geom_histogram(aes(x = tot_culls), bins = 100) +
+        labs(x = "Number of Farms Culled", y = "Number of Simulations") + 
+    theme_classic()
+  
+  lay <- rbind(c(1,1,2,2),
+               c(3,3,4,4))
+
+  arranged_plot <- grid.arrange(i_plot, dur_plot, farm_plot, cull_plot, layout_matrix = lay, top = paste("Culling time =",val,"days"))
+  gb <- rectGrob(height = 1, width = 1, gp = gpar(lwd = 2, col = "dimgrey", fill = NA))
+  gt <- gTree(children = gList(arranged_plot, gb))
+  grid.draw(gt)
+}
+vals <- seq_len(10)
+
+
+```
+
+###Parameters
+The parameters for these runs:
+
+`r farm_size` chickens
+
+`r farm_number` farms
+
+`r sims` simulations per parameter set.
+
+$\beta$ = `r parms["beta"]` -- Contact rate
+
+$\gamma$ = `r parms["gamma"]` -- Recovery rate
+
+$\mu$ = `r parms["mu"]` -- Base mortality rate
+
+$\alpha$ = `r parms["alpha"]` -- Disease mortality rate
+
+$\phi$ = `r parms["phi"]` -- Infectiousness of environmental virions
+
+$\eta$ = `r parms["eta"]` -- Degradation of environmental virions
+
+$\nu$ = `r parms["nu"]` -- Update rate of environmental virions
+
+$\sigma$ = `r parms["sigma"]` -- Virion shedding rate
+
+$\omega$ = `r parms["omega"]` -- Inter-patch movement rate
+
+$\rho$ = `r parms["rho"]` -- Contact non-linearity parameter
+
+$\lambda$ = `r parms["lambda"]` -- External force of infection
+
+$\tau$-crit = `r parms["tau_crit"]` -- Critical surveillance time
+
+$I$-crit = `r parms["I_crit"]` -- Threshold for reporting
+
+$\pi$-report = `r parms["pi_report"]` -- Reporting probability
+
+$\pi$-detect = `r parms["pi_detect"]` -- Detection probability
+
+$t_c$-detect = *1 to 10, by 1  -- Mean time (days) to culling after detection*
+
+
+
+```{r plots, include = FALSE, eval = FALSE}
+plot_test <- lapply(vals, function(x) get_plots(x))
+```
+
+
+```{r per-day}
+cull_time_vals <- seq_len(10)
+
+cull_time_plots <- function(val){
+parms["cull_time"] <- val
+conditions <- create_initial_condition(basic_patches(farm_size, farm_number))
+res1 <- mf_sim(init = conditions, parameters = parms, times=1:365, n_sims = 1000)
+
+count_ones <- apply(res1,4, function(x){
+  c <- x["C",,]
+  ones <- apply(c, 1, function(y){
+    sum(y == 1)
+  })
+})
+
+ones <- as.vector(count_ones)
+only_ones <- ones[which(ones > 0)]
+
+ggplot() + geom_histogram(aes(x = only_ones), binwidth = 0.5) +
+  labs(x = "Number of Days from Reported to Culled State", y = "Number of Patches", title = "Time to Culling", subtitle = paste("Mean =", round(mean(only_ones),2), "Parameter =", val)) +
+  theme_minimal()
+
+}
+
+```
+
+```{r time_plots}
+lapply(cull_time_vals, function(x) cull_time_plots(x))
+
+```
