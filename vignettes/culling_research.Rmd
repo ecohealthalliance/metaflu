@@ -60,6 +60,10 @@ The [CDC](https://www.cdc.gov/flu/avianflu/outbreaks.htm) summarizes the recogni
 
 - The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) mentions the importance of reporting and culling, suggests that culling be limited to the infected farm or a small radius around it, and implies that countries which don't compensate affected farmers can see smaller reporting rates, but does not investigate what a normal reporting rate is.
 
+#Other research
+
+[This factsheet](https://www.usda.gov/sites/default/files/documents/nass-poultry-stats-factsheet.pdf) has some statistics about US poultry slaughter--links to pdfs which may be useful, but won't open over the bus' wifi.
+
 
 #Summary 
 While there is data available about culling numbers (although not as a percentage of total population), and other models have given rates for culling based on assumptions or knowledge about surveillance, there is little synthesis of the two types of reports. The proposed model can use data such as that in `r citep('10.1186/1476-072X-8-47')` to obtain a more accurate culling rate.
