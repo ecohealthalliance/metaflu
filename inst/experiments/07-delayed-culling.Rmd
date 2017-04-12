@@ -7,7 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
-#devtools::load_all()
 library(metaflu)
 library(ggplot2)
 library(dplyr)
@@ -17,7 +16,6 @@ library(purrr)
 library(gridExtra)
 library(abind)
 library(grid)
-source(rprojroot::find_rstudio_root_file("R/summarizing_functions.R"))
 set.seed(123)
 registerDoMC(cores = detectCores())
 ```
@@ -165,7 +163,6 @@ only_ones <- ones[which(ones > 0)]
 ggplot() + geom_histogram(aes(x = only_ones), binwidth = 0.5) +
   labs(x = "Number of Days from Reported to Culled State", y = "Number of Patches", title = "Time to Culling", subtitle = paste("Mean =", round(mean(only_ones),2), "Parameter =", val)) +
   theme_minimal()
-
 }
 
 ```

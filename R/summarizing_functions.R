@@ -194,3 +194,17 @@ create_initial_condition <- function(patches){
   return(patches)
 }
 
+#' @export
+seed_initial_infection <- function(patches, multiplier = 1, risk_group = NULL){
+  temp_patches <- patches
+  if (!is.null(risk_group)){
+    temp_patches[risk_group,1] <- temp_patches[risk_group,1]*multiplier
+  }
+  s <- cumsum(temp_patches[,1])
+  random <- sample.int(max(s), 1)
+  index <- which.max(s > random)
+  patches[index, 2] <- 1
+  patches[index, 1] <- patches[index, 1] - 1
+  return(patches)
+}
+
