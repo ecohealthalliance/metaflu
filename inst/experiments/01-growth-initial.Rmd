@@ -6,7 +6,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
-#devtools::load_all()
 library(metaflu)
 library(ggplot2)
 library(dplyr)
@@ -16,7 +15,6 @@ library(purrr)
 library(gridExtra)
 library(doRNG)
 P <-rprojroot::find_rstudio_root_file
-source(P("R/summarizing_functions.R"))
 set.seed(123)
 ```
 

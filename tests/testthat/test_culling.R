@@ -1,7 +1,6 @@
 library(abind)
 library(doMC)
-
-source(rprojroot::find_rstudio_root_file("R","summarizing_functions.R"))
+library(metaflu)
 
 farm_number <- 100
 farm_size <- 40
