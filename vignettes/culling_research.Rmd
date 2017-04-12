@@ -18,6 +18,15 @@ P <- rprojroot::find_rstudio_root_file
 
 A summary of the available research on poultry culling rates.
 
+###Time from detection to culling
+The National Wildlife Health Center has [press releases](https://www.nwhc.usgs.gov/disease_information/avian_influenza/) about outbreaks of avian influenza. Its values for $t_c$-detect:
+
+- 1 to 2 days in developed countries (Austria, Poland, Taiwan, US)
+
+- 4 to 6 days in developed countries with other considerations: an Austrian zoo had to test a flock of endangered pelicans to confirm infection before euthanizing them
+
+- 6 to 21 days, if my interpretation of the site is correct (for example, the bulletin was dated 3/22, and said that the flock "will be" culled after an outbreak confirmed on 3/16). Assuming this means that the infection was detected before the first date and the flock has note yet been culled by the second, $t_c$-detect can be as high as 14 (Nepal) or 21 (Russia) days.
+
 ###From Paperpile
 Hosseini's model `r citep('10.1371/journal.pone.0080091')` gives base values for number of dead birds in a given period ($\tau$ = 1), a threshold value ($\iota$ = 5), and a probability of reporting and detecting ($\pi$~Report~ = 0.1, $\pi$~Detect~ = 0.9).
 
