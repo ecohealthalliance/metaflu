@@ -4,7 +4,7 @@
 \alias{mf_sim}
 \title{Influenza Metapopulation Simulator}
 \usage{
-mf_sim(init, parameters, times, n_sims = 1, return_array = FALSE)
+mf_sim(init, parameters, times, n_sims = 1, return_array = TRUE)
 }
 \arguments{
 \item{init}{Intital conditions - a patches X 4 (SIRV) matrix of populations}
@@ -35,6 +35,7 @@ a \strong{foreach} back-end such as \code{\link[doMC:registerDoMC]{doMC::registe
    omega = 0,      #movement rate
    rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
    lambda = 0,    #force of infection from external sources
+   cull_time = 0,    #average time, in days, it takes for a reported patch to be culled
    chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
    )
  initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)

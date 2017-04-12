@@ -29,6 +29,7 @@ struct mf_parmlist {
   arma::irowvec I_crit;               //number of deaths that would trigger reporting
   arma::rowvec pi_report;         //probability of reporting deaths
   arma::rowvec pi_detect;         //probability of detecting AI
+  arma::rowvec cull_rate;      //rate at which culling occurs at a reported farm
 
 
   int n_actions;            // number of possible actions
@@ -56,20 +57,22 @@ struct mf_parmlist {
     I_crit = as<arma::irowvec>(parmlist["I_crit"]);
     pi_report = as<arma::rowvec>(parmlist["pi_report"]);
     pi_detect = as<arma::rowvec>(parmlist["pi_detect"]);
+    cull_rate = 1 / as<arma::rowvec>(parmlist["cull_time"]);
 
-    n_actions = 10;
-    n_pstates = 4;
+    n_actions = 11;
+    n_pstates = 5;
     action_matrix = {
-      {-1,  1,  0,  0},  //0 infection
-      { 0, -1, +1,  0},  //1 recovery
-      {-1,  0,  0,  0},  //2 S mortality
-      { 0, -1,  0,  0},  //3 I mortality
-      { 0,  0, -1,  0},  //4 R mortality
-      { 0,  0,  0, +1},  //5 shedding
-      { 0,  0,  0, -1},  //6 degradation
-      {-1,  0,  0,  0},  //7 S emigration
-      { 0, -1,  0,  0},  //8 I emigration
-      { 0,  0, -1,  0},  //9 R emigration
+      {-1,  1,  0,  0,  0},  //0 infection
+      { 0, -1, +1,  0,  0},  //1 recovery
+      {-1,  0,  0,  0,  0},  //2 S mortality
+      { 0, -1,  0,  0,  0},  //3 I mortality
+      { 0,  0, -1,  0,  0},  //4 R mortality
+      { 0,  0,  0, +1,  0},  //5 shedding
+      { 0,  0,  0, -1,  0},  //6 degradation
+      {-1,  0,  0,  0,  0},  //7 S emigration
+      { 0, -1,  0,  0,  0},  //8 I emigration
+      { 0,  0, -1,  0,  0},  //9 R emigration
+      { 0,  0,  0,  0, +1},  //10 culling
     };
     action_matrix = trans(action_matrix);
 

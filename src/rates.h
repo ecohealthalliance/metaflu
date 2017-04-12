@@ -45,13 +45,14 @@ arma::vec set_rates(arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
   vals.rates_mat.row(5) = vals.state_mat.row(1) * parms.sigma;   //virion shedding
   vals.rates_mat.row(6) = vals.state_mat.row(3) * parms.eta;     //viron degradation
   vals.rates_mat.rows(7, 9) = vals.state_mat.rows(0, 2) * parms.omega; // emigration of all classes
+  vals.rates_mat.row(10) = (vals.state_mat.row(4) == 1) % parms.cull_rate; // culling
 
   //Rcout << rates.t();
   return rates;
 
 };
 
-void update_state(arma::vec &state, const mf_parmlist &parms, const double &time, mf_vals &vals, arma::uword event) {
+void update_state(arma::vec &state, mf_parmlist &parms, const double &time, mf_vals &vals, arma::uword event) {
 
   vals.patch = event / parms.n_actions;
   vals.action = event % parms.n_actions;
@@ -59,8 +60,6 @@ void update_state(arma::vec &state, const mf_parmlist &parms, const double &time
   if(vals.action == 2 || vals.action == 3 || vals.action ==4) {  //in the case of death,
     //  Rcout << "test: " << vals.deathtimes[vals.patch].size() << std::endl;
     vals.deathtimes[vals.patch].push(time);                          //record the time
-
-
     while(vals.deathtimes[vals.patch].top() < (time - parms.tau_crit[vals.patch])) {
       vals.deathtimes[vals.patch].pop();
     }  //drop any deaths further back than tau_crit
@@ -70,28 +69,36 @@ void update_state(arma::vec &state, const mf_parmlist &parms, const double &time
     if(vals.deathtimes[vals.patch].size() >= parms.I_crit[vals.patch] &&   //if I_crit deaths have occurred in the past tau_crit time...
        R::runif(0,1) < parms.pi_report[vals.patch]                 &&   //and the deaths are reported
        R::runif(0,1) < (1 - pow((1 - parms.pi_detect[vals.patch]), state[vals.patch * 4 + 1]))) {   //and disease is detected
-      state.subvec(vals.patch * 4, vals.patch * 4 + 3) = zeros<vec>(4);
-      vals.cull = true;
+      state(vals.patch * parms.n_pstates + 4) = 1;  //set the state to reported
+      //state.subvec(vals.patch * parms.n_pstates, vals.patch * parms.n_pstates + 3) = zeros<vec>(4);  //Cull
+      //vals.cull = true;
       while(vals.deathtimes[vals.patch].size() > 0) {
         vals.deathtimes[vals.patch].pop();
       }
     } else {
-      for(uword i = 0; i < 4; i++) {
-        state[vals.patch * 4 + i] += parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
+      for(uword i = 0; i < parms.n_pstates; i++) {
+        state[vals.patch * parms.n_pstates + i] += parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
       }
     }
   } else {
-    for(uword i = 0; i < 4; i++) {
-      state[vals.patch * 4 + i] += parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
+    for(uword i = 0; i < parms.n_pstates; i++) {
+      state[vals.patch * parms.n_pstates + i] += parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
+    }
+    if(vals.action == 10) { //for culling, in addition to updating the cull state (done via action matrix)
+      state.subvec(vals.patch * parms.n_pstates, vals.patch * parms.n_pstates + 3) = zeros<vec>(4);  //kill 'em all
+      parms.chi.col(vals.patch) = zeros<vec>(parms.chi.n_rows);  //remove patch from the marix by setting its column to zero.
+      parms.chi.each_col() /= sum(parms.chi, 1); //renormalize the rows - divide each column element-wise by the row sums
+      parms.chi_cum = cumsum(parms.chi, 1); //recalculate cumulative probabilities
+      //Rcpp::Rcout << "Culled farm #" << vals.patch << " at time " << time << std::endl;
     }
 
     //Rcout << state.row(patch)<< std::endl;
-    if(vals.action >= 7) {
+    if(vals.action == 7 | vals.action == 8 | vals.action == 9)  {
       //double rand_value = R::runif(0,1);
       //vals.target_patch = as_scalar(find(parms.chi_cum.row(vals.patch) > rand_value, 1, "first"));
       sample_cumrates_row(vals.target_patch, parms.chi_cum.row(vals.patch), 1);
-      for(uword i = 0; i < 4; i++) {
-        state[vals.target_patch * 4 + i] -= parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
+      for(uword i = 0; i < parms.n_pstates; i++) {
+        state[vals.target_patch * parms.n_pstates + i] -= parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
       }}
   }
 
@@ -112,11 +119,11 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
   // }
 
   // Rcout << vals.patch << ";  " << vals.action<< std::endl;
-  vals.min_patch = vals.patch*10;
-  if(vals.cull) {
-    vals.rates_mat.col(vals.patch) = zeros<vec>(10);
-    vals.cull = false;
-  } else {
+  vals.min_patch = vals.patch*parms.n_actions;
+  // if(vals.cull) {
+  //   vals.rates_mat.col(vals.patch) = zeros<vec>(10);
+  //   vals.cull = false;
+  // } else {
     vals.rates_mat.at(0, vals.patch) =
       vals.state_mat.at(0, vals.patch) == 0 ? 0 :
     vals.state_mat.at(0, vals.patch) * (
@@ -130,8 +137,9 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
     vals.rates_mat.at(5, vals.patch) = vals.state_mat.at(1, vals.patch) * parms.sigma;   //virion shedding
     vals.rates_mat.at(6, vals.patch) = vals.state_mat.at(3, vals.patch) * parms.eta;     //viron degradation
     vals.rates_mat.submat(7, vals.patch, 9, vals.patch) = vals.state_mat.submat(0, vals.patch, 2, vals.patch) * parms.omega; // emigration of all classes
+    vals.rates_mat.at(10, vals.patch) = (as_scalar(vals.state_mat.at(4, vals.patch)) == 1) ? parms.cull_rate[vals.patch] : 0.0;     //culling
 
-    if(vals.action >= 7) {    //If an emigration action, send the individual to another patch
+    if(vals.action == 7 | vals.action == 8 | vals.action == 9) {    //If an emigration action, send the individual to another patch
       vals.rates_mat.at(0, vals.target_patch) = vals.state_mat.at(0, vals.target_patch) * (
         (parms.beta *  vals.state_mat.at(1, vals.target_patch) / pow(accu(vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch)), parms.rho)) + //infection events (contact)
           parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.at(3, vals.target_patch))) + //virion uptake
@@ -143,9 +151,10 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
       vals.rates_mat.at(5, vals.target_patch) = vals.state_mat.at(1, vals.target_patch) * parms.sigma;   //virion shedding
       vals.rates_mat.at(6, vals.target_patch) = vals.state_mat.at(3, vals.target_patch) * parms.eta;     //viron degradation
       vals.rates_mat.submat(7, vals.target_patch, 9, vals.target_patch) = vals.state_mat.submat(0, vals.target_patch, 2, vals.target_patch) * parms.omega; // emigration of all classes
-      vals.min_patch = std::min(vals.target_patch*10, vals.min_patch);
+      vals.rates_mat.at(10, vals.target_patch) = (as_scalar(vals.state_mat.at(4, vals.target_patch)) == 1) ? parms.cull_rate[vals.target_patch] : 0.0;     //culling
+      vals.min_patch = std::min(vals.target_patch*parms.n_actions, vals.min_patch);
     }
-  }
+ // }
 
   //Rcout << vals.state_mat.col(vals.patch).t() << std::endl;
 

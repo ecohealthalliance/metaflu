@@ -22,6 +22,7 @@
 #'    omega = 0,      #movement rate
 #'    rho = 0,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
 #'    lambda = 0,    #force of infection from external sources
+#'    cull_time = 0,    #average time, in days, it takes for a reported patch to be culled
 #'    chi = matrix(c(1,0,0,1), nrow=2)  #patch connectivity matrix
 #'    )
 #'  initial_cond <- matrix(c(99, 1, 0, 0), nrow=2, ncol=4, byrow=TRUE)
@@ -46,7 +47,7 @@ mf_sim <- function(init, parameters, times, n_sims=1, return_array=TRUE) {
   }
 
   #Convert scalar parameters to vectors
-  parameters <-  repeat_parms(parameters, n_patches, c("lambda", "tau_crit", "I_crit", "pi_report", "pi_detect"))
+  parameters <-  repeat_parms(parameters, n_patches, c("lambda", "tau_crit", "I_crit", "pi_report", "pi_detect", "cull_time"))
 
   if(!is.null(parameters[["network_type"]]) && !parameters[["stochastic_network"]]) {
     parameters[["chi"]] <- make_net(parameters[["network_type"]],
@@ -80,8 +81,8 @@ mf_sim <- function(init, parameters, times, n_sims=1, return_array=TRUE) {
 
   if(return_array) {
     results <- array(data = unlist(outputs[[1]], recursive = FALSE, use.names = FALSE),
-                     dim = c(4, n_patches, length(times), n_sims),
-                     dimnames =  list(c("S", "I", "R", "V"),
+                     dim = c(5, n_patches, length(times), n_sims),
+                     dimnames =  list(c("S", "I", "R", "V", "C"),
                                       seq_len(n_patches),
                                       times,
                                       seq_len(n_sims)))
@@ -90,7 +91,7 @@ mf_sim <- function(init, parameters, times, n_sims=1, return_array=TRUE) {
     sim = seq_len(n_sims),
     time = times,
     patch = seq_len(n_patches),
-    class = factor(c("S", "I", "R", "V"), levels = c("S", "I", "R", "V"))
+    class = factor(c("S", "I", "R", "V"), levels = c("S", "I", "R", "V", "C"))
   ))
   results[["population"]] <- unlist(outputs[[1]], recursive = FALSE, use.names = FALSE)
   }
