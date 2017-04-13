@@ -124,8 +124,36 @@ $(document).ready(function () {
 
 
 <p>A summary of the available research on poultry culling rates.</p>
-<div id="from-the-literature" class="section level3">
-<h3>From the literature</h3>
+<div id="time-from-detection-to-culling" class="section level3">
+<h3>Time from detection to culling</h3>
+<p>The National Wildlife Health Center has <a href="https://www.nwhc.usgs.gov/disease_information/avian_influenza/">press releases</a> about outbreaks of avian influenza. Its values for <span class="math inline">\(t_c\)</span>-detect:</p>
+<ul>
+<li><p>1 to 2 days in developed countries (Austria, Poland, Taiwan, US)</p></li>
+<li><p>4 to 6 days when testing is required: for instance, an Austrian zoo had to test a flock of endangered pelicans to confirm infection before euthanizing them</p></li>
+<li><p>6 to 21 days, if my interpretation of the site is correct (for example, the bulletin was dated 3/22, and said that the flock “will be” culled after an outbreak confirmed on 3/16). Assuming this means that the infection was detected before the first date and the flock has note yet been culled by the second, <span class="math inline">\(t_c\)</span>-detect can be as high as 14 (Nepal) or 21 (Russia) days.</p></li>
+</ul>
+<p>A <a href="https://fas.org/sgp/crs/misc/R44114.pdf">report</a> on the 2014-2015 US outbreak gives 48 million chickens culled between 12/2014 and 6/2015. On page 14, it refers to producers’ concerns that culling time was too high. This seems to suggest that the time to culling is 2-7 days and that the time taken to cull a flock is significant (perhaps only a consideration on large-scale farms).</p>
+</div>
+<div id="other-resources" class="section level3">
+<h3>Other resources</h3>
+<p>The OIE records poultry deaths due to avian influenza.</p>
+<ul>
+<li><p>A March 2017 <a href="http://www.oie.int/fileadmin/Home/eng/Animal_Health_in_the_World/docs/pdf/OIE_AI_situation_report/OIE_SituationReport__AI_3_28Mar2017.pdf">situation report</a> has data on H5 and H7 outbreaks (page 3). It summarizes both poultry culled in an outbreak and poultry culled within a 2-week period by region.</p></li>
+<li><p>In the US, 127,956 chickens were culled in the most recent outbreak (H5N2 and H7N9). According to the USDA’s <a href="https://www.usda.gov/sites/default/files/documents/nass-poultry-stats-factsheet.pdf">fact sheet</a>, there are 8.54 billion boiler chickens in the US, so the probability that a US chicken will be culled due to avian influenza is 0.000015.</p></li>
+<li><p>In Africa, 5,065 chickens were culled; in Asia and the Pacific, 2,469,469; in Europe, 3,055,768. I couldn’t find individual countries’ industry data, and as a result do not have a similar probability for these regions. (I’ll try converting between metric tons of poultry and number of individual chickens.)</p></li>
+<li><p>A 2014 <a href="http://www.oie.int/for-the-media/press-releases/detail/article/questions-and-answers-on-high-pathogenic-h5n8-avian-influenza-strain-update-27112014/">press release</a> looks at the H5N8 outbreak in detail. It gives the total number of chickens and ducks culled in Korea (629,800), Japan (112,000), Germany (1,731), the Netherlands (200,000), and the UK (6,000).</p></li>
+<li><p>Article 10.4.29 of the <a href="http://www.oie.int/index.php?id=169&amp;L=0&amp;htmfile=chapitre_avian_influenza_viruses.htm">OIE’s handbook</a> gives guidelines for surveillance, namely that <span class="math inline">\(\pi\)</span>-detect should be 1.</p></li>
+<li><p>The site on <a href="http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/">control</a> suggests that culling be limited to the infected farm or a small radius around it (perhaps an idea for a modification to the model), and implies that countries which don’t compensate affected farmers can see smaller reporting rates.</p></li>
+</ul>
+<p>The FAO has less poultry-specific data, but offer guidelines for response.</p>
+<ul>
+<li><p>The FAO’s <a href="http://www.fao.org/3/a-a1521e.pdf">manual</a> shows that &gt;230 million chickens worldwide have died due to flu since 2003, but this number seems to represent mortality due to avian influenza, not deaths due to culling (as some have cited it).</p></li>
+<li><p>Their <a href="http://www.fao.org/avianflu/en/qanda.html">FAQs</a> suggest that farmers should always report deaths (making <span class="math inline">\(\pi\)</span>-report = 1), but do not give rates of compliance.</p></li>
+<li><p>Opportunity for questions: what is the total number of poultry culled due to avian influenza? What is a country’s rate of reporting?</p></li>
+</ul>
+</div>
+<div id="from-paperpile" class="section level3">
+<h3>From Paperpile</h3>
 <p>Hosseini’s model <span class="citation">[<a href="#ref-Hosseini_2013">1</a>]</span> gives base values for number of dead birds in a given period (<span class="math inline">\(\tau\)</span> = 1), a threshold value (<span class="math inline">\(\iota\)</span> = 5), and a probability of reporting and detecting (<span class="math inline">\(\pi\)</span><sub>Report</sub> = 0.1, <span class="math inline">\(\pi\)</span><sub>Detect</sub> = 0.9).</p>
 <ul>
 <li>Total probability of culling = <span class="math inline">\(\pi\)</span><sub>Report</sub> * <span class="math inline">\(\pi\)</span><sub>Detect</sub> = 0.09</li>
@@ -140,14 +168,18 @@ $(document).ready(function () {
 <p>Bridges’ paper <span class="citation">[<a href="#ref-Bridges_2002">6</a>]</span> uses the culling event after the 1997 Hong Kong epidemic to show that workers occupationally exposed to poultry are at higher risk of flu, but has no hard data about the poultry culled.</p>
 <p>To contrast with our approach, Bourouiba’s model <span class="citation">[<a href="#ref-Bourouiba_2011">7</a>]</span> includes culling in its per capita mortality parameter, not as a separate event.</p>
 </div>
-<div id="other-resources" class="section level3">
-<h3>Other resources</h3>
-<p>FAO’s manual <span class="citation">[<a href="#ref-greycite75992">8</a>]</span> shows that &gt;230 million chickens worldwide have died due to flu since 2003, but is vague on whether this figure represents culling (as some papers have cited it) or mortality due to influenza.</p>
-<p>The <a href="https://www.cdc.gov/flu/avianflu/outbreaks.htm">CDC</a> summarizes the recognized outbreaks in North America.</p>
+<div id="from-the-literature" class="section level3">
+<h3>From the literature</h3>
+<p>This paper <span class="citation">[<a href="#ref-Vergne_2012">8</a>]</span> on the relationship between vaccination and reporting gives a rate of 0.46 to 0.69 for poultry surveillance (<span class="math inline">\(\pi\)</span>-report) in the absence of vaccination efforts. (The reporting rate was about twice what it was when vaccination was ongoing, which the authors believe to be a result of the disproportionate trust in the benefits of vaccination.)</p>
+<p>EHA has indentified the lack of wild bird surveillance strategies <span class="citation">[<a href="#ref-Machalaba_2015">9</a>]</span> as an obstacle to understanding the virus, but this paper was limited to wild birds, not poultry.</p>
+<ul>
+<li>A reference <span class="citation">[<a href="#ref-Hoye_2010">10</a>]</span> suggests surveillance improvements such as sampling according to age-dependent, temporal, or spatial patterns, sampling different sites of infection, and screening for multiple strains at once; however, this paper also considers only wild birds.</li>
+</ul>
 </div>
 <div id="summary" class="section level1">
 <h1>Summary</h1>
-<p>While there is data available about culling numbers (although not as a percentage of total population), and other models have given rates for culling based on assumptions or knowledge about surveillance, there is little synthesis of the two types of reports. The proposed model can use data such as that in <span class="citation">[<a href="#ref-Williams_2009">4</a>]</span> to obtain a more accurate culling rate.</p>
+<p>The time from detection to culling can range from 1-7 days in the US to 14-21 in developing countries, and so varying <span class="math inline">\(t_c\)</span>-detect from 1 to 21 will cover most possibilities. In addition, <span class="citation">[<a href="#ref-Vergne_2012">8</a>]</span> gives a range of 0.46 to 0.69 for the probability that Egyptian farmers will report suspected cases (<span class="math inline">\(\pi\)</span>-report) in the absence of vaccination efforts.</p>
+<p>Poultry producers have complained about the time culling takes, which may be proportional to the number of chickens and thus only an issue with larger farms. The effect of a long culling time may be worth investigating for industrial farms with tens of thousands of birds.</p>
 <div id="references" class="section level2">
 <h2>References</h2>
 <div id="refs">
@@ -172,8 +204,14 @@ $(document).ready(function () {
 <div id="ref-Bourouiba_2011">
 <p>[7] L. Bourouiba, S.A. Gourley, R. Liu, J. Wu, The Interaction of Migratory Birds and Domestic Poultry and Its Role in Sustaining Avian Influenza. SIAM Journal on Applied Mathematics. 71 (2011) 487–516. doi:<a href="https://doi.org/10.1137/100803110">10.1137/100803110</a>.</p>
 </div>
-<div id="ref-greycite75992">
-<p>[8] murguia, Manual5.indb. (2017). <a href="http://www.fao.org/3/a-a1521e.pdf" class="uri">http://www.fao.org/3/a-a1521e.pdf</a>.</p>
+<div id="ref-Vergne_2012">
+<p>[8] T. Vergne, V. Grosbois, Y. Jobre, A. Saad, A.A.E. Nabi, S. Galal, et al., Avian Influenza Vaccination of Poultry and Passive Case Reporting, Egypt. Emerging Infectious Diseases. 18 (2012) 2076–2078. doi:<a href="https://doi.org/10.3201/eid1812.120616">10.3201/eid1812.120616</a>.</p>
+</div>
+<div id="ref-Machalaba_2015">
+<p>[9] C.C. Machalaba, S.E. Elwood, S. Forcella, K.M. Smith, K. Hamilton, K.B. Jebara, et al., Global Avian Influenza Surveillance in Wild Birds: A Strategy to Capture Viral Diversity. Emerging Infectious Diseases. 21 (2015). doi:<a href="https://doi.org/10.3201/eid2104.141415">10.3201/eid2104.141415</a>.</p>
+</div>
+<div id="ref-Hoye_2010">
+<p>[10] B.J. Hoye, V.J. Munster, H. Nishiura, M. Klaassen, R.A. Fouchier, Surveillance of Wild Birds for Avian Influenza Virus. Emerging Infectious Diseases. 16 (2010) 1827–1834. doi:<a href="https://doi.org/10.3201/eid1612.100589">10.3201/eid1612.100589</a>.</p>
 </div>
 </div>
 </div>
