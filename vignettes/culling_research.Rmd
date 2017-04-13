@@ -19,6 +19,7 @@ P <- rprojroot::find_rstudio_root_file
 A summary of the available research on poultry culling rates.
 
 ###Time from detection to culling
+
 The National Wildlife Health Center has [press releases](https://www.nwhc.usgs.gov/disease_information/avian_influenza/) about outbreaks of avian influenza. Its values for $t_c$-detect:
 
 - 1 to 2 days in developed countries (Austria, Poland, Taiwan, US)
