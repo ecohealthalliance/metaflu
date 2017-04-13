@@ -23,9 +23,35 @@ The National Wildlife Health Center has [press releases](https://www.nwhc.usgs.g
 
 - 1 to 2 days in developed countries (Austria, Poland, Taiwan, US)
 
-- 4 to 6 days in developed countries with other considerations: an Austrian zoo had to test a flock of endangered pelicans to confirm infection before euthanizing them
+- 4 to 6 days when testing is required: for instance, an Austrian zoo had to test a flock of endangered pelicans to confirm infection before euthanizing them
 
 - 6 to 21 days, if my interpretation of the site is correct (for example, the bulletin was dated 3/22, and said that the flock "will be" culled after an outbreak confirmed on 3/16). Assuming this means that the infection was detected before the first date and the flock has note yet been culled by the second, $t_c$-detect can be as high as 14 (Nepal) or 21 (Russia) days.
+
+A [report](https://fas.org/sgp/crs/misc/R44114.pdf) on the 2014-2015 US outbreak gives 48 million chickens culled between 12/2014 and 6/2015. On page 14, it refers to producers' concerns that culling time was too high. This seems to suggest that the time to culling is 2-7 days and that the time taken to cull a flock is significant (perhaps only a consideration on large-scale farms).
+
+### Other resources
+
+The OIE records poultry deaths due to avian influenza.
+
+* A March 2017 [situation report](http://www.oie.int/fileadmin/Home/eng/Animal_Health_in_the_World/docs/pdf/OIE_AI_situation_report/OIE_SituationReport__AI_3_28Mar2017.pdf) has data on H5 and H7 outbreaks (page 3). It summarizes both poultry culled in an outbreak and poultry culled within a 2-week period by region.
+
+  + In the US, 127,956 chickens were culled in the most recent outbreak (H5N2 and H7N9). According to the USDA's [fact sheet](https://www.usda.gov/sites/default/files/documents/nass-poultry-stats-factsheet.pdf), there are 8.54 billion boiler chickens in the US, so the probability that a US chicken will be culled due to avian influenza is 0.000015.
+
+  + In Africa, 5,065 chickens were culled; in Asia and the Pacific, 2,469,469; in Europe, 3,055,768. I couldn't find individual countries' industry data, and as a result do not have a similar probability for these regions. (I'll try converting between metric tons of poultry and number of individual chickens.)
+
+* A 2014 [press release](http://www.oie.int/for-the-media/press-releases/detail/article/questions-and-answers-on-high-pathogenic-h5n8-avian-influenza-strain-update-27112014/) looks at the H5N8 outbreak in detail. It gives the total number of chickens and ducks culled in Korea (629,800), Japan (112,000), Germany (1,731), the Netherlands (200,000), and the UK (6,000).
+
+* Article 10.4.29 of the [OIE's handbook](http://www.oie.int/index.php?id=169&L=0&htmfile=chapitre_avian_influenza_viruses.htm) gives guidelines for surveillance, namely that $\pi$-detect should be 1.
+
+* The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) suggests that culling be limited to the infected farm or a small radius around it (perhaps an idea for a modification to the model), and implies that countries which don't compensate affected farmers can see smaller reporting rates.
+
+The FAO has less poultry-specific data, but offer guidelines for response.
+
+- The FAO's [manual](http://www.fao.org/3/a-a1521e.pdf) shows that  >230 million chickens worldwide have died due to flu since 2003, but this number seems to represent mortality due to avian influenza, not deaths due to culling (as some  have cited it).
+
+- Their [FAQs](http://www.fao.org/avianflu/en/qanda.html) suggest that farmers should always report deaths (making $\pi$-report = 1), but do not give rates of compliance.
+
+- Opportunity for questions: what is the total number of poultry culled due to avian influenza? What is a country's rate of reporting?
 
 ###From Paperpile
 Hosseini's model `r citep('10.1371/journal.pone.0080091')` gives base values for number of dead birds in a given period ($\tau$ = 1), a threshold value ($\iota$ = 5), and a probability of reporting and detecting ($\pi$~Report~ = 0.1, $\pi$~Detect~ = 0.9).
@@ -54,32 +80,10 @@ EHA has indentified the lack of wild bird surveillance strategies `r citep('10.3
 
 - A reference `r citep('10.3201/eid1612.100589')` suggests surveillance improvements such as sampling according to age-dependent, temporal, or spatial patterns, sampling different sites of infection, and screening for multiple strains at once; however, this paper also considers only wild birds.
 
-Looking at other livestock, `r citep('10.1111/zph.12049')` advocates pig surveillance to improve our understanding of influenza's ecology and impact on human health, mostly on a laboratory (rather than farm or individual) level. (I was only allowed access to the abstract--I'm going to check with Dartmouth to see why--but this paper seems like an interesting extension idea.)
-
-
-### Other resources
-
-FAO's [manual](http://www.fao.org/3/a-a1521e.pdf) shows that  >230 million chickens worldwide have died due to flu since 2003, but this number seems to represent mortality due to avian influenza, not deaths due to culling (as some  have cited it).
-
-- Their [FAQs](http://www.fao.org/avianflu/en/qanda.html) suggest that farmers should always report deahts (making $\pi$-report = 1), but do not give rates of compliance.
-
-The [CDC](https://www.cdc.gov/flu/avianflu/outbreaks.htm) summarizes the recognized outbreaks in North America.
-
-Article 10.4.29 of the [OIE's handbook](http://www.oie.int/index.php?id=169&L=0&htmfile=chapitre_avian_influenza_viruses.htm) gives guidelines for surveillance, namely that $\pi$-detect should be 1.
-
-- The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) suggests that culling be limited to the infected farm or a small radius around it (perhaps an idea for a modification to the model), and implies that countries which don't compensate affected farmers can see smaller reporting rates.
-
-- A March 2017 [press release](http://www.oie.int/en/animal-health-in-the-world/update-on-avian-influenza/2017/) has data on H5 and H7 outbreaks: 827,780 birds were culled between 3/13/17 and 3/27/17, and 5,658,258 total have been culled in ongoing outbreaks (pg 3 of the [situation report](http://www.oie.int/fileadmin/Home/eng/Animal_Health_in_the_World/docs/pdf/OIE_AI_situation_report/OIE_SituationReport__AI_3_28Mar2017.pdf)).
-
-- A 2014 [press release](http://www.oie.int/for-the-media/press-releases/detail/article/questions-and-answers-on-high-pathogenic-h5n8-avian-influenza-strain-update-27112014/), which puts the total number of birds culled in a 2014 outbreak of HPAI H5N8 at 939,531, breaks the total down by country (Korea, Japan, Germany, Netherlands, UK).
-
-#Other research
-
-[This factsheet](https://www.usda.gov/sites/default/files/documents/nass-poultry-stats-factsheet.pdf) has some statistics about US poultry slaughter--links to pdfs which may be useful, but won't open over the bus' wifi.
-
-
 #Summary 
-While there is data available about culling numbers (although not as a percentage of total population), and other models have given rates for culling based on assumptions or knowledge about surveillance, there is little synthesis of the two types of reports. The proposed model can use data such as that in `r citep('10.1186/1476-072X-8-47')` to obtain a more accurate culling rate.
+The time from detection to culling can range from 1-7 days in the US to 14-21 in developing countries, and so varying $t_c$-detect from 1 to 21 will cover most possibilities. In addition, `r citep('10.3201/eid1812.120616')` gives a range of 0.46 to 0.69 for the probability that Egyptian farmers will report suspected cases ($\pi$-report) in the absence of vaccination efforts. 
+
+Poultry producers have complained about the time culling takes, which may be proportional to the number of chickens and thus only an issue with larger farms. The effect of a long culling time may be worth investigating for industrial farms with tens of thousands of birds. 
 
 
 ```{r, include=FALSE}
