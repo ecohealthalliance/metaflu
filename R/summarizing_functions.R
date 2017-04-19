@@ -208,3 +208,19 @@ seed_initial_infection <- function(patches, multiplier = 1, risk_group = NULL){
   return(patches)
 }
 
+#' @export
+grow_patches_clustered <- function(old_condition){
+  s_num <- round(nrow(old_condition)*1/9)
+  old_condition[1:s_num,1] <- old_condition[1:s_num,1]*10
+  return(old_condition)
+}
+
+#' @export
+grow_patches_random <- function(old_condition){
+  s_num <- round(nrow(old_condition)*1/9)
+  random_numbers <- sample.int(nrow(old_condition), s_num)
+  old_condition[random_numbers,1] <- old_condition[random_numbers,1]*10
+  return(old_condition)
+}
+
+
