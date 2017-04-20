@@ -30,6 +30,10 @@ The National Wildlife Health Center has [press releases](https://www.nwhc.usgs.g
 
 A [report](https://fas.org/sgp/crs/misc/R44114.pdf) on the 2014-2015 US outbreak gives 48 million chickens culled between 12/2014 and 6/2015. On page 14, it refers to producers' concerns that culling time was too high. This seems to suggest that the time to culling is 2-7 days and that the time taken to cull a flock is significant (perhaps only a consideration on large-scale farms).
 
+### Varying the culling parameter
+
+This [paper](https://arxiv.org/pdf/1309.0248.pdf) is conceptually closest to our experiment. The authors model culling as a function of the number of infected birds (with 2 variations depending on how widespread culling is) and find that small variations in the culling rate lead to large differences in the asymptotic level of disease (endemic levels). It offers a different lens, of seeding the model with small variations and graphing the difference in outcomes, with which to analyze the effect of culling.  
+
 ### Other resources
 
 The OIE records poultry deaths due to avian influenza.
