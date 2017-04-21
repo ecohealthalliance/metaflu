@@ -1,12 +1,4 @@
----
-title: "Growth Scenario - One Initial Infection Seeded, Non-Linear Contact Rate, Clustered Intensification, Paired Networks"
-author: "Cale Basaraba"
-output: html_document
----
 
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
 library(metaflu)
 library(ggplot2)
 library(dplyr)
@@ -16,70 +8,18 @@ library(purrr)
 library(gridExtra)
 library(abind)
 registerDoMC(cores = 20)
-devtools::install_github("renozao/doRNG", force = TRUE)
+#devtools::install_github("renozao/doRNG", force = TRUE)
+library(doRNG)
 set.seed(123)
-```
 
 
-### Introduction
-
-The following simulation includes the following scenario options:
-
-- Non-linear Contact Rate ($\rho, \beta$)
-
-- Clustered Intensification in Growth Scenario
-
-- Paired Networks: Initial / Growth Scenarios have same set of stochastic networks
-
-- Poisson distribution with 40 as mean number of chickens per farm
-
-- 100 Farms
-
-- One initial seeded infection
 
 
-```{r network-setup}
+
 #Set number of farms and ~ number of chickens per farm
 farm_number <- 100
 farm_size <- 40
-
-```
-
-#### Parameters
-
-$\beta$ = 1.4456 -- Contact rate implemented alongside $\rho$
-
-$\gamma$ = 0.167 -- Recovery rate
-
-$\mu$ = 0.0 -- Base mortality rate
-
-$\alpha$ = 0.4 -- Disease mortality rate
-
-$\phi$ = 0.0 -- Infectiousness of environmental virions
-
-$\eta$ = 0.0 -- Degradation of environmental virions
-
-$\nu$ = 0.0 -- Update rate of environmental virions
-
-$\sigma$ = 0.0 -- Virion shedding rate
-
-$\omega$ = 0.03 -- Inter-patch movement rate
-
-$\rho$ = 0.8526 -- Contact non-linearity parameter
-
-$\lambda$ = 0.0 -- External force of infection
-
-$\tau$-crit = 0.0 -- Critical surveillance time
-
-$I$-crit = 0.0 -- Threshold for reporting
-
-$\pi$-report = 0.0 -- Reporting probability
-
-$\pi$-detect = 0.0 -- Detection probability
-
-t-detect = 0-10 -- Time to culling (variable)
-
-```{r parameter-setup}
+print(farm_number)
   parms = list(
     beta = 1.44456,   #contact rate for direct transmission
     gamma = 0.167,  #recovery rate
@@ -96,25 +36,17 @@ t-detect = 0-10 -- Time to culling (variable)
     I_crit = 1,     #threshold for reporting
     pi_report = 0.9, #reporting probability
     pi_detect = 0.9, #detection probability
-    cull_time = 0,   #time to detect
+    cull_time = 1,   #time to detect
     network_type = "smallworld",
     network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
     stochastic_network = TRUE
     )
-```
-
-
-### Varying culling parameters
-
-In this experiment, the mean number of infections and the duration of the epidemic are plotted against t-detect, which varies from 0 to 10 days in steps of 0.5.
-
-```{r vary-tdetect}
 
 
 cull_time_vector <- seq(0, 10, 0.5)
 
 results_list <- lapply(cull_time_vector, function(x){
- # print(x)
+  print(x)
   parms["cull_time"] <- x
   sims <- 1000
   g_list <- mclapply(seq_len(sims), function(y){
@@ -125,22 +57,23 @@ results_list <- lapply(cull_time_vector, function(x){
 
   return(do.call("abind", g_list))
 })
-```
 
-```{r infections-plot}
+saveRDS(results_list, "cull_time.rds")
+
+print("graphing infections")
 tot_i_list <- lapply(results_list, function(x) get_tot_infections_array(x))
 means <- sapply(tot_i_list, function(x) mean(x$total_i))
 infection_df <- data.frame(cull_time = seq(1, 5, 0.5), mean_infections = means)
 ggplot(data = infection_df) + geom_point(aes(x = cull_time, y = mean_infections)) +
   labs(x = "days to culling", y = "mean number of infections")
-```
 
-```{r duration-plot}
+print("graphing duration")
 duration_list <- lapply(results_list, function(x) get_duration_array(x))
 means <- sapply(duration_list, function(x) mean(x$duration))
 duration_df <- data.frame(cull_time = seq(1, 5, 0.5), mean_durations = means)
 ggplot(data = duration_df) + geom_point(aes(x = cull_time, y = mean_durations)) +
   labs(x = "days to culling", y = "duration of epidemic")
-```
+
+
 
 
