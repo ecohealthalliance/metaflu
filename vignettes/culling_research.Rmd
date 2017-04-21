@@ -14,51 +14,48 @@ keep_md: true
 library(knitcitations)
 cite_options(citation_format = 'pandoc')
 P <- rprojroot::find_rstudio_root_file
-#`#r citep('10.1371/journal.pone.0080091')` is the Hosseni paper, which is currently giving me a server error when I try to knit it
 ```
-
-#Summary
 
 ###Values for $\tau$, $\iota$, $\pi$
 
-$\tau$ = 1 (Hosseni paper) 
-$\iota$ = 5 (Hosseni)
-$\pi$ = 0.09 (Hosseni), 0.14 `r citep('10.1038/srep02175')`
-t-detect = 2-6 days `r citep('10.1186/1746-6148-7-59')`; 2, 5, or 21 days (https://www.nwhc.usgs.gov/disease_information/avian_influenza/);
+$\tau$ = 1 `r citep('10.1371/journal.pone.0080091')`  
+$\iota$ = 5 `r citep('10.1371/journal.pone.0080091')`   
+$\pi$ = 0.09 `r citep('10.1371/journal.pone.0080091')`, 0.14 `r citep('10.1038/srep02175')`  
+t-detect = 2-6 days `r citep('10.1186/1746-6148-7-59')`; 2, 5, or 21 days (https://www.nwhc.usgs.gov/disease_information/avian_influenza/)  
  
-- $\pi$~Report~ and $\pi$~Detect~ have been combined into one value $\pi$ = probability of culling because some sources do not discriminate between the two.
+- $\pi$-report and $\pi$-detect have been combined into one value, $\pi$ = probability of culling, because some sources do not discriminate between the two.
 
-  + Others only give one piece of the puzzle:`r citep('10.3201/eid1812.120616')`gives a rate of 0.46 to 0.69 for poultry surveillance ($\pi$-report) in the absence of vaccination efforts. (The reporting rate was about twice what it was when vaccination was ongoing, which the authors believe to be a result of the disproportionate trust in the benefits of vaccination.)
+  + Others only give one piece of the puzzle: `r citep('10.3201/eid1812.120616')` gives a rate of 0.46 to 0.69 for poultry surveillance ($\pi$-report) in the absence of vaccination efforts. (The reporting rate was about twice what it was when vaccination was ongoing, which the authors believe to be a result of the disproportionate trust in the benefits of vaccination.)
 
 - Some [reports](https://fas.org/sgp/crs/misc/R44114.pdf) indicate that the time taken to cull a flock is significant, although this delay may only be noticeable on large, industrial farms.
 
 ### Varying culling parameters
 
-Other models have set surveillance zones in which $\pi$ is higher, and vary $\pi$ depending on where the initial infection occurs `r citep('10.1186/1746-6148-7-59')`, or included a base level of culling in their per capita mortality parameter `r citep('10.1137/100803110')`.
+Other models have set surveillance zones in which $\pi$ is higher, and vary $\pi$ depending on where the initial infection occurs `r citep('10.1186/1746-6148-7-59')`, or included a base level of culling in their per capita mortality, rather than as a separate parameter `r citep('10.1137/100803110')`.
 
 However, this [paper](https://arxiv.org/pdf/1309.0248.pdf) is conceptually closest to the current experiment, as it only considers the effect of culling on avian influenza. The authors find a flaw in setting a culling threshold, that the intensity of culling does not respond to the intensity of infection, and so instead model culling as a function of the number of infected birds. In addition, they consider 2 culling rates, for susceptible versus infected birds. The paper considers 3 approaches.
 
---Mass culling: Culling increases with infections. This scenario leads to 1 global stable equilibrim for R~0~ > 1, where HPAI is endemic.
+- Mass culling: Culling increases with infections. This scenario leads to 1 global stable equilibrim for R~0~ > 1, where HPAI is endemic.
 
---Modified culling: Culling increases with infections until a limited response is overwhelmed, when the per capita culling rate decreases (a strained public health system can't cull a large number of infected birds). This scenario leads to 3 endemic equilibria and forward hysteresis, where the initial number of infections (at the time of response) determines if HPAI will be endemic at high or low levels.
+- Modified culling: Culling increases with infections until a limited response is overwhelmed, when the per capita culling rate decreases (a strained public health system can't cull a large number of infected birds). This scenario leads to 3 endemic equilibria and forward hysteresis, where the initial number of infections (at the time of response) determines if HPAI will be endemic at high or low levels.
 
---Selective culling: Same as the modified version, except that only infected birds are culled. (This models a scenario where farmers are reluctant to lose profits and only cull confirmed cases.) Although the authors acknowledge that this is an extreme version (they don't consider an exposed class that might reseed the infection), it illuminates the possibility of a backward bifurcation. There are 2 possible endemic equilibria for the system to reach depending on the value of $\beta$, the transmission rate.
+- Selective culling: Same as the modified version, except that only infected birds are culled. (This models a scenario where farmers are reluctant to lose profits and only cull confirmed cases.) Although the authors acknowledge that this is an extreme version (they don't consider an exposed class that might reseed the infection), it illuminates the possibility of a backward bifurcation. There are 2 possible endemic equilibria for the system to reach depending on the value of $\beta$, the transmission rate.
 
 
-An experiment like this is implemented in 08-cull-time-analysis, which varied the cull time from 1 to 5 days by steps of 0.5. (Although there's now a bug in the code, which prevents me from running further analysis.) On this scale, there is not a bifurcation of the type described, but there is a dip at 2.5. I also attempted to graph variation on the scale of years, as shown in this paper, but have not yet found any nonlinear behavior.
+An experiment like this is implemented in 08-cull-time-analysis, which varied the cull time from 1 to 5 days by steps of 0.5. On this scale, there is not a bifurcation of the type described, but there is a dip in both total infections and the duration of the epidemic at t-detect = 2.5. (See Rplots in experiments.) I also attempted to graph variation on the scale of years, as shown in this paper, but have not yet found any nonlinear behavior.
 
 
 ### Other resources
 
 OIE
 
---A March 2017 [situation report](http://www.oie.int/fileadmin/Home/eng/Animal_Health_in_the_World/docs/pdf/OIE_AI_situation_report/OIE_SituationReport__AI_3_28Mar2017.pdf) summarizes both poultry culled in an outbreak and poultry culled within a 2-week period by region. I believe dividing the number culled by the total number in the US (127,976/8.54 billion = 0.000015) represents Gulbudak and Martcheva's susceptible culling rate, $c$~s~. (USDA's[fact sheet](https://www.usda.gov/sites/default/files/documents/nass-poultry-stats-factsheet.pdf) gives the total number of chickens in the US.)
+- A March 2017 [situation report](http://www.oie.int/fileadmin/Home/eng/Animal_Health_in_the_World/docs/pdf/OIE_AI_situation_report/OIE_SituationReport__AI_3_28Mar2017.pdf) summarizes both poultry culled in an outbreak and poultry culled within a 2-week period by region. I believe dividing the number culled by the total number in the US (127,976/8.54 billion = 0.000015) represents Gulbudak and Martcheva's susceptible culling rate, $c$~s~. (USDA's[fact sheet](https://www.usda.gov/sites/default/files/documents/nass-poultry-stats-factsheet.pdf) gives the total number of chickens in the US.)
 
 
---A 2014 [press release](http://www.oie.int/for-the-media/press-releases/detail/article/questions-and-answers-on-high-pathogenic-h5n8-avian-influenza-strain-update-27112014/) gives the total number of chickens and ducks culled in Korea (629,800), Japan (112,000), Germany (1,731), the Netherlands (200,000), and the UK (6,000) in the H5N8 outbreak.
+- A 2014 [press release](http://www.oie.int/for-the-media/press-releases/detail/article/questions-and-answers-on-high-pathogenic-h5n8-avian-influenza-strain-update-27112014/) gives the total number of chickens and ducks culled in Korea (629,800), Japan (112,000), Germany (1,731), the Netherlands (200,000), and the UK (6,000) in the H5N8 outbreak.
 
 
---The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) suggests that culling be limited to the infected farm or a small radius around it (another idea for a modification to the model), and implies that countries which don't compensate affected farmers can see smaller reporting rates, lowering $\pi$.
+- The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) suggests that culling be limited to the infected farm or a small radius around it (another idea for a modification to the model), and implies that countries which don't compensate affected farmers can see smaller reporting rates, lowering $\pi$.
 
 FAO
 
