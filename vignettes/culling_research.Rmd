@@ -33,7 +33,7 @@ t-detect = 2-6 days `r citep('10.1186/1746-6148-7-59')`; 2, 5, or 21 days (https
 
 Other models have set surveillance zones in which $\pi$ is higher, and vary $\pi$ depending on where the initial infection occurs `r citep('10.1186/1746-6148-7-59')`, or included a base level of culling in their per capita mortality, rather than as a separate parameter `r citep('10.1137/100803110')`.
 
-However, this [paper](https://arxiv.org/pdf/1309.0248.pdf) is conceptually closest to the current experiment, as it only considers the effect of culling on avian influenza. The authors find a flaw in setting a culling threshold, that the intensity of culling does not respond to the intensity of infection, and so instead model culling as a function of the number of infected birds. In addition, they consider 2 culling rates, for susceptible versus infected birds. The paper considers 3 approaches.
+However, `r citep('10.1016/j.mbs.2013.09.001')` is conceptually closest to the current experiment, as it only considers the effect of culling on avian influenza. The authors find a flaw in setting a culling threshold, that the intensity of culling does not respond to the intensity of infection, and so instead model culling as a function of the number of infected birds. In addition, they consider 2 culling rates, for susceptible versus infected birds. The paper considers 3 approaches.
 
 - Mass culling: Culling increases with infections. This scenario leads to 1 global stable equilibrim for R~0~ > 1, where HPAI is endemic.
 
