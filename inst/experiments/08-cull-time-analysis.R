@@ -36,14 +36,14 @@ print(farm_number)
     I_crit = 1,     #threshold for reporting
     pi_report = 0.9, #reporting probability
     pi_detect = 0.9, #detection probability
-    cull_time = 1,   #time to detect
+    cull_time = 1,   #time to detect, which will be changed in this simulation
     network_type = "smallworld",
     network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
     stochastic_network = TRUE
     )
 
 
-cull_time_vector <- seq(0, 10, 0.5)
+cull_time_vector <- c(7, 365, 1095, 1825, 2555, 3285, 3650) #1 week; 1, 3, 5, 7, 9, 10 years
 
 results_list <- lapply(cull_time_vector, function(x){
   print(x)
@@ -62,15 +62,15 @@ saveRDS(results_list, "cull_time.rds")
 
 print("graphing infections")
 tot_i_list <- lapply(results_list, function(x) get_tot_infections_array(x))
-means <- sapply(tot_i_list, function(x) mean(x$total_i))
-infection_df <- data.frame(cull_time = seq(1, 5, 0.5), mean_infections = means)
+inf_means <- sapply(tot_i_list, function(x) mean(x$total_i))
+infection_df <- data.frame(cull_time = cull_time_vector, mean_infections = inf_means)
 ggplot(data = infection_df) + geom_point(aes(x = cull_time, y = mean_infections)) +
   labs(x = "days to culling", y = "mean number of infections")
 
 print("graphing duration")
 duration_list <- lapply(results_list, function(x) get_duration_array(x))
-means <- sapply(duration_list, function(x) mean(x$duration))
-duration_df <- data.frame(cull_time = seq(1, 5, 0.5), mean_durations = means)
+dmeans <- sapply(duration_list, function(x) mean(x$duration))
+duration_df <- data.frame(cull_time = cull_time_vector, mean_durations = dmeans)
 ggplot(data = duration_df) + geom_point(aes(x = cull_time, y = mean_durations)) +
   labs(x = "days to culling", y = "duration of epidemic")
 

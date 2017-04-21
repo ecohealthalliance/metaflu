@@ -14,81 +14,61 @@ keep_md: true
 library(knitcitations)
 cite_options(citation_format = 'pandoc')
 P <- rprojroot::find_rstudio_root_file
+#`#r citep('10.1371/journal.pone.0080091')` is the Hosseni paper, which is currently giving me a server error when I try to knit it
 ```
 
-A summary of the available research on poultry culling rates.
+#Summary
 
-###Time from detection to culling
+###Values for $\tau$, $\iota$, $\pi$
 
-The National Wildlife Health Center has [press releases](https://www.nwhc.usgs.gov/disease_information/avian_influenza/) about outbreaks of avian influenza. Its values for $t_c$-detect:
+$\tau$ = 1 (Hosseni paper) 
+$\iota$ = 5 (Hosseni)
+$\pi$ = 0.09 (Hosseni), 0.14 `r citep('10.1038/srep02175')`
+t-detect = 2-6 days `r citep('10.1186/1746-6148-7-59')`; 2, 5, or 21 days (https://www.nwhc.usgs.gov/disease_information/avian_influenza/);
+ 
+- $\pi$~Report~ and $\pi$~Detect~ have been combined into one value $\pi$ = probability of culling because some sources do not discriminate between the two.
 
-- 1 to 2 days in developed countries (Austria, Poland, Taiwan, US)
+  + Others only give one piece of the puzzle:`r citep('10.3201/eid1812.120616')`gives a rate of 0.46 to 0.69 for poultry surveillance ($\pi$-report) in the absence of vaccination efforts. (The reporting rate was about twice what it was when vaccination was ongoing, which the authors believe to be a result of the disproportionate trust in the benefits of vaccination.)
 
-- 4 to 6 days when testing is required: for instance, an Austrian zoo had to test a flock of endangered pelicans to confirm infection before euthanizing them
+- Some [reports](https://fas.org/sgp/crs/misc/R44114.pdf) indicate that the time taken to cull a flock is significant, although this delay may only be noticeable on large, industrial farms.
 
-- 6 to 21 days, if my interpretation of the site is correct (for example, the bulletin was dated 3/22, and said that the flock "will be" culled after an outbreak confirmed on 3/16). Assuming this means that the infection was detected before the first date and the flock has note yet been culled by the second, $t_c$-detect can be as high as 14 (Nepal) or 21 (Russia) days.
+### Varying culling parameters
 
-A [report](https://fas.org/sgp/crs/misc/R44114.pdf) on the 2014-2015 US outbreak gives 48 million chickens culled between 12/2014 and 6/2015. On page 14, it refers to producers' concerns that culling time was too high. This seems to suggest that the time to culling is 2-7 days and that the time taken to cull a flock is significant (perhaps only a consideration on large-scale farms).
+Other models have set surveillance zones in which $\pi$ is higher, and vary $\pi$ depending on where the initial infection occurs `r citep('10.1186/1746-6148-7-59')`, or included a base level of culling in their per capita mortality parameter `r citep('10.1137/100803110')`.
 
-### Varying the culling parameter
+However, this [paper](https://arxiv.org/pdf/1309.0248.pdf) is conceptually closest to the current experiment, as it only considers the effect of culling on avian influenza. The authors find a flaw in setting a culling threshold, that the intensity of culling does not respond to the intensity of infection, and so instead model culling as a function of the number of infected birds. In addition, they consider 2 culling rates, for susceptible versus infected birds. The paper considers 3 approaches.
 
-This [paper](https://arxiv.org/pdf/1309.0248.pdf) is conceptually closest to our experiment. The authors model culling as a function of the number of infected birds (with 2 variations depending on how widespread culling is) and find that small variations in the culling rate lead to large differences in the asymptotic level of disease (endemic levels). It offers a different lens, of seeding the model with small variations and graphing the difference in outcomes, with which to analyze the effect of culling.  
+--Mass culling: Culling increases with infections. This scenario leads to 1 global stable equilibrim for R~0~ > 1, where HPAI is endemic.
+
+--Modified culling: Culling increases with infections until a limited response is overwhelmed, when the per capita culling rate decreases (a strained public health system can't cull a large number of infected birds). This scenario leads to 3 endemic equilibria and forward hysteresis, where the initial number of infections (at the time of response) determines if HPAI will be endemic at high or low levels.
+
+--Selective culling: Same as the modified version, except that only infected birds are culled. (This models a scenario where farmers are reluctant to lose profits and only cull confirmed cases.) Although the authors acknowledge that this is an extreme version (they don't consider an exposed class that might reseed the infection), it illuminates the possibility of a backward bifurcation. There are 2 possible endemic equilibria for the system to reach depending on the value of $\beta$, the transmission rate.
+
+
+An experiment like this is implemented in 08-cull-time-analysis, which varied the cull time from 1 to 5 days by steps of 0.5. (Although there's now a bug in the code, which prevents me from running further analysis.) On this scale, there is not a bifurcation of the type described, but there is a dip at 2.5. I also attempted to graph variation on the scale of years, as shown in this paper, but have not yet found any nonlinear behavior.
+
 
 ### Other resources
 
-The OIE records poultry deaths due to avian influenza.
+OIE
 
-* A March 2017 [situation report](http://www.oie.int/fileadmin/Home/eng/Animal_Health_in_the_World/docs/pdf/OIE_AI_situation_report/OIE_SituationReport__AI_3_28Mar2017.pdf) has data on H5 and H7 outbreaks (page 3). It summarizes both poultry culled in an outbreak and poultry culled within a 2-week period by region.
+--A March 2017 [situation report](http://www.oie.int/fileadmin/Home/eng/Animal_Health_in_the_World/docs/pdf/OIE_AI_situation_report/OIE_SituationReport__AI_3_28Mar2017.pdf) summarizes both poultry culled in an outbreak and poultry culled within a 2-week period by region. I believe dividing the number culled by the total number in the US (127,976/8.54 billion = 0.000015) represents Gulbudak and Martcheva's susceptible culling rate, $c$~s~. (USDA's[fact sheet](https://www.usda.gov/sites/default/files/documents/nass-poultry-stats-factsheet.pdf) gives the total number of chickens in the US.)
 
-  + In the US, 127,956 chickens were culled in the most recent outbreak (H5N2 and H7N9). According to the USDA's [fact sheet](https://www.usda.gov/sites/default/files/documents/nass-poultry-stats-factsheet.pdf), there are 8.54 billion boiler chickens in the US, so the probability that a US chicken will be culled due to avian influenza is 0.000015.
 
-  + In Africa, 5,065 chickens were culled; in Asia and the Pacific, 2,469,469; in Europe, 3,055,768. I couldn't find individual countries' industry data, and as a result do not have a similar probability for these regions. (I'll try converting between metric tons of poultry and number of individual chickens.)
+--A 2014 [press release](http://www.oie.int/for-the-media/press-releases/detail/article/questions-and-answers-on-high-pathogenic-h5n8-avian-influenza-strain-update-27112014/) gives the total number of chickens and ducks culled in Korea (629,800), Japan (112,000), Germany (1,731), the Netherlands (200,000), and the UK (6,000) in the H5N8 outbreak.
 
-* A 2014 [press release](http://www.oie.int/for-the-media/press-releases/detail/article/questions-and-answers-on-high-pathogenic-h5n8-avian-influenza-strain-update-27112014/) looks at the H5N8 outbreak in detail. It gives the total number of chickens and ducks culled in Korea (629,800), Japan (112,000), Germany (1,731), the Netherlands (200,000), and the UK (6,000).
 
-* Article 10.4.29 of the [OIE's handbook](http://www.oie.int/index.php?id=169&L=0&htmfile=chapitre_avian_influenza_viruses.htm) gives guidelines for surveillance, namely that $\pi$-detect should be 1.
+--The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) suggests that culling be limited to the infected farm or a small radius around it (another idea for a modification to the model), and implies that countries which don't compensate affected farmers can see smaller reporting rates, lowering $\pi$.
 
-* The site on [control](http://www.oie.int/en/animal-health-in-the-world/web-portal-on-avian-influenza/early-detection-warning-diagnostic-confirmation/) suggests that culling be limited to the infected farm or a small radius around it (perhaps an idea for a modification to the model), and implies that countries which don't compensate affected farmers can see smaller reporting rates.
-
-The FAO has less poultry-specific data, but offer guidelines for response.
-
-- The FAO's [manual](http://www.fao.org/3/a-a1521e.pdf) shows that  >230 million chickens worldwide have died due to flu since 2003, but this number seems to represent mortality due to avian influenza, not deaths due to culling (as some  have cited it).
-
-- Their [FAQs](http://www.fao.org/avianflu/en/qanda.html) suggest that farmers should always report deaths (making $\pi$-report = 1), but do not give rates of compliance.
+FAO
 
 - Opportunity for questions: what is the total number of poultry culled due to avian influenza? What is a country's rate of reporting?
 
-###From Paperpile
-Hosseini's model `r citep('10.1371/journal.pone.0080091')` gives base values for number of dead birds in a given period ($\tau$ = 1), a threshold value ($\iota$ = 5), and a probability of reporting and detecting ($\pi$~Report~ = 0.1, $\pi$~Detect~ = 0.9).
-
-- Total probability of culling = $\pi$~Report~ * $\pi$~Detect~ = 0.09
-
-Pandit's model `r citep('10.1038/srep02175')` uses a culling probability of 1/7 due to assumption that infected poultry were either culled or dead within 7 days of the infection. 
-
-Dent's model `r citep('10.1186/1746-6148-7-59')` sets a culling parameter for each simulation (see Table 1) depending on whether the farm with the initial infection is in a surveillance zone or not.
-
-- This approach allows them to calculate a time to detection of 2 to 6 days 
-
-There is some data available: Additional File 1 in `r citep('10.1186/1476-072X-8-47')` gives the number of poultry influenza cases and number of poultry culled per country.
-
-Loth et al. `r citep('10.1016/j.prevetmed.2010.05.013')` give data regarding AI in Bangladesh: 1.6 million poultry have been culled out of 220 million total (0.73%).
-
-Bridges' paper `r citep('10.1086/340044')` uses the culling event after the 1997 Hong Kong epidemic to show that workers occupationally exposed to poultry are at higher risk of flu, but has no hard data about the poultry culled.
-
-To contrast with our approach, Bourouiba's model `r citep('10.1137/100803110')` includes culling in its per capita mortality parameter, not as a separate event.
-
-###From the literature
-
-This paper `r citep('10.3201/eid1812.120616')` on the relationship between vaccination and reporting gives a rate of 0.46 to 0.69 for poultry surveillance ($\pi$-report) in the absence of vaccination efforts. (The reporting rate was about twice what it was when vaccination was ongoing, which the authors believe to be a result of the disproportionate trust in the benefits of vaccination.)
 
 EHA has indentified the lack of wild bird surveillance strategies `r citep('10.3201/eid2104.141415')` as an obstacle to understanding the virus, but this paper was limited to wild birds, not poultry.
 
-- A reference `r citep('10.3201/eid1612.100589')` suggests surveillance improvements such as sampling according to age-dependent, temporal, or spatial patterns, sampling different sites of infection, and screening for multiple strains at once; however, this paper also considers only wild birds.
-
-#Summary 
-The time from detection to culling can range from 1-7 days in the US to 14-21 in developing countries, and so varying $t_c$-detect from 1 to 21 will cover most possibilities. In addition, `r citep('10.3201/eid1812.120616')` gives a range of 0.46 to 0.69 for the probability that Egyptian farmers will report suspected cases ($\pi$-report) in the absence of vaccination efforts. 
-
-Poultry producers have complained about the time culling takes, which may be proportional to the number of chickens and thus only an issue with larger farms. The effect of a long culling time may be worth investigating for industrial farms with tens of thousands of birds. 
+- A reference to this paper suggests surveillance improvements such as sampling according to age-dependent, temporal, or spatial patterns, sampling different sites of infection, and screening for multiple strains at once; however, this paper also considers only wild birds `r citep('10.3201/eid1612.100589')`. 
+ 
 
 
 ```{r, include=FALSE}
