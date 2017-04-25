@@ -1,0 +1,271 @@
+---
+title: "Growth Scenario - One Initial Infection Seeded, Non-Linear Contact Rate, Clustered Intensification, Paired Networks"
+author: "Cale Basaraba"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
+library(metaflu)
+library(ggplot2)
+library(dplyr)
+library(doMC)
+library(tidyr)
+library(purrr)
+library(gridExtra)
+library(abind)
+#registerDoMC(cores = 20)
+#devtools::install_github("renozao/doRNG", force = TRUE)
+library(doRNG)
+library(igraph)
+library(threejs)
+set.seed(123)
+library(ggraph)
+library(gganimate)
+library(ggforce)
+P <- rprojroot::find_package_root_file
+```
+
+
+### Introduction
+
+The following document explores some 3D and 2D methods of visualizing networks.
+
+
+```{r network-setup}
+#Set number of farms and ~ number of chickens per farm
+farm_number <- 100
+farm_size <- 40
+
+```
+
+
+```{r parameter-setup}
+  parms = list(
+    beta = 1.44456,   #contact rate for direct transmission
+    gamma = 0.167,  #recovery rate
+    mu = 0,         #base mortality rate
+    alpha = 0.4,      #disease mortality rate
+    phi = 0,  #infectiousness of environmental virions
+    eta = 0,     #degradation rate of environmental virions
+    nu =  0.00,    #uptake rate of environmental virion
+    sigma = 0,      #virion shedding rate
+    omega = 0.03,   #movement rate
+    rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+    lambda = 0,     #force of infection from external sources
+    tau_crit = 5,   #critical suveillance time
+    I_crit = 1,     #threshold for reporting
+    pi_report = 0.1, #reporting probability
+    pi_detect = 0.9, #detection probability
+    cull_time = 1,   #time to detect
+    network_type = "smallworld",
+    network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+    stochastic_network = TRUE
+    )
+```
+
+
+```{r growth-run}
+#Grow an adjacent set of patches to get double total chicken population
+
+sims <- 10
+  g_list <- parallel::mclapply(seq_len(sims), function(y){
+    patches <- grow_patches_clustered(basic_patches(40,100))
+    i_patches <- seed_initial_infection(patches)
+    result <- mf_sim(init = i_patches, parameters = parms, times=1:365, n_sims = 1)
+    return(result)
+  }, mc.cores = 4)
+
+g_results <- do.call("abind", g_list)
+
+```
+
+###Parameters
+
+The parameters for these runs:
+
+`r farm_size` chickens
+
+`r farm_number` farms
+
+`r sims` simulations per parameter set.
+
+$\beta$ = `r parms["beta"]` -- Contact rate
+
+$\gamma$ = `r parms["gamma"]` -- Recovery rate
+
+$\mu$ = `r parms["mu"]` -- Base mortality rate
+
+$\alpha$ = `r parms["alpha"]` -- Disease mortality rate
+
+$\phi$ = `r parms["phi"]` -- Infectiousness of environmental virions
+
+$\eta$ = `r parms["eta"]` -- Degradation of environmental virions
+
+$\nu$ = `r parms["nu"]` -- Update rate of environmental virions
+
+$\sigma$ = `r parms["sigma"]` -- Virion shedding rate
+
+$\omega$ = `r parms["omega"]` -- Inter-patch movement rate
+
+$\rho$ = `r parms["rho"]` -- Contact non-linearity parameter
+
+$\lambda$ = `r parms["lambda"]` -- External force of infection
+
+$\tau$-crit = `r parms["tau_crit"]` -- Critical surveillance time
+
+$I$-crit = `r parms["I_crit"]` -- Threshold for reporting
+
+$\pi$-report = `r parms["pi_report"]` -- Reporting probability
+
+$\pi$-detect = `r parms["pi_detect"]` -- Detection probability
+
+$t_c$-detect = `r parms["cull_time"]` -- Mean Time in Days until Culling
+
+
+### Growth Run
+
+Eleven percent of farms have grown in size by an order of magnititude, resulting in the doubling of total chicken population in the system. This intensification occurs in the same region.
+
+
+```{r 3d-animation}
+
+create_graphjs <- function(sim, num){
+  net_adj <- attr(sim, "network")$`1`
+  net <- graph_from_adjacency_matrix(net_adj > 0)
+  graph_layout <- layout_nicely(net,3)  
+    graph <- lapply(seq_len(dim(sim)[3]), function(x){
+      S <- sim["S",,x,1]
+      I <- sim["I",,x,1]
+      C <- sim["C",,x,1]
+      net <- graph_from_adjacency_matrix(net_adj > 0)
+      V(net)$size <- log2(S)
+      V(net)$color <- "grey"
+      inf <- which(I > 0)
+      cul <- which(C > 1)
+      V(net)[inf]$color <- "red"
+      V(net)[cul]$color <- "blue"
+      return(net)
+  })
+  graphjs(graph, main = paste("Simulation:", num, "Day ",1:365), fpl = 60, layout = graph_layout)
+}
+
+create_graphjs(g_list[[2]],2)
+
+
+```
+
+```{r 2d-animation}
+
+
+create_gif <- function(list_el, fname){
+
+simulation <- list_el[,,,1]
+
+sim_net <- attr(list_el, "network")$`1`
+
+sim_df <- plyr::adply(simulation, c(1,2,3)) %>%
+  rename(compartment = X1, patch = X2, time = X3, population = V1) %>%
+  spread(compartment, population)
+
+
+raw_net <- graph_from_adjacency_matrix(sim_net > 0, "undirected")
+
+layout <- layout_with_graphopt(raw_net) %>% as.data.frame() %>% rename(x=V1, y=V2)
+
+sim1 <- sim_df %>% 
+  group_by(time) %>% 
+  mutate(x = as.numeric(layout$x), y = as.numeric(layout$y)) %>% 
+  group_by()
+
+sim1 <- sim1 %>%
+  group_by(patch,time) %>%
+  mutate(status = if_else(I > 0, "infected", if_else(C > 1, "culled", "normal")))
+
+original_s <- sim1 %>%
+  filter(time == 1) %>%
+  select(patch, original_S = S, blargo = time)
+
+sim1 <- left_join(sim1, original_s, by = "patch") %>%
+  select(-blargo)
+
+sim_end = filter(sim1, time==1) # A single time point for use for background
+
+cols <- c("normal" = "black", "infected" = "red", "culled" = "blue")
+
+plot <- ggraph(raw_net, 'manual', node.positions=layout) + 
+  geom_edge_arc(curvature = 0.1, edge_colour='grey40') +
+  geom_node_point(data=sim_end, mapping=aes(x=x, y=y), #white bg for the nodes
+                  shape=21, size=5, stroke=1,          #to hide the edges beind
+                  color="white", fill="white") +       #them
+  geom_node_point(data=sim1,
+                  mapping=aes(x=x, y=y, fill= status, alpha=(S/original_S)*100, frame=time, size = original_S),
+                  shape=21, stroke=1, color="grey10") + 
+  scale_fill_manual(values = cols) +
+  scale_alpha_continuous(range=c(0.5,1)) +
+  scale_size_continuous(range=c(3,12)) +
+  ggforce::theme_no_axes() +
+  theme(legend.position="none",
+        panel.border = element_blank())
+
+animation::ani.options(interval=1.0)
+gganimate(plot, paste0(fname,'.gif'), title_frame = FALSE)
+}
+
+create_gif(g_list[[2]], "sim2")
+
+```
+
+![Simulation 2.](`r P("inst","experiments","sim2.gif")`)
+
+
+```{r assign-variables}
+
+
+s.df <- get_all_sims("S", g_results)
+i.df <- get_all_sims("I", g_results)
+r.df <- get_all_sims("R", g_results)
+
+gdurations <- get_duration_array(g_results)
+
+gfarm_no <- get_number_farms(g_results)
+
+gtot_i <- get_tot_infections_array(g_results)
+
+```
+
+```{r plots-growth, message = FALSE}
+l <- length(gtot_i$total_i)
+
+sir.df <- ggplot() +
+  geom_line(data = s.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "blue") +
+  geom_line(data = i.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "red") +
+  geom_line(data = r.df, aes(x = time, y = pop, group = sim), alpha = 0.05, color = "green") +
+  labs(title = paste0("Results from ", l," Simulations"), x = "Time", y = "Population") +
+  scale_colour_manual(name = "Compartment", values=c(S = "blue", I = "red", R = "green")) +
+  theme_minimal()
+
+gtotal_i <- ggplot() +
+  geom_histogram(data = gtot_i, aes(x = total_i), bins = 100) +
+  labs(title = "Infections", x = "Infections", y = "Number of Simulations") +
+  theme_minimal()
+
+gfarm_numbers <- ggplot() +
+  geom_histogram(aes(x = gfarm_no), bins = 100) +
+  labs(title = "Farm Spread", x = "Farms Infected", y = "Number of Simulations") +
+  coord_flip() +
+  theme_minimal()
+
+gduration <- ggplot() +
+  geom_histogram(data = gdurations, aes(x = duration), bins = 100) +
+  theme_minimal() +
+  labs(title = "Duration of Epidemic", x = "Duration in Days", y = "Number of Simulations")
+
+lay <- rbind(c(1,1,1,4),
+             c(1,1,1,4),
+             c(2,2,3,3))
+
+grid.arrange(sir.df,gtotal_i,gduration,gfarm_numbers, layout_matrix = lay)
+
+```
