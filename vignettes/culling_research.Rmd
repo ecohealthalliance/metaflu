@@ -65,6 +65,12 @@ FAO
 EHA has indentified the lack of wild bird surveillance strategies `r citep('10.3201/eid2104.141415')` as an obstacle to understanding the virus, but this paper was limited to wild birds, not poultry.
 
 - A reference to this paper suggests surveillance improvements such as sampling according to age-dependent, temporal, or spatial patterns, sampling different sites of infection, and screening for multiple strains at once; however, this paper also considers only wild birds `r citep('10.3201/eid1612.100589')`. 
+
+# Future research
+
+--How alertness vs not alertness (vaccination, culling) changes outcome
+
+--Graphs on day scale
  
 
 
