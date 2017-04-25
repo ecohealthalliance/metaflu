@@ -1,12 +1,4 @@
----
-title: "Changing the time to culling in a growth scenario"
-author: "Cale Basaraba & Kate Royce"
-output: html_document
----
 
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
 library(metaflu)
 library(ggplot2)
 library(dplyr)
@@ -16,71 +8,15 @@ library(purrr)
 library(gridExtra)
 library(abind)
 registerDoMC(cores = 20)
-devtools::install_github("renozao/doRNG", force = TRUE)
+#devtools::install_github("renozao/doRNG", force = TRUE)
+library(doRNG)
 set.seed(123)
-```
 
-
-### Introduction
-
-The following simulation includes the following scenario options:
-
-- Non-linear Contact Rate ($\rho, \beta$)
-
-- Clustered Intensification in Growth Scenario
-
-- Paired Networks: Initial / Growth Scenarios have same set of stochastic networks
-
-- Poisson distribution with 40 as mean number of chickens per farm
-
-- 100 Farms
-
-- One initial seeded infection
-
-
-```{r network-setup}
 #Set number of farms and ~ number of chickens per farm
 farm_number <- 100
 farm_size <- 40
 
-```
-
-#### Parameters
-
-$\beta$ = 1.4456 -- Contact rate implemented alongside $\rho$
-
-$\gamma$ = 0.167 -- Recovery rate
-
-$\mu$ = 0.0 -- Base mortality rate
-
-$\alpha$ = 0.4 -- Disease mortality rate
-
-$\phi$ = 0.0 -- Infectiousness of environmental virions
-
-$\eta$ = 0.0 -- Degradation of environmental virions
-
-$\nu$ = 0.0 -- Update rate of environmental virions
-
-$\sigma$ = 0.0 -- Virion shedding rate
-
-$\omega$ = 0.03 -- Inter-patch movement rate
-
-$\rho$ = 0.8526 -- Contact non-linearity parameter
-
-$\lambda$ = 0.0 -- External force of infection
-
-$\tau$-crit = 0.0 -- Critical surveillance time
-
-$I$-crit = 0.0 -- Threshold for reporting
-
-$\pi$-report = 0.0 -- Reporting probability
-
-$\pi$-detect = 0.0 -- Detection probability
-
-t-detect = variable -- Time to culling
-
-```{r parameter-setup}
-  parms = list(
+parms = list(
     beta = 1.44456,   #contact rate for direct transmission
     gamma = 0.167,  #recovery rate
     mu = 0,         #base mortality rate
@@ -94,28 +30,21 @@ t-detect = variable -- Time to culling
     lambda = 0,     #force of infection from external sources
     tau_crit = 5,   #critical suveillance time
     I_crit = 1,     #threshold for reporting
-    pi_report = 0.9, #reporting probability
-    pi_detect = 0.9, #detection probability
-    cull_time = 0,   #time to detect (changed in this experiment)
+    pi_report = 1, #reporting probability
+    pi_detect = 1, #detection probability (1 for cleanliness)
+    cull_time = 1,   #time to detect, which will be changed in this simulation
     network_type = "smallworld",
     network_parms = list(dim = 1, size = farm_number, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
     stochastic_network = TRUE
     )
-```
 
-
-### Varying culling parameters
-
-In this experiment, the mean number of infections and the duration of the epidemic are plotted against t-detect, which varies as [1,5,10,20,30,40,50].
-
-
-```{r vary-tdetect}
 
 cull_time_vector <- c(1:20)
 
 results_list <- lapply(cull_time_vector, function(x){
+  print(x)
   parms["cull_time"] <- x
-  sims <- 100
+  sims <- 1000
   g_list <- mclapply(seq_len(sims), function(y){
     patches <- grow_patches_clustered(basic_patches(40,100))
     i_patches <- seed_initial_infection(patches)
@@ -124,38 +53,31 @@ results_list <- lapply(cull_time_vector, function(x){
 
   return(do.call("abind", g_list))
 })
-```
 
-This plot shows the total number of infections (representing the severity of the outbreak) for each value of t-detect.
 
-```{r infections-plot}
+#saveRDS(results_list, "cull_time.rds", compress = FALSE)
+#delete before committing, as this is a lot of space
+
+#print("graphing infections")
 tot_i_list <- lapply(results_list, function(x) get_tot_infections_array(x))
-means <- sapply(tot_i_list, function(x) mean(x$total_i))
-infection_df <- data.frame(cull_time_vector, mean_infections = means)
-ggplot(data = infection_df) + geom_point(aes(x = cull_time_vector, y = mean_infections)) +
-  labs(x = "days to culling", y = "mean number of infections")
-```
+inf_means <- sapply(tot_i_list, function(x) mean(x$total_i))
+infection_df <- data.frame(cull_time = cull_time_vector, mean_infections = inf_means)
+ggplot(data = infection_df) + geom_point(aes(x = cull_time, y = mean_infections)) +
+  labs(x = "days to culling", y = "mean number of infections") + scale_y_log10() + scale_x_log10()
 
-This graph shows the proportion of outbreaks that spread to more than 1 farm for each value of t-detect.
-
-```{r outbreak-proportion}
+#get oubreak proportions
 farm_num <- lapply(results_list, function(x) get_number_farms(x))
 
 outbreak_list <- unlist(lapply(farm_num, function(x){
   return(sum(x > 1)/length(x))
 }))
 
-outbreak_df <- data.frame(cull_time_vector, outbreak_list)
-outbreaks <- ggplot(data = outbreak_df) +
-  geom_point(aes(x = cull_time_vector, y = outbreak_list)) +
-  labs(x = "days to culling", y = "proportion of large outbreaks")
-plot(outbreaks)
-```
+outbreak_df <- data.frame(cull_time = cull_time_vector, props = outbreak_list)
+ggplot(data = outbreak_df) + geom_point(aes(x = cull_time, y = props)) +
+  labs(x = "days to culling", y = "proportion of outbreaks >1 farm") +
+  scale_x_log10() + scale_y_log10()
 
-These graphs show the runs of each simulation for the different values of t-detect. (Change makegraphs to 1 to see the graphs. I'm trying to combine them into 1 so that a unique panel doesn't print out for each value of t-detect.)
-```{r aggregate-plot}
-
-makegraphs <- 0 #toggle to 1 to show graphs
+makegraphs <- 0 #currently set so that the next block, which creates summarizing graphs for each paragraph, won't run. Set to 1 to see these graphs.
 
 create_graph_panel <- function(result_array, value){
 
@@ -203,9 +125,5 @@ create_graph_panel <- function(result_array, value){
 }
 
 if (makegraphs > 0){
-graph_panel <- purrr::map2(results_list,cull_time_vector, function(x,y) create_graph_panel(x,y))
+  graph_panel <- purrr::map2(results_list,cull_time_vector, function(x,y) create_graph_panel(x,y))
 }
-
-```
-
-
