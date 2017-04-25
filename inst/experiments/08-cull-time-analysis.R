@@ -12,15 +12,11 @@ registerDoMC(cores = 20)
 library(doRNG)
 set.seed(123)
 
-
-
-
-
 #Set number of farms and ~ number of chickens per farm
 farm_number <- 100
 farm_size <- 40
-print(farm_number)
-  parms = list(
+
+parms = list(
     beta = 1.44456,   #contact rate for direct transmission
     gamma = 0.167,  #recovery rate
     mu = 0,         #base mortality rate
@@ -43,12 +39,12 @@ print(farm_number)
     )
 
 
-cull_time_vector <- c(1,5,10,20,30,40,50)
+cull_time_vector <- c(1:20)
 
 results_list <- lapply(cull_time_vector, function(x){
   print(x)
   parms["cull_time"] <- x
-  sims <- 100
+  sims <- 1000
   g_list <- mclapply(seq_len(sims), function(y){
     patches <- grow_patches_clustered(basic_patches(40,100))
     i_patches <- seed_initial_infection(patches)
@@ -58,7 +54,8 @@ results_list <- lapply(cull_time_vector, function(x){
   return(do.call("abind", g_list))
 })
 
-saveRDS(results_list, "cull_time.rds", compress = FALSE)
+
+#saveRDS(results_list, "cull_time.rds", compress = FALSE)
 #delete before committing, as this is a lot of space
 
 #print("graphing infections")
@@ -66,20 +63,7 @@ tot_i_list <- lapply(results_list, function(x) get_tot_infections_array(x))
 inf_means <- sapply(tot_i_list, function(x) mean(x$total_i))
 infection_df <- data.frame(cull_time = cull_time_vector, mean_infections = inf_means)
 ggplot(data = infection_df) + geom_point(aes(x = cull_time, y = mean_infections)) +
-  labs(x = "days to culling", y = "mean number of infections")
-
-#more simulations
-#plot graphs like Cale's for 1 run
-#on a log scale--culling vs infections (this will help with extension too (40-50 days))
-#output: fraction of successful outbreaks
-#Sample graphs (like Cale's) aggressive vs nonaggressive culling
-
-#print("graphing duration")
-duration_list <- lapply(results_list, function(x) get_duration_array(x))
-dmeans <- sapply(duration_list, function(x) mean(x$duration))
-duration_df <- data.frame(cull_time = cull_time_vector, mean_durations = dmeans)
-ggplot(data = duration_df) + geom_point(aes(x = cull_time, y = mean_durations)) +
-  labs(x = "days to culling", y = "duration of epidemic")
+  labs(x = "days to culling", y = "mean number of infections") + scale_y_log10() + scale_x_log10()
 
 #get oubreak proportions
 farm_num <- lapply(results_list, function(x) get_number_farms(x))
@@ -88,7 +72,12 @@ outbreak_list <- unlist(lapply(farm_num, function(x){
   return(sum(x > 1)/length(x))
 }))
 
-#make nice graphs
+outbreak_df <- data.frame(cull_time = cull_time_vector, props = outbreak_list)
+ggplot(data = outbreak_df) + geom_point(aes(x = cull_time, y = props)) +
+  labs(x = "days to culling", y = "proportion of outbreaks >1 farm") +
+  scale_x_log10() + scale_y_log10()
+
+makegraphs <- 0 #currently set so that the next block, which creates summarizing graphs for each paragraph, won't run. Set to 1 to see these graphs.
 
 create_graph_panel <- function(result_array, value){
 
@@ -135,4 +124,6 @@ create_graph_panel <- function(result_array, value){
 
 }
 
-graph_panel <- purrr::map2(results_list,cull_time_vector, function(x,y) create_graph_panel(x,y))
+if (makegraphs > 0){
+  graph_panel <- purrr::map2(results_list,cull_time_vector, function(x,y) create_graph_panel(x,y))
+}

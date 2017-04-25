@@ -111,10 +111,9 @@ In this experiment, the mean number of infections and the duration of the epidem
 
 ```{r vary-tdetect}
 
-cull_time_vector <- c(1,5,10,20,30,40,50)
+cull_time_vector <- c(1:20)
 
 results_list <- lapply(cull_time_vector, function(x){
-  print(x)
   parms["cull_time"] <- x
   sims <- 100
   g_list <- mclapply(seq_len(sims), function(y){
@@ -153,8 +152,10 @@ outbreaks <- ggplot(data = outbreak_df) +
 plot(outbreaks)
 ```
 
-These graphs show the runs of each simulation for the different values of t-detect.
+These graphs show the runs of each simulation for the different values of t-detect. (Change makegraphs to 1 to see the graphs. I'm trying to combine them into 1 so that a unique panel doesn't print out for each value of t-detect.)
 ```{r aggregate-plot}
+
+makegraphs <- 0 #toggle to 1 to show graphs
 
 create_graph_panel <- function(result_array, value){
 
@@ -201,7 +202,9 @@ create_graph_panel <- function(result_array, value){
 
 }
 
+if (makegraphs > 0){
 graph_panel <- purrr::map2(results_list,cull_time_vector, function(x,y) create_graph_panel(x,y))
+}
 
 ```
 
