@@ -141,6 +141,16 @@ get_tot_infections_array <- function(results){
 }
 
 #' @export
+get_exposure <- function(results){
+  infections <- apply(results,4,function(x){
+    i <- x["I",,]
+    return(sum(colSums(i)))
+  })
+  df <- data.frame(sim = seq_along(infections), inf_exp = infections)
+  return(df)
+}
+
+#' @export
 get_tot_infections <- function(results){
   tot_infections <- results %>%
     filter(class == "S") %>%
@@ -150,7 +160,6 @@ get_tot_infections <- function(results){
     summarize(total_i = max(tots) - min(tots))
   return(tot_infections)
 }
-
 
 #' @export
 get_all_sims <- function(compartment, results){
