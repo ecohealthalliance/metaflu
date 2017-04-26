@@ -79,6 +79,8 @@ sims <- 10
 
 g_results <- do.call("abind", g_list)
 
+durations <- get_duration_array(g_results)
+
 ```
 
 ###Parameters
@@ -134,8 +136,9 @@ Eleven percent of farms have grown in size by an order of magnititude, resulting
 create_graphjs <- function(sim, num){
   net_adj <- attr(sim, "network")$`1`
   net <- graph_from_adjacency_matrix(net_adj > 0)
-  graph_layout <- layout_nicely(net,3)  
-    graph <- lapply(seq_len(dim(sim)[3]), function(x){
+  graph_layout <- layout_nicely(net,3) 
+  sim_dur <- get_duration_array(sim)$duration
+    graph <- lapply(seq_len(sim_dur + 1), function(x){
       S <- sim["S",,x,1]
       I <- sim["I",,x,1]
       C <- sim["C",,x,1]
@@ -156,12 +159,19 @@ create_graphjs(g_list[[2]],2)
 
 ```
 
-```{r 2d-animation}
+```{r second-3d}
+create_graphjs(g_list[[10]],10)
 
+```
+
+
+```{r 2d-animation, message = FALSE}
 
 create_gif <- function(list_el, fname){
 
-simulation <- list_el[,,,1]
+sim_dur <- get_duration_array(list_el)$duration  
+  
+simulation <- list_el[,,1:(sim_dur+1),1]
 
 sim_net <- attr(list_el, "network")$`1`
 
@@ -196,8 +206,8 @@ cols <- c("normal" = "black", "infected" = "red", "culled" = "blue")
 
 plot <- ggraph(raw_net, 'manual', node.positions=layout) + 
   geom_edge_arc(curvature = 0.1, edge_colour='grey40') +
-  geom_node_point(data=sim_end, mapping=aes(x=x, y=y), #white bg for the nodes
-                  shape=21, size=5, stroke=1,          #to hide the edges beind
+  geom_node_point(data=sim_end, mapping=aes(x=x, y=y,size=original_S), #white bg for the nodes
+                  shape=21, stroke=1,          #to hide the edges beind
                   color="white", fill="white") +       #them
   geom_node_point(data=sim1,
                   mapping=aes(x=x, y=y, fill= status, alpha=(S/original_S)*100, frame=time, size = original_S),
@@ -215,9 +225,17 @@ gganimate(plot, paste0(fname,'.gif'), title_frame = FALSE)
 
 create_gif(g_list[[2]], "sim2")
 
+create_gif(g_list[[10]], "sim10")
+
 ```
 
+####Simulation 2
+
 ![Simulation 2.](`r P("inst","experiments","sim2.gif")`)
+
+####Simulation 10
+
+![Simulation 10.](`r P("inst","experiments","sim10.gif")`)
 
 
 ```{r assign-variables}
