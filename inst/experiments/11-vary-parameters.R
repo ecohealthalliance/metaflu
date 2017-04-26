@@ -6,7 +6,6 @@ library(tidyr)
 library(purrr)
 library(gridExtra)
 library(abind)
-registerDoMC(cores = 20)
 #devtools::install_github("renozao/doRNG", force = TRUE)
 library(doRNG)
 set.seed(123)
@@ -17,13 +16,13 @@ vary_params <- function(param_value, param_vector){
 
   #create list of results for varying the given parameter
   results_list <- lapply(param_vector, function(x){
-    parms[param_value] <- x
+    parms[[param_value]] <- x
     sims <- 1000
-    g_list <- mclapply(seq_len(sims), function(y){
+    g_list <- lapply(seq_len(sims), function(y){
       patches <- grow_patches_clustered(basic_patches(40,100))
       i_patches <- seed_initial_infection(patches)
       return(mf_sim(init = i_patches, parameters = parms, times=1:365, n_sims = 1))
-    }, mc.cores = 20 )
+    })
 
     return(do.call("abind", g_list))
   })
@@ -82,14 +81,14 @@ farm_size <- 50
 
 #vary culling time
 cull_time_vector <- c(1:5)
-cull_time_results <- vary_params("cull-time", cull_time_vector)
+cull_time_results <- vary_params("cull_time", cull_time_vector)
 print(cull_time) #to check if it resets to 1
 
 break
 
 #vary reporting/detection probability
 prob_vector <- seq(0.1,1,0.1)
-prob_results <- vary_params("pi-report", prob_vector) #pi-detect is set to 1, so there's only 1 real probability
+prob_results <- vary_params("pi_report", prob_vector) #pi-detect is set to 1, so there's only 1 real probability
 
 #vary movement rate
 rate_vector <- seq(0.01,0.1, 0.01)
