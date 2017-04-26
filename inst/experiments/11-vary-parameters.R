@@ -13,7 +13,7 @@ set.seed(123)
 #Function to apply multiple values of a parameter
 #inputs: parameter name, vector of parameter values
 vary_params <- function(param_value, param_vector){
-
+  print("in vary_params")
   #create list of results for varying the given parameter
   results_list <- lapply(param_vector, function(x){
     parms[[param_value]] <- x
@@ -26,15 +26,23 @@ vary_params <- function(param_value, param_vector){
 
     return(do.call("abind", g_list))
   })
-
+  #print("savingRDS")
+  #saveRDS(results_list, "vary_params_small.rds")
+  #print("loadingRDS")
+  #results_list <- readRDS("vary_params_small.rds")
   #graph the duration of the outbreak for each param value
-  dlist <- lapply(results_list, function(x) get_duration_array(x))
+
+  dlist <- lapply(seq_along(results_list), function(x){
+    #print(x)
+    #print(paste("cull-time =",cull_time_vector[x]))
+    return(get_duration_array(results_list[[x]]))
+  })
   dmeans <- sapply(dlist, function(x) mean(x$duration))
   duration_df <- data.frame(values = param_vector, mean_durations = dmeans)
-  ggplot(data = duration_df) + geom_point(aes(x = values, y = mean_durations)) +
+  duration <- ggplot(data = duration_df) + geom_point(aes(x = values, y = mean_durations)) +
     labs(x = "parameter values", y = "mean duration") + theme_classic()
   #+ scale_y_log10() + scale_x_log10()
-
+  plot(duration)
   #graph severity of outbreak for each param value
   farm_num <- lapply(results_list, function(x) get_number_farms(x))
 
@@ -43,9 +51,9 @@ vary_params <- function(param_value, param_vector){
   }))
 
   outbreak_df <- data.frame(values = param_vector, props = outbreak_list)
-  ggplot(data = outbreak_df) + geom_point(aes(x = values, y = props)) +
+  outbreak <- ggplot(data = outbreak_df) + geom_point(aes(x = values, y = props)) +
     labs(x = "parameter", y = "proportion of outbreaks >1 farm")
-
+  plot(outbreak)
   #unclutter environment
   rm(results_list)
 }
@@ -80,11 +88,10 @@ parms = list(
 farm_size <- 50
 
 #vary culling time
-cull_time_vector <- c(1:5)
+cull_time_vector <- c(1)
 cull_time_results <- vary_params("cull_time", cull_time_vector)
-print(cull_time) #to check if it resets to 1
+#print(cull_time_vector) #to check if it resets to 1
 
-break
 
 #vary reporting/detection probability
 prob_vector <- seq(0.1,1,0.1)
@@ -93,5 +100,34 @@ prob_results <- vary_params("pi_report", prob_vector) #pi-detect is set to 1, so
 #vary movement rate
 rate_vector <- seq(0.01,0.1, 0.01)
 rate_results <- vary_params("omega", rate_vector)
+
+
+
+
+
+
+
+
+
+sims <- seq_len(dim(results)[4])
+durations <- lapply(sims, function(x) {
+  infections <- results["I", , , x]    #gets matrix of patches by times
+  i_by_time <- colSums(infections)       #gets total infections by time
+  zero_i_col <- min(which(i_by_time == 0)) #gets first column there are zero infections
+  duration <- as.numeric(attr(i_by_time, "names")[zero_i_col])
+  return(duration - 1)
+})
+return(data.frame(sim = sims, duration = unlist(durations)))
+
+
+
+
+
+
+
+
+
+
+
 
 
