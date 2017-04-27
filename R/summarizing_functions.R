@@ -73,15 +73,16 @@ proportion_failed <- function(failure_results){
 }
 
 #' @export
-get_tot_infections_array <- function(results){
+get_proportion_loss <- function(results){
   sims <- seq_len(dim(results)[4])
-  tot_i <- sapply(sims, function(x){
+  loss <- sapply(sims, function(x){
     s <- results["S",,,x]
     s_by_t <- colSums(s)
     total_i <- max(s_by_t) - min(s_by_t)
-    return(total_i)
+    prop_loss <- total_i/max(s_by_t)
+    return(prop_loss)
   })
-  df <- data.frame(sim = sims, total_i = tot_i)
+  df <- data.frame(sim = sims, total_i = loss)
   return(df)
 }
 
