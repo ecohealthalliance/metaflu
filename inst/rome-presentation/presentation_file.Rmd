@@ -9,6 +9,7 @@ library(metaflu)
 library(ggplot2)
 library(dplyr)
 library(doMC)
+library(foreach)
 library(tidyr)
 library(purrr)
 library(gridExtra)
@@ -24,7 +25,6 @@ P <- rprojroot::find_package_root_file
 ### Basic Run No Culling
 
 ```{r basic-run}
-registerDoMC(cores = 20)
 number_of_farms <- 200
 number_of_chickens <- 50
 
@@ -40,47 +40,103 @@ number_of_chickens <- 50
     omega = 0.03,   #movement rate
     rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
     lambda = 0,     #force of infection from external sources
-    tau_crit = 0,   #critical suveillance time
-    I_crit = 0,     #threshold for reporting
+    tau_crit = 5,   #critical suveillance time
+    I_crit = 5,     #threshold for reporting
     pi_report = 0, #reporting probability
     pi_detect = 0, #detection probability
-    cull_time = 0, #time to culling
+    cull_time = 10,#time to culling
     network_type = "smallworld",
     network_parms = list(dim = 1, size = number_of_farms, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
     stochastic_network = TRUE
     )
   
 #create patches
-sims <- 1000
+sims <- 10
 
 initial_cond_list <- lapply(seq_len(sims), function(x){
-  return(seed_initial_infection(basic_patches(number_of_chickens, number_of_farms)))
+  return(basic_patches(number_of_chickens, number_of_farms))
+})
+
+base_seeded_list <- lapply(initial_cond_list, function(x){
+  return(seed_initial_infection(x))
 })
 
 network_list <- lapply(seq_len(sims), function(x){
   return(make_net(parms$network_type, parms$network_parms))
-}
+})
 
-  
-basic_results_list <- lapply(initial_cond_list, function(x){
+basic_results_list <- map2(base_seeded_list,network_list, function(x,y){
+  parms$chi <- y
   return(mf_sim(init = x, parameters = parms, times = 1:365))
 })
+
+basic_results <- do.call("abind", basic_results_list)
   
-  
-  
+rm(basic_results_list)
+gc()
+
+```
+
+```{r visualize}
+
+create_graph_panel(basic_results)
+
+```
+
+### Random Growth Run No Culling
+
+```{r growth-no-culling}
+growth_cond_list <- lapply(initial_cond_list, function(x){
+  return(grow_patches_random(x))
+})
+
+growth_seeded_list <- lapply(growth_cond_list, function(x){
+  return(seed_initial_infection(x))
+})
+
+random_growth_list <- map2(growth_seeded_list, network_list, function(x,y){
+  parms$chi <- y
+  return(mf_sim(init = x, parameters = parms, times = 1:365))
+})
+
+random_growth <- do.call("abind", random_growth_list)
+
+rm(random_growth_list)
+gc()
+
+```
+
+```{r visualize-gnc}
+create_graph_panel(random_growth)
+
+```
+
+### Localized Growth Run No Culling
+
+```{r lgrowth-no-culling}
+growth_cond_list <- lapply(initial_cond_list, function(x){
+  return(grow_patches_random(x))
+})
+
+growth_seeded_list <- lapply(growth_cond_list, function(x){
+  return(seed_initial_infection(x))
+})
+
+random_growth_list <- map2(growth_seeded_list, network_list, function(x,y){
+  parms$chi <- y
+  return(mf_sim(init = x, parameters = parms, times = 1:365))
+})
+
+random_growth <- do.call("abind", random_growth_list)
+
+rm(random_growth_list)
+gc()
+
+```
+
+```{r visualize-gnc}
+create_graph_panel(random_growth)
+
 ```
 
 
-
-
-
-
-
-
-### Growth Run No Culling
-
-
-
-
-
-```

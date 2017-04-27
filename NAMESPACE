@@ -2,6 +2,7 @@
 
 export(basic_patches)
 export(create_gif)
+export(create_graph_panel)
 export(create_graphjs)
 export(create_initial_condition)
 export(get_all_sims)
