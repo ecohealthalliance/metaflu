@@ -96,6 +96,18 @@ get_exposure <- function(results){
   return(df)
 }
 
+#' @export
+get_exposure_fraction <- function(results){
+  infections <- apply(results,4,function(x){
+    i <- x["I",,]
+    initial_s <- colSums(x["S",,1])
+    times <- dim(x)[3]
+    return(sum(colSums(i))/(initial_s*times))
+  })
+  df <- data.frame(sim = seq_along(infections), inf_exp = infections)
+  return(df)
+}
+
 
 #' @export
 get_all_sims <- function(compartment, results){
