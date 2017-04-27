@@ -13,17 +13,6 @@ get_duration_array <- function(results){
 }
 
 #' @export
-get_duration <- function(results){
-  duration <- results %>%
-    filter(class == "I") %>%
-    group_by(sim, time) %>%
-    summarize(infectious = sum(population))%>%
-    group_by(sim) %>%
-    summarize(days_greater = sum(infectious > 0 ))
-  duration
-}
-
-#' @export
 get_infectious_array <- function(results){
   times <- seq_len(dim(results)[3])
   summaries <- sapply(times, function(x){
@@ -34,17 +23,6 @@ get_infectious_array <- function(results){
   })
   df <- data.frame(time = times-1, lower = summaries[1,], median = summaries[2,], upper = summaries[3,])
   return(df)
-}
-
-#' @export
-get_infectious <- function(results){
-  infections <- results %>%
-    filter(class == "I") %>%
-    group_by(sim, time) %>%
-    summarize(infectious = sum(population)) %>%
-    group_by(time) %>%
-    summarize(middle = median(infectious), lower = quantile(infectious, probs = c(0.025)), upper = quantile(infectious, probs = c(0.975)))
-  infections
 }
 
 #' @export
@@ -60,16 +38,6 @@ get_susceptibles_array <- function(results){
   return(df)
 }
 
-#' @export
-get_susceptibles<- function(results){
-  susceptibles <- results %>%
-    filter(class == "S") %>%
-    group_by(sim, time) %>%
-    summarize(susceptibles = sum(population)) %>%
-    group_by(time) %>%
-    summarize(middle = median(susceptibles), lower = quantile(susceptibles, probs = c(0.025)), upper = quantile(susceptibles, probs = c(0.975)))
-  susceptibles
-}
 
 #' @export
 get_recovered_array <- function(results){
@@ -85,17 +53,6 @@ get_recovered_array <- function(results){
 }
 
 #' @export
-get_recovered<- function(results){
-  recovered <- results %>%
-    filter(class == "R") %>%
-    group_by(sim, time) %>%
-    summarize(recovereds = sum(population)) %>%
-    group_by(time) %>%
-    summarize(middle = median(recovereds), lower = quantile(recovereds, probs = c(0.025)), upper = quantile(recovereds, probs = c(0.975)))
-  recovered
-}
-
-#' @export
 get_failure_array <- function(results){
   sims <- seq_len(dim(results)[4])
   f_info <- sapply(sims, function(x){
@@ -108,18 +65,6 @@ get_failure_array <- function(results){
   return(df)
 }
 
-#' @export
-get_failure<-function(results){
-  check_fails <- function(time, population, patch, class){
-    initial<- which(time == 1 & class == "I" & population > 0)
-    all<-which(class == "I" & population > 0)
-    identical(patch[initial],unique(patch[all]))
-  }
-  failures <- results %>%
-    group_by(sim) %>%
-    summarize(failed = check_fails(time, population, patch, class))
-  failures
-}
 
 
 #' @export
@@ -150,16 +95,6 @@ get_exposure <- function(results){
   return(df)
 }
 
-#' @export
-get_tot_infections <- function(results){
-  tot_infections <- results %>%
-    filter(class == "S") %>%
-    group_by(sim, time) %>%
-    summarize(tots = sum(population)) %>%
-    group_by(sim) %>%
-    summarize(total_i = max(tots) - min(tots))
-  return(tot_infections)
-}
 
 #' @export
 get_all_sims <- function(compartment, results){
@@ -178,7 +113,8 @@ get_number_farms <- function(results){
     tot_i <- rowSums(results["I",,,x])
     return(sum(tot_i > 0))
   })
-  return(farms)
+  f.df <- data.frame(sim = seq_len(dim(results)[4]), num_farms = farms)
+  return(f.df)
 }
 
 #' @export
@@ -189,47 +125,5 @@ get_number_culls <- function(results){
   })
 }
 
-#' @export
-basic_patches <- function(farm_size, farm_number){
-  initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 4, nrow = farm_number))
-  return(initial_cond)
-}
-
-#' @export
-create_initial_condition <- function(patches){
-  infected_patches <- sample(seq_len(nrow(patches)), 1)
-  patches[infected_patches, 2] <- 1
-  patches[infected_patches, 1] <- patches[infected_patches, 1] - 1
-  return(patches)
-}
-
-#' @export
-seed_initial_infection <- function(patches, multiplier = 1, risk_group = NULL){
-  temp_patches <- patches
-  if (!is.null(risk_group)){
-    temp_patches[risk_group,1] <- temp_patches[risk_group,1]*multiplier
-  }
-  s <- cumsum(temp_patches[,1])
-  random <- sample.int(max(s), 1)
-  index <- which.max(s > random)
-  patches[index, 2] <- 1
-  patches[index, 1] <- patches[index, 1] - 1
-  return(patches)
-}
-
-#' @export
-grow_patches_clustered <- function(old_condition){
-  s_num <- round(nrow(old_condition)*1/9)
-  old_condition[1:s_num,1] <- old_condition[1:s_num,1]*10
-  return(old_condition)
-}
-
-#' @export
-grow_patches_random <- function(old_condition){
-  s_num <- round(nrow(old_condition)*1/9)
-  random_numbers <- sample.int(nrow(old_condition), s_num)
-  old_condition[random_numbers,1] <- old_condition[random_numbers,1]*10
-  return(old_condition)
-}
 
 

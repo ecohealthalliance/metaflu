@@ -1,0 +1,81 @@
+#' @export
+#' @importFrom igraph graph_from_adjacency_matrix layout_nicely
+#' @importFrom threejs graphjs
+#' 
+create_graphjs <- function(sim, num){
+  net_adj <- attr(sim, "network")$`1`
+  net <- graph_from_adjacency_matrix(net_adj > 0)
+  graph_layout <- layout_nicely(net,3) 
+  sim_dur <- get_duration_array(sim)$duration
+  graph <- lapply(seq_len(sim_dur + 1), function(x){
+    S <- sim["S",,x,1]
+    I <- sim["I",,x,1]
+    C <- sim["C",,x,1]
+    net <- graph_from_adjacency_matrix(net_adj > 0)
+    V(net)$size <- log2(S)
+    V(net)$color <- "grey"
+    inf <- which(I > 0)
+    cul <- which(C > 1)
+    V(net)[inf]$color <- "red"
+    V(net)[cul]$color <- "blue"
+    return(net)
+  })
+  graphjs(graph, main = paste("Simulation:", num, "Day ",1:365), fpl = 60, layout = graph_layout)
+}
+
+#' @export
+#' @importFrom plyr adply
+#' @importFrom dplyr %>% rename group_by mutate filter select
+#' @importFrom tidyr spread
+#' @importFrom igraph graph_from_adjacency_matrix layout_with_graphopt
+#' @importFrom ggraph ggraph geom_edge_arc geom_node_point
+
+create_gif <- function(list_el, fname){
+  sim_dur <- get_duration_array(list_el)$duration  
+  simulation <- list_el[,,1:(sim_dur+1),1]
+  sim_net <- attr(list_el, "network")$`1`
+  sim_df <- plyr::adply(simulation, c(1,2,3)) %>%
+    dplyr::rename(compartment = X1, patch = X2, time = X3, population = V1) %>%
+    tidyr::spread(compartment, population)
+  raw_net <- graph_from_adjacency_matrix(sim_net > 0, "undirected")
+  
+  layout <- layout_with_graphopt(raw_net) %>% as.data.frame() %>% rename(x=V1, y=V2)
+  
+  sim1 <- sim_df %>% 
+    group_by(time) %>% 
+    mutate(x = as.numeric(layout$x), y = as.numeric(layout$y)) %>% 
+    group_by()
+  
+  sim1 <- sim1 %>%
+    group_by(patch,time) %>%
+    mutate(status = if_else(I > 0, "infected", if_else(C > 1, "culled", "normal")))
+  
+  original_s <- sim1 %>%
+    filter(time == 1) %>%
+    select(patch, original_S = S, blargo = time)
+  
+  sim1 <- left_join(sim1, original_s, by = "patch") %>%
+    select(-blargo)
+  
+  sim_end = filter(sim1, time==1) # A single time point for use for background
+  
+  cols <- c("normal" = "black", "infected" = "red", "culled" = "blue")
+  
+  plot <- ggraph(raw_net, 'manual', node.positions=layout) + 
+    geom_edge_arc(curvature = 0.1, edge_colour='grey40') +
+    geom_node_point(data=sim_end, mapping=aes(x=x, y=y,size=original_S), #white bg for the nodes
+                    shape=21, stroke=1,          #to hide the edges beind
+                    color="white", fill="white") +       #them
+    geom_node_point(data=sim1,
+                    mapping=aes(x=x, y=y, fill= status, alpha=(S/original_S)*100, frame=time, size = original_S),
+                    shape=21, stroke=1, color="grey10") + 
+    scale_fill_manual(values = cols) +
+    scale_alpha_continuous(range=c(0.5,1)) +
+    scale_size_continuous(range=c(3,12)) +
+    ggforce::theme_no_axes() +
+    theme(legend.position="none",
+          panel.border = element_blank())
+  
+  animation::ani.options(interval=1.0)
+  gganimate(plot, paste0(fname,'.gif'), title_frame = FALSE)
+}
