@@ -141,8 +141,12 @@ results_inter <- lapply(seq_along(f_list), function(x){
   df.d <- get_duration_array(arr)
   df.e <- get_exposure(arr)
   df.f <- get_number_farms(arr)
+  df.p <- get_proportion_loss(arr)
+  df.ef <- get_exposure_fraction(arr)
   df <- full_join(df.d, df.e, by = "sim") %>%
-    full_join(df.f, by = "sim")
+    full_join(df.f, by = "sim") %>%
+    full_join(df.p, by = "sim") %>%
+    full_join(df.ef, by = "sim")
   df$chickens <- farm_size
   df$farms <- farm_number_vec[x]
   return(df)
