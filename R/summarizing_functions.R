@@ -100,7 +100,7 @@ get_exposure <- function(results){
 get_exposure_fraction <- function(results){
   infections <- apply(results,4,function(x){
     i <- x["I",,]
-    initial_s <- colSums(x["S",,1])
+    initial_s <- sum(x["S",,1])
     times <- dim(x)[3]
     return(sum(colSums(i))/(initial_s*times))
   })
