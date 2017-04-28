@@ -1,10 +1,14 @@
 ---
 title: "Presentation Notes"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    keep_md: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+library(knitr)
+opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(metaflu)
 library(ggplot2)
 library(dplyr)
@@ -14,15 +18,25 @@ library(tidyr)
 library(purrr)
 library(gridExtra)
 library(abind)
+library(printr)
 #registerDoMC(cores = 20)
 #devtools::install_github("renozao/doRNG", force = TRUE)
 library(doRNG)
+library(stargazer)
 set.seed(123)
 P <- rprojroot::find_package_root_file
-
+library(parallel)
 ```
 
-### Basic Run No Culling
+### Basic Run
+
+- The base scenario in this report simulates a network of 200 farms, with around 50 chickens per farm. 
+
+- Each simulation creates a randomly generated network of farms.
+
+- Each simulation seeds one initial infected chicken at a random farm. 
+
+- No culling practices are implemented.
 
 ```{r basic-run}
 number_of_farms <- 200
@@ -65,25 +79,152 @@ network_list <- lapply(seq_len(sims), function(x){
   return(make_net(parms$network_type, parms$network_parms))
 })
 
-basic_results_list <- map2(base_seeded_list,network_list, function(x,y){
+basic_results_list <- pmap(list(base_seeded_list,network_list), function(x,y){
   parms$chi <- y
   return(mf_sim(init = x, parameters = parms, times = 1:365))
 })
 
 basic_results <- do.call("abind", basic_results_list)
   
-rm(basic_results_list)
-gc()
+#rm(basic_results_list)
 
 ```
 
-```{r visualize}
+- The two GIFs below are examples of the base network scenario:
+
+  - This graphic shows a simulation run that resulted in a long epidemic (80 days). 
+  
+  - Nodes represent farms, with edges illustrating connections between farms. 
+
+  - Black nodes represent farms with a normal chicken population, while red nodes indicate farms
+  with at least one infected chicken. 
+  
+  
+```{r basic-gif, eval = FALSE}
+
+durs <- get_duration_array(basic_results) %>%
+  arrange(desc(duration))
+
+high_duration_sim <- durs$sim[1]
+low_duration_sim <- durs$sim[sims-1]
+
+create_gif(basic_results_list[[high_duration_sim]], P("inst","rome-presentation","base_high_dur_sim"))
+create_gif(basic_results_list[[low_duration_sim]], P("inst","rome-presentation","base_low_dur_sim"))
+
+```
+
+![Long Duration Simulation](`r P("inst","rome-presentation","base_high_dur_sim.gif")`)
+
+
+  - This graphic, on the other hand, shows a short duration simulation, where a seeded infection fails to spread throughout the network. 
+
+![Short Duration Simulation](`r P("inst","rome-presentation","base_low_dur_sim.gif")`) 
+
+
+```{r basic_table}
+create_pres_df <- function(res_array, scenario){
+
+mean_prop_loss <- mean(get_proportion_loss(res_array)[,2])
+mean_proportion_farms <- mean(get_number_farms(res_array)[,2]/number_of_farms)
+mean_duration <- mean(get_duration_array(res_array)[,2])
+mean_fraction_exposure <- mean(get_exposure_fraction(res_array)[,2])
+
+df <- data.frame(scenario, mean_prop_loss, mean_proportion_farms, mean_duration, 
+                 mean_fraction_exposure)
+
+df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
+                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
+  kable()
+}
+
+create_pres_df(basic_results, "Base Scenario")
+
+```
+
+```{r visualize-basic}
 
 create_graph_panel(basic_results)
 
 ```
 
-### Random Growth Run No Culling
+### Scalability Across Network Size
+
+- The following graphs show that there does not appear to be a substantial relationship between increases in the number of farms in the network and our epidemic summary statistics. 
+
+- However, as the number of chickens increase in each farm, there are noticeable patterns of change for epidemic duration, proportion of infected farms, proportion of chickens lost across the network, and fraction of possible exposure measure. 
+
+- Due to the scalability of this model across network size, subsequent simulations are run with a network size of 200 farms of 50 chickens. 
+
+- The duration of the epidemic is affected by the number of chickens in each farm, but not the number of farms in the network.
+
+```{r load-netsize-experiment}
+grand_df <- readRDS(P("inst","experiments","node_pop_df.rds"))
+
+ggplot(data = grand_df) +
+  geom_boxplot(aes(x = as.factor(chickens), y = duration)) +
+  facet_wrap(~farms) +
+  labs(title = "Duration of Epidemic by Number of Farms and Chickens", x = "Number of Chickens", y = "Days") +
+  theme_minimal()
+
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+- The proportion of infected farms in a network is affected by the number of chickens in each farm, but not the number of farms in the network. 
+
+```{r proportion-infected-farms}
+grand_df$adj_farms <- grand_df$num_farms/grand_df$farms
+
+ggplot(data = grand_df) +
+  geom_boxplot(aes(x = as.factor(chickens), y = adj_farms)) +
+  facet_wrap(~farms) +
+  labs(title = "Proportion of Infected Farms by Number of Farms and Chickens", y = "Proportion of Infected Farms", x = "Number of Chickens per Farm") +
+  theme_minimal()
+
+
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+- The proportion of chickens lost to infection or culling in a network is affected by the number of chickens in each farm, but not the number of farms in the network. 
+
+```{r proportion-loss}
+ggplot(data = grand_df) +
+  geom_boxplot(aes(x = as.factor(chickens), y = prop_loss)) +
+  facet_wrap(~farms) +
+  labs(title = "Proportion of Chickens Lost", y = "Proportion of Chickens Lost", x = "Number of Chickens per Farm") +
+  theme_minimal()
+
+```
+<br>
+<br>
+<br>
+<br>
+<br>
+
+- The fraction of infectious exposure is affected by the number of chickens in each farm, but not the number of farms in the network. 
+
+
+```{r measure-prop}
+ggplot(data = grand_df) +
+  geom_boxplot(aes(x = as.factor(chickens), y = exp_measure)) +
+  facet_wrap(~farms) +
+  labs(title = "Fraction of Infectious Exposure", y = "Infected-Chicken-Days over Total Chicken-Days", x = "Number of Chickens per Farm") +
+  theme_minimal()
+
+```
+
+### Random Growth Run
+
+- In the random growth scenario, 11% of farms grow from around 50 chickens to 500 chickens, resulting in a doubling of the total network chicken population. 
+
+- Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
 ```{r growth-no-culling}
 growth_cond_list <- lapply(initial_cond_list, function(x){
@@ -94,7 +235,7 @@ growth_seeded_list <- lapply(growth_cond_list, function(x){
   return(seed_initial_infection(x))
 })
 
-random_growth_list <- map2(growth_seeded_list, network_list, function(x,y){
+random_growth_list <- pmap(list(growth_seeded_list, network_list), function(x,y){
   parms$chi <- y
   return(mf_sim(init = x, parameters = parms, times = 1:365))
 })
@@ -102,27 +243,34 @@ random_growth_list <- map2(growth_seeded_list, network_list, function(x,y){
 random_growth <- do.call("abind", random_growth_list)
 
 rm(random_growth_list)
-gc()
+
+create_pres_df(random_growth, "Growth in Random Farms")
 
 ```
 
 ```{r visualize-gnc}
+
 create_graph_panel(random_growth)
 
 ```
 
 ### Localized Growth Run No Culling
 
+- INSERT DESCRIPTION HERE
+
+- AND HERE
+
 ```{r lgrowth-no-culling}
+
 growth_cond_list <- lapply(initial_cond_list, function(x){
-  return(grow_patches_random(x))
+  return(grow_patches_clustered(x))
 })
 
 growth_seeded_list <- lapply(growth_cond_list, function(x){
   return(seed_initial_infection(x))
 })
 
-random_growth_list <- map2(growth_seeded_list, network_list, function(x,y){
+random_growth_list <- pmap(list(growth_seeded_list, network_list), function(x,y){
   parms$chi <- y
   return(mf_sim(init = x, parameters = parms, times = 1:365))
 })
@@ -130,13 +278,18 @@ random_growth_list <- map2(growth_seeded_list, network_list, function(x,y){
 random_growth <- do.call("abind", random_growth_list)
 
 rm(random_growth_list)
-gc()
+
+create_pres_df(random_growth, "Localized Farm Growth")
+
 
 ```
 
-```{r visualize-gnc}
+
+```{r visualize-gncr}
+
 create_graph_panel(random_growth)
 
 ```
+
 
 

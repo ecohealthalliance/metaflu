@@ -30,7 +30,7 @@ create_graphjs <- function(sim, num){
 #' @importFrom igraph graph_from_adjacency_matrix layout_with_graphopt
 #' @importFrom ggraph ggraph geom_edge_arc geom_node_point
 
-create_gif <- function(list_el, fname){
+create_gif <- function(list_el, fname, g_status = FALSE){
   sim_dur <- get_duration_array(list_el)$duration
   simulation <- list_el[,,1:(sim_dur+1),1]
   sim_net <- attr(list_el, "network")$`1`
@@ -39,7 +39,7 @@ create_gif <- function(list_el, fname){
     tidyr::spread(compartment, population)
   raw_net <- graph_from_adjacency_matrix(sim_net > 0, "undirected")
 
-  layout <- layout_with_graphopt(raw_net) %>% as.data.frame() %>% rename(x=V1, y=V2)
+  layout <- layout_nicely(raw_net,2) %>% as.data.frame() %>% rename(x=V1, y=V2)
 
   sim1 <- sim_df %>%
     group_by(time) %>%
@@ -61,6 +61,12 @@ create_gif <- function(list_el, fname){
 
   cols <- c("normal" = "black", "infected" = "red", "culled" = "blue")
 
+  if(g_status == TRUE){
+    size_range <- c(4,12)
+  }else{
+    size_range <- c(5,7)
+  }
+
   plot <- ggraph(raw_net, 'manual', node.positions=layout) +
     geom_edge_arc(curvature = 0.1, edge_colour='grey40') +
     geom_node_point(data=sim_end, mapping=aes(x=x, y=y,size=original_S), #white bg for the nodes
@@ -71,7 +77,7 @@ create_gif <- function(list_el, fname){
                     shape=21, stroke=1, color="grey10") +
     scale_fill_manual(values = cols) +
     scale_alpha_continuous(range=c(0.5,1)) +
-    scale_size_continuous(range=c(3,12)) +
+    scale_size_continuous(range=size_range) +
     ggforce::theme_no_axes() +
     theme(legend.position="none",
           panel.border = element_blank())
