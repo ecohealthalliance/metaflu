@@ -122,19 +122,17 @@ create_gif(basic_results_list[[low_duration_sim]], P("inst","rome-presentation",
 
 
 ```{r basic_table}
-create_pres_df <- function(res_array, scenario){
+create_pres_df <- function(res_array, scenario){ #results, cull_time (string)
 
 mean_prop_loss <- mean(get_proportion_loss(res_array)[,2])
-mean_proportion_farms <- mean(get_number_farms(res_array)[,2]/number_of_farms)
+mean_proportion_farms <- mean(get_number_farms(res_array)[,2]/200) #denominator: # of farms
 mean_duration <- mean(get_duration_array(res_array)[,2])
 mean_fraction_exposure <- mean(get_exposure_fraction(res_array)[,2])
 
 df <- data.frame(scenario, mean_prop_loss, mean_proportion_farms, mean_duration, 
                  mean_fraction_exposure)
 
-df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
-                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
-  kable()
+return(df)
 }
 
 create_pres_df(basic_results, "Base Scenario")
@@ -292,4 +290,39 @@ create_graph_panel(random_growth)
 ```
 
 
+
+### Clustered Growth Run with Culling
+
+- Culling is implemented whenever a death is detected, representing the best case detection and reporting scenario.
+
+- The time to culling varies from 1 to 21 days.
+
+``` {r culling-graphs}
+final_df <- readRDS("cull-time-data.RDS")
+
+closs <- ggplot(data = final_df) +
+  geom_point(aes(x = scenario, y = mean_prop_loss)) +
+  labs(title = "Proportion of Loss by Time to Culling", x = "Cull Time", y = "Days") +
+  theme_minimal()
+
+cfarms <- ggplot(data = final_df) +
+  geom_point(aes(x = scenario, y = mean_proportion_farms)) +
+  labs(title = "Proportion of Infected Farms by Time to Culling", x = "Cull Time", y = "Days") +
+  theme_minimal()
+
+cduration <- ggplot(data = final_df) +
+  geom_point(aes(x = scenario, y = mean_duration)) +
+  labs(title = "Duration of Epidemic by Time to Culling", x = "Cull Time", y = "Days") +
+  theme_minimal()
+
+cexposure <- ggplot(data = final_df) +
+  geom_point(aes(x = scenario, y = mean_fraction_exposure)) +
+  labs(title = "Fraction Exposed by Time to Culling", x = "Cull Time", y = "Days") +
+  theme_minimal()
+
+lay <- rbind(c(1,2),
+             c(3,4))
+
+  grid.arrange(closs, cfarms, cduration, cexposure, layout_matrix = lay)
+```
 
