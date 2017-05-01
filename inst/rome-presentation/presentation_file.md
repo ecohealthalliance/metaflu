@@ -26,24 +26,18 @@
   
 
 
-![Long Duration Simulation](/home/royce/metaflu/inst/rome-presentation/base_high_dur_sim.gif)
+![Long Duration Simulation](/Users/Basaraba/R/metaflu/inst/rome-presentation/base_high_dur_sim.gif)
 
 
   - This graphic, on the other hand, shows a short duration simulation, where a seeded infection fails to spread throughout the network. 
 
-![Short Duration Simulation](/home/royce/metaflu/inst/rome-presentation/base_low_dur_sim.gif) 
+![Short Duration Simulation](/Users/Basaraba/R/metaflu/inst/rome-presentation/base_low_dur_sim.gif) 
 
 
 
-<<<<<<< HEAD
-scenario         mean_prop_loss   mean_proportion_farms   mean_duration   mean_fraction_exposure
---------------  ---------------  ----------------------  --------------  -----------------------
-Base Scenario         0.0757303                   0.076            37.4                0.0003736
-=======
 Scenario         Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
 --------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
-Base Scenario                           0.0964127                             0.09982                             36.081                              0.0004667
->>>>>>> ccc16dfb7cbaaf6f88e611333adda7b1093d0e78
+Base Scenario                           0.0757303                               0.076                               37.4                              0.0003736
 
 ![](presentation_file_files/figure-html/visualize-basic-1.png)<!-- -->
 
@@ -94,15 +88,9 @@ Base Scenario                           0.0964127                             0.
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
 
-<<<<<<< HEAD
-scenario                  mean_prop_loss   mean_proportion_farms   mean_duration   mean_fraction_exposure
------------------------  ---------------  ----------------------  --------------  -----------------------
-Growth in Random Farms         0.5314347                   0.512            48.3                0.0025624
-=======
 Scenario                  Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
 -----------------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
-Growth in Random Farms                           0.5917104                             0.57408                             62.414                              0.0028588
->>>>>>> ccc16dfb7cbaaf6f88e611333adda7b1093d0e78
+Growth in Random Farms                           0.5314347                               0.512                               48.3                              0.0025624
 
 ![](presentation_file_files/figure-html/visualize-gnc-1.png)<!-- -->
 
@@ -113,21 +101,21 @@ Growth in Random Farms                           0.5917104                      
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
 
-<<<<<<< HEAD
-scenario                 mean_prop_loss   mean_proportion_farms   mean_duration   mean_fraction_exposure
-----------------------  ---------------  ----------------------  --------------  -----------------------
-Localized Farm Growth         0.5493707                   0.409            47.3                0.0026297
-=======
 Scenario                 Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
 ----------------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
-Localized Farm Growth                           0.4773329                            0.374775                             49.824                              0.0023064
->>>>>>> ccc16dfb7cbaaf6f88e611333adda7b1093d0e78
+Localized Farm Growth                           0.5493707                               0.409                               47.3                              0.0026297
 
 
 ![](presentation_file_files/figure-html/visualize-gncr-1.png)<!-- -->
 
 
-<<<<<<< HEAD
+Scenario                  Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
+-----------------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
+Base Scenario                                    0.0757303                               0.076                               37.4                              0.0003736
+Growth in Random Farms                           0.5314347                               0.512                               48.3                              0.0025624
+Localized Farm Growth                            0.5493707                               0.409                               47.3                              0.0026297
+
+
 
 ### Clustered Growth Run with Culling
 
@@ -136,11 +124,3 @@ Localized Farm Growth                           0.4773329                       
 - The time to culling varies from 1 to 21 days.
 
 ![](presentation_file_files/figure-html/culling-graphs-1.png)<!-- -->
-
-=======
-Scenario                  Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
------------------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
-Base Scenario                                    0.0964127                            0.099820                             36.081                              0.0004667
-Growth in Random Farms                           0.5917104                            0.574080                             62.414                              0.0028588
-Localized Farm Growth                            0.4773329                            0.374775                             49.824                              0.0023064
->>>>>>> ccc16dfb7cbaaf6f88e611333adda7b1093d0e78

@@ -65,7 +65,7 @@ number_of_chickens <- 50
     )
   
 #create patches
-sims <- 1000
+sims <- 10
 
 initial_cond_list <- lapply(seq_len(sims), function(x){
   return(basic_patches(number_of_chickens, number_of_farms))
