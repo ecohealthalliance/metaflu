@@ -65,7 +65,7 @@ number_of_chickens <- 50
     )
   
 #create patches
-sims <- 10
+sims <- 1000
 
 initial_cond_list <- lapply(seq_len(sims), function(x){
   return(basic_patches(number_of_chickens, number_of_farms))
@@ -132,12 +132,14 @@ mean_fraction_exposure <- mean(get_exposure_fraction(res_array)[,2])
 df <- data.frame(scenario, mean_prop_loss, mean_proportion_farms, mean_duration, 
                  mean_fraction_exposure)
 
-df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
-                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
-  kable()
+return(df)
 }
 
-create_pres_df(basic_results, "Base Scenario")
+basic_df <- create_pres_df(basic_results, "Base Scenario")
+
+basic_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
+                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
+  kable()
 
 ```
 
@@ -222,7 +224,7 @@ ggplot(data = grand_df) +
 
 ### Random Growth Run
 
-- In the random growth scenario, 11% of farms grow from around 50 chickens to 500 chickens, resulting in a doubling of the total network chicken population. 
+- In the random growth scenario, 11% of farms grow from around 50 chickens to 500 chickens, resulting in a doubling of the total network chicken population. The location of these farms in the network is chosen at random. 
 
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
@@ -244,7 +246,11 @@ random_growth <- do.call("abind", random_growth_list)
 
 rm(random_growth_list)
 
-create_pres_df(random_growth, "Growth in Random Farms")
+rg_df <- create_pres_df(random_growth, "Growth in Random Farms")
+
+rg_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
+                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
+  kable()
 
 ```
 
@@ -256,9 +262,9 @@ create_graph_panel(random_growth)
 
 ### Localized Growth Run No Culling
 
-- INSERT DESCRIPTION HERE
+- In the localized growth scenario, 11% of farms grow from around 50 chickens to 500 chickens, resulting in a doubling of the total network chicken population. The farms chosen to grow are adjacent nodes in a network, simulating the intensification of poultry production in one geographic, closely connected area. 
 
-- AND HERE
+- Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
 ```{r lgrowth-no-culling}
 
@@ -279,8 +285,11 @@ random_growth <- do.call("abind", random_growth_list)
 
 rm(random_growth_list)
 
-create_pres_df(random_growth, "Localized Farm Growth")
+lg_df <- create_pres_df(random_growth, "Localized Farm Growth")
 
+lg_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
+                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
+  kable()
 
 ```
 
@@ -291,5 +300,12 @@ create_graph_panel(random_growth)
 
 ```
 
+```{r non-cull-summary-df}
 
+tot_df <- bind_rows(basic_df, rg_df, lg_df)
 
+tot_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
+                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
+  kable()
+
+```
