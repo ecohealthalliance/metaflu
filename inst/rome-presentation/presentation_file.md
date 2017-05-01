@@ -35,11 +35,17 @@
 
 
 
-Scenario         Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
---------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
-Base Scenario                           0.0757303                               0.076                               37.4                              0.0003736
 
 ![](presentation_file_files/figure-html/visualize-basic-1.png)<!-- -->
+<br>
+<br>
+
+
+Scenario                       Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Exposure Index   Proportion of Simulations that Failed to Spread
+----------------------------  ---------------------------------  ----------------------------------  ---------------------------------  --------------------  ------------------------------------------------
+Base Scenario                                         0.0964127                           0.0998200                           36.08100             0.0004667                                              0.28
+Base Scenario - Spread Only                           0.1335270                           0.1366944                           48.55556             0.0006463                                              0.00
+
 
 ### Scalability Across Network Size
 
@@ -88,9 +94,14 @@ Base Scenario                           0.0757303                               
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
 
-Scenario                  Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
------------------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
-Growth in Random Farms                           0.5314347                               0.512                               48.3                              0.0025624
+
+
+Scenario                                Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Exposure Index   Proportion of Simulations that Failed to Spread
+-------------------------------------  ---------------------------------  ----------------------------------  ---------------------------------  --------------------  ------------------------------------------------
+Growth in Random Farms                                         0.5917104                           0.5740800                           62.41400             0.0028588                                             0.202
+Growth in Random Farms - Spread Only                           0.7414420                           0.7181328                           77.50376             0.0035821                                             0.000
+<br>
+<br>
 
 ![](presentation_file_files/figure-html/visualize-gnc-1.png)<!-- -->
 
@@ -101,26 +112,62 @@ Growth in Random Farms                           0.5314347                      
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
 
-Scenario                 Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
-----------------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
-Localized Farm Growth                           0.5493707                               0.409                               47.3                              0.0026297
 
+
+
+
+Scenario                                Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Exposure Index   Proportion of Simulations that Failed to Spread
+-------------------------------------  ---------------------------------  ----------------------------------  ---------------------------------  --------------------  ------------------------------------------------
+Base Scenario                                                  0.0964127                           0.0998200                           36.08100             0.0004667                                             0.280
+Base Scenario - Spread Only                                    0.1335270                           0.1366944                           48.55556             0.0006463                                             0.000
+Growth in Random Farms                                         0.5917104                           0.5740800                           62.41400             0.0028588                                             0.202
+Growth in Random Farms - Spread Only                           0.7414420                           0.7181328                           77.50376             0.0035821                                             0.000
+Localized Farm Growth                                          0.4773329                           0.3747750                           49.82400             0.0023064                                             0.237
+Localized Farm Growth - Spread Only                            0.6254755                           0.4896330                           64.18480             0.0030222                                             0.000
+<br>
+<br>
 
 ![](presentation_file_files/figure-html/visualize-gncr-1.png)<!-- -->
 
 
-Scenario                  Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Fraction of Infectious Exposure
------------------------  ---------------------------------  ----------------------------------  ---------------------------------  -------------------------------------
-Base Scenario                                    0.0757303                               0.076                               37.4                              0.0003736
-Growth in Random Farms                           0.5314347                               0.512                               48.3                              0.0025624
-Localized Farm Growth                            0.5493707                               0.409                               47.3                              0.0026297
-
-
-
 ### Clustered Growth Run with Culling
 
-- Culling is implemented whenever a death is detected, representing the best case detection and reporting scenario.
+- Culling is implemented as a two-step process:
+    
+    - Farms are first identified to be culled if a critical number of chickens have died in a certain time window.
+    
+    - Once a farm is identified, it is culled with an average speed parameterized by the *culling time* variable. When a farm is culled, all chickens (Susceptible, Infectious, and Recovered) are removed from that farm.
 
-- The time to culling varies from 1 to 21 days.
+- The following graphs show how variation in the cull time parameter effects chicken loss, epidemic spread, duration of epidemic, and infected chicken exposure.
 
 ![](presentation_file_files/figure-html/culling-graphs-1.png)<!-- -->
+
+<div>
+<div>
+<div>
+<div>
+
+
+ Culling Time (days)   Mean Proportion of Chickens Lost   Mean Proportion of Farms Infected   Mean Duration of Epidemic (days)   Mean Exposure Index
+--------------------  ---------------------------------  ----------------------------------  ---------------------------------  --------------------
+                   1                          0.2908635                            0.177020                             33.435             0.0008672
+                   2                          0.3992773                            0.279585                             41.311             0.0014814
+                   3                          0.4707156                            0.355515                             47.513             0.0020148
+                   4                          0.4932861                            0.393805                             50.212             0.0023617
+                   5                          0.5103106                            0.421755                             51.178             0.0026519
+                   6                          0.5585069                            0.466455                             54.654             0.0030650
+                   7                          0.5545843                            0.471915                             54.165             0.0032188
+                   8                          0.5915634                            0.515060                             58.297             0.0035533
+                   9                          0.5874925                            0.514655                             58.191             0.0036713
+                  10                          0.6115625                            0.539915                             60.246             0.0039618
+                  11                          0.6172856                            0.550085                             60.986             0.0040879
+                  12                          0.6222489                            0.555785                             60.918             0.0042105
+                  13                          0.6376711                            0.576205                             63.252             0.0044178
+                  14                          0.6345393                            0.573060                             63.312             0.0044858
+                  15                          0.6567254                            0.596925                             65.635             0.0047094
+                  16                          0.6323005                            0.579120                             63.062             0.0045832
+                  17                          0.6619602                            0.608130                             66.779             0.0048735
+                  18                          0.6593961                            0.604180                             68.279             0.0048979
+                  19                          0.6664469                            0.614625                             66.938             0.0050035
+                  20                          0.6500229                            0.601185                             66.890             0.0049526
+                  21                          0.6498694                            0.602360                             66.280             0.0049984

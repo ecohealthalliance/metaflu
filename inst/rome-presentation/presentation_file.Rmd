@@ -22,10 +22,10 @@ library(printr)
 #registerDoMC(cores = 20)
 #devtools::install_github("renozao/doRNG", force = TRUE)
 library(doRNG)
-library(stargazer)
 set.seed(123)
 P <- rprojroot::find_package_root_file
 library(parallel)
+library(gganimate)
 ```
 
 ### Basic Run
@@ -65,7 +65,7 @@ number_of_chickens <- 50
     )
   
 #create patches
-sims <- 10
+sims <- 1000
 
 initial_cond_list <- lapply(seq_len(sims), function(x){
   return(basic_patches(number_of_chickens, number_of_farms))
@@ -128,18 +128,22 @@ mean_prop_loss <- mean(get_proportion_loss(res_array)[,2])
 mean_proportion_farms <- mean(get_number_farms(res_array)[,2]/200) #denominator: # of farms
 mean_duration <- mean(get_duration_array(res_array)[,2])
 mean_fraction_exposure <- mean(get_exposure_fraction(res_array)[,2])
+prop_failure <- proportion_failed(get_failure_array(res_array))
 
 df <- data.frame(scenario, mean_prop_loss, mean_proportion_farms, mean_duration, 
-                 mean_fraction_exposure)
+                 mean_fraction_exposure, prop_failure, stringsAsFactors = FALSE)
 
 return(df)
 }
 
 basic_df <- create_pres_df(basic_results, "Base Scenario")
 
-basic_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
-                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
+kable_table <- function(df){
+  df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
+                 `Mean Exposure Index` = mean_fraction_exposure, `Proportion of Simulations that Failed to Spread` = prop_failure) %>%
   kable()
+}
+
 
 ```
 
@@ -148,6 +152,18 @@ basic_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = 
 create_graph_panel(basic_results)
 
 ```
+<br>
+<br>
+
+```{r reduced-basic}
+r_basic_results <- reduce_epi_array(basic_results)
+
+r_basic_df <- create_pres_df(r_basic_results, "Base Scenario - Spread Only")
+
+kable_table(bind_rows(basic_df,r_basic_df))
+
+```
+
 
 ### Scalability Across Network Size
 
@@ -185,7 +201,6 @@ ggplot(data = grand_df) +
   facet_wrap(~farms) +
   labs(title = "Proportion of Infected Farms by Number of Farms and Chickens", y = "Proportion of Infected Farms", x = "Number of Chickens per Farm") +
   theme_minimal()
-
 
 ```
 <br>
@@ -248,11 +263,22 @@ rm(random_growth_list)
 
 rg_df <- create_pres_df(random_growth, "Growth in Random Farms")
 
-rg_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
-                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
-  kable()
+
 
 ```
+
+```{r reduced-gnc}
+
+r_rg <- reduce_epi_array(random_growth)
+
+r_rg_df <- create_pres_df(r_rg, "Growth in Random Farms - Spread Only")
+
+kable_table(bind_rows(rg_df, r_rg_df))
+
+
+```
+<br>
+<br>
 
 ```{r visualize-gnc}
 
@@ -276,23 +302,36 @@ growth_seeded_list <- lapply(growth_cond_list, function(x){
   return(seed_initial_infection(x))
 })
 
-random_growth_list <- pmap(list(growth_seeded_list, network_list), function(x,y){
+random_growth_list_c <- pmap(list(growth_seeded_list, network_list), function(x,y){
   parms$chi <- y
   return(mf_sim(init = x, parameters = parms, times = 1:365))
 })
 
-random_growth <- do.call("abind", random_growth_list)
+random_growth_c <- do.call("abind", random_growth_list_c)
 
-rm(random_growth_list)
+rm(random_growth_list_c)
 
-lg_df <- create_pres_df(random_growth, "Localized Farm Growth")
+lg_df <- create_pres_df(random_growth_c, "Localized Farm Growth")
 
-lg_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
-                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
-  kable()
 
 ```
 
+```{r r-lg-df}
+r_lg <- reduce_epi_array(random_growth_c)
+
+r_lg_df <- create_pres_df(r_lg, "Localized Farm Growth - Spread Only")
+
+```
+
+```{r non-cull-summary-df}
+
+tot_df <- bind_rows(basic_df, r_basic_df, rg_df,r_rg_df, lg_df, r_lg_df)
+
+kable_table(tot_df)
+
+```
+<br>
+<br>
 
 ```{r visualize-gncr}
 
@@ -300,26 +339,19 @@ create_graph_panel(random_growth)
 
 ```
 
-```{r non-cull-summary-df}
-
-tot_df <- bind_rows(basic_df, rg_df, lg_df)
-
-tot_df %>% rename(`Scenario` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
-                 `Mean Fraction of Infectious Exposure` = mean_fraction_exposure) %>%
-  kable()
-
-```
-
-
 
 ### Clustered Growth Run with Culling
 
-- Culling is implemented whenever a death is detected, representing the best case detection and reporting scenario.
+- Culling is implemented as a two-step process:
+    
+    - Farms are first identified to be culled if a critical number of chickens have died in a certain time window.
+    
+    - Once a farm is identified, it is culled with an average speed parameterized by the *culling time* variable. When a farm is culled, all chickens (Susceptible, Infectious, and Recovered) are removed from that farm.
 
-- The time to culling varies from 1 to 21 days.
+- The following graphs show how variation in the cull time parameter effects chicken loss, epidemic spread, duration of epidemic, and infected chicken exposure.
 
 ``` {r culling-graphs}
-final_df <- readRDS("cull-time-data.RDS")
+final_df <- readRDS(P("inst", "rome-presentation","cull-time-data.RDS"))
 
 closs <- ggplot(data = final_df) +
   geom_point(aes(x = scenario, y = mean_prop_loss)) +
@@ -344,5 +376,18 @@ cexposure <- ggplot(data = final_df) +
 lay <- rbind(c(1,2),
              c(3,4))
 
-  grid.arrange(closs, cfarms, cduration, cexposure, layout_matrix = lay)
+grid.arrange(closs, cfarms, cduration, cexposure, layout_matrix = lay)
+
+```
+
+<div>
+<div>
+<div>
+<div>
+
+```{r culling-df}
+final_df %>%  rename(`Culling Time (days)` = scenario, `Mean Proportion of Chickens Lost` = mean_prop_loss, `Mean Proportion of Farms Infected` = mean_proportion_farms, `Mean Duration of Epidemic (days)` = mean_duration, 
+                 `Mean Exposure Index` = mean_fraction_exposure) %>%
+  kable()
+
 ```

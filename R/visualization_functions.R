@@ -29,6 +29,8 @@ create_graphjs <- function(sim, num){
 #' @importFrom tidyr spread
 #' @importFrom igraph graph_from_adjacency_matrix layout_with_graphopt
 #' @importFrom ggraph ggraph geom_edge_arc geom_node_point
+#' @importFrom gganimate gganimate
+#' @importFrom animation ani.options
 
 create_gif <- function(list_el, fname, g_status = FALSE){
   sim_dur <- get_duration_array(list_el)$duration
@@ -82,7 +84,7 @@ create_gif <- function(list_el, fname, g_status = FALSE){
     theme(legend.position="none",
           panel.border = element_blank())
 
-  animation::ani.options(interval=1.0)
+  animation::ani.options(interval=0.25)
   gganimate(plot, paste0(fname,'.gif'), title_frame = FALSE)
 }
 

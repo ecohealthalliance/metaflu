@@ -65,6 +65,13 @@ get_failure_array <- function(results){
   return(df)
 }
 
+#' @export
+reduce_epi_array <- function(results){
+  non_failure_tf <- !get_failure_array(results)[,2]
+  non_failures <- results[,,,non_failure_tf]
+  return(non_failures)
+}
+
 
 
 #' @export
