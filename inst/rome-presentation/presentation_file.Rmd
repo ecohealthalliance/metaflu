@@ -11,6 +11,8 @@ library(knitr)
 opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 library(metaflu)
 library(ggplot2)
+library(plyr)
+library(ggraph)
 library(dplyr)
 library(doMC)
 library(foreach)
@@ -27,6 +29,8 @@ P <- rprojroot::find_package_root_file
 library(parallel)
 library(gganimate)
 library(grid)
+library(igraph)
+
 ```
 
 ### Basic Run
@@ -109,17 +113,17 @@ durs <- get_duration_array(basic_results) %>%
 high_duration_sim <- durs$sim[1]
 low_duration_sim <- durs$sim[sims-1]
 
-create_gif(basic_results_list[[high_duration_sim]], P("inst","rome-presentation","base_high_dur_sim"))
-create_gif(basic_results_list[[low_duration_sim]], P("inst","rome-presentation","base_low_dur_sim"))
+create_gif(basic_results_list[[high_duration_sim]], P("inst","rome-presentation","base_high_dur_sim"), "Long Duration Simulation")
+create_gif(basic_results_list[[low_duration_sim]], P("inst","rome-presentation","base_low_dur_sim"), "Short Duration Simulation")
 
 ```
 
-![Long Duration Simulation](`r P("inst","rome-presentation","base_high_dur_sim.gif")`)
+![](`r P("inst","rome-presentation","base_high_dur_sim.gif")`)
 
 
   - This graphic, on the other hand, shows a short duration simulation, where a seeded infection fails to spread throughout the network. 
 
-![Short Duration Simulation](`r P("inst","rome-presentation","base_low_dur_sim.gif")`) 
+![](`r P("inst","rome-presentation","base_low_dur_sim.gif")`) 
 
 
 ```{r basic_table}
@@ -244,6 +248,8 @@ ggplot(data = grand_df) +
 
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
+- The network graph below illustrates this growth scenario, with a random selection of nodes growing by a factor of 10 (indicated in green).
+
 ```{r growth-no-culling}
 growth_cond_list <- lapply(initial_cond_list, function(x){
   return(grow_patches_random(x))
@@ -260,13 +266,59 @@ random_growth_list <- pmap(list(growth_seeded_list, network_list), function(x,y)
 
 random_growth <- do.call("abind", random_growth_list)
 
-rm(random_growth_list)
+#rm(random_growth_list)
 
 rg_df <- create_pres_df(random_growth, "Growth in Random Farms")
 
 
 
 ```
+
+
+```{r random-growth-vis}
+
+rg_viz <- random_growth_list[[1]]
+start <- rg_viz[,,1,1]
+
+rg_net <- attr(rg_viz, "network")[[1]]
+
+rg_graph <- graph_from_adjacency_matrix(rg_net > 0, "undirected")
+
+rg_layout <- layout_nicely(rg_graph,2) %>% as.data.frame() %>% rename(x=V1, y=V2)
+
+sim_df <- plyr::adply(start, c(1,2)) %>%
+    dplyr::rename(compartment = X1, patch = X2, population = V1) %>%
+    tidyr::spread(compartment, population)
+
+sim_df <- sim_df %>%
+    mutate(x = as.numeric(rg_layout$x), y = as.numeric(rg_layout$y))
+
+size_range <- c(4,11)
+
+sim_df$growth <- if_else(sim_df$S >= min(sim_df$S)*10, "growth", "normal")
+
+cols <- c("growth" = "chartreuse3", "normal" = "grey10")
+
+rg_plot <- ggraph(rg_graph, 'manual', node.positions=rg_layout) +
+    geom_edge_arc(curvature = 0.1, edge_colour='grey40') +
+    geom_node_point(data=sim_df,
+                    mapping=aes(x=x, y=y, fill= growth, size = S),
+                    shape=21, stroke=1, color="grey10") +
+    scale_fill_manual(values = cols) +
+    scale_alpha_continuous(range=c(0.5,1)) +
+    scale_size_continuous(range=size_range) +
+    ggforce::theme_no_axes() +
+  labs(title = "Random Growth Network") +
+    theme(legend.position="none",
+          panel.border = element_blank())
+
+plot(rg_plot)
+
+
+
+
+```
+
 
 ```{r reduced-gnc}
 
@@ -293,6 +345,8 @@ create_graph_panel(random_growth, "Random Growth Scenario")
 
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
+- The network graph below illustrates this growth scenario, with a clustered selection of nodes growing by a factor of 10 (indicated in green).
+
 ```{r lgrowth-no-culling}
 
 growth_cond_list <- lapply(initial_cond_list, function(x){
@@ -310,12 +364,57 @@ random_growth_list_c <- pmap(list(growth_seeded_list, network_list), function(x,
 
 random_growth_c <- do.call("abind", random_growth_list_c)
 
-rm(random_growth_list_c)
+#rm(random_growth_list_c)
 
 lg_df <- create_pres_df(random_growth_c, "Localized Farm Growth")
 
 
 ```
+
+```{r local-growth-vis}
+
+rg_viz <- random_growth_list_c[[1]]
+start <- rg_viz[,,1,1]
+
+rg_net <- attr(rg_viz, "network")[[1]]
+
+rg_graph <- graph_from_adjacency_matrix(rg_net > 0, "undirected")
+
+rg_layout <- layout_nicely(rg_graph,2) %>% as.data.frame() %>% rename(x=V1, y=V2)
+
+sim_df <- plyr::adply(start, c(1,2)) %>%
+    dplyr::rename(compartment = X1, patch = X2, population = V1) %>%
+    tidyr::spread(compartment, population)
+
+sim_df <- sim_df %>%
+    mutate(x = as.numeric(rg_layout$x), y = as.numeric(rg_layout$y))
+
+size_range <- c(4,11)
+
+sim_df$growth <- if_else(sim_df$S >= min(sim_df$S)*10, "growth", "normal")
+
+cols <- c("growth" = "chartreuse3", "normal" = "grey10")
+
+lg_plot <- ggraph(rg_graph, 'manual', node.positions=rg_layout) +
+    geom_edge_arc(curvature = 0.1, edge_colour='grey40') +
+    geom_node_point(data=sim_df,
+                    mapping=aes(x=x, y=y, fill= growth, size = S),
+                    shape=21, stroke=1, color="grey10") +
+    scale_fill_manual(values = cols) +
+    scale_alpha_continuous(range=c(0.5,1)) +
+    scale_size_continuous(range=size_range) +
+    ggforce::theme_no_axes() +
+    labs(title = "Localized Growth Network") +
+    theme(legend.position="none",
+          panel.border = element_blank())
+
+plot(lg_plot)
+
+
+
+
+```
+
 
 ```{r r-lg-df}
 r_lg <- reduce_epi_array(random_growth_c)

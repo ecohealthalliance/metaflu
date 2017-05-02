@@ -32,7 +32,7 @@ create_graphjs <- function(sim, num){
 #' @importFrom gganimate gganimate
 #' @importFrom animation ani.options
 
-create_gif <- function(list_el, fname, g_status = FALSE){
+create_gif <- function(list_el, fname, g_status = FALSE, title = ""){
   sim_dur <- get_duration_array(list_el)$duration
   simulation <- list_el[,,1:(sim_dur+1),1]
   sim_net <- attr(list_el, "network")$`1`
@@ -80,6 +80,7 @@ create_gif <- function(list_el, fname, g_status = FALSE){
     scale_fill_manual(values = cols) +
     scale_alpha_continuous(range=c(0.5,1)) +
     scale_size_continuous(range=size_range) +
+    labs(title = title) +
     ggforce::theme_no_axes() +
     theme(legend.position="none",
           panel.border = element_blank())
@@ -92,7 +93,7 @@ create_gif <- function(list_el, fname, g_status = FALSE){
 #' @export
 #' @importFrom gridExtra grid.arrange
 
-create_graph_panel <- function(result_array, title){
+create_graph_panel <- function(result_array, title = ""){
   gdurations <- get_duration_array(result_array)
   gexposure <- get_exposure(result_array)
   gs.df <- get_all_sims("S", result_array)

@@ -26,12 +26,12 @@
   
 
 
-![Long Duration Simulation](/Users/Basaraba/R/metaflu/inst/rome-presentation/base_high_dur_sim.gif)
+![](/Users/Basaraba/R/metaflu/inst/rome-presentation/base_high_dur_sim.gif)
 
 
   - This graphic, on the other hand, shows a short duration simulation, where a seeded infection fails to spread throughout the network. 
 
-![Short Duration Simulation](/Users/Basaraba/R/metaflu/inst/rome-presentation/base_low_dur_sim.gif) 
+![](/Users/Basaraba/R/metaflu/inst/rome-presentation/base_low_dur_sim.gif) 
 
 
 
@@ -93,6 +93,12 @@ Base Scenario - Spread Only                           0.1335270                 
 
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
+- The network graph below illustrates this growth scenario, with a random selection of nodes growing by a factor of 10 (indicated in green).
+
+
+
+
+![](presentation_file_files/figure-html/random-growth-vis-1.png)<!-- -->
 
 
 
@@ -111,6 +117,11 @@ Growth in Random Farms - Spread Only                           0.7414420        
 
 - Each simulation is seeded by choosing a random chicken to be infected. Since larger farms represent about 50% of the chicken population, there is about a 50% chance that the seeded infection will be on a larger farm.
 
+- The network graph below illustrates this growth scenario, with a clustered selection of nodes growing by a factor of 10 (indicated in green).
+
+
+
+![](presentation_file_files/figure-html/local-growth-vis-1.png)<!-- -->
 
 
 
@@ -122,8 +133,8 @@ Base Scenario                                                  0.0964127        
 Base Scenario - Spread Only                                    0.1335270                           0.1366944                           48.55556             0.0006463                                             0.000
 Growth in Random Farms                                         0.5917104                           0.5740800                           62.41400             0.0028588                                             0.202
 Growth in Random Farms - Spread Only                           0.7414420                           0.7181328                           77.50376             0.0035821                                             0.000
-Localized Farm Growth                                          0.4773329                           0.3747750                           49.82400             0.0023064                                             0.237
-Localized Farm Growth - Spread Only                            0.6254755                           0.4896330                           64.18480             0.0030222                                             0.000
+Localized Farm Growth                                          0.5127656                           0.3995100                           49.99800             0.0024792                                             0.202
+Localized Farm Growth - Spread Only                            0.6424679                           0.4993734                           61.76817             0.0031063                                             0.000
 <br>
 <br>
 
