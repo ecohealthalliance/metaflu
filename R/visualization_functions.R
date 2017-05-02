@@ -90,8 +90,9 @@ create_gif <- function(list_el, fname, g_status = FALSE){
 
 
 #' @export
+#' @importFrom gridExtra grid.arrange
 
-create_graph_panel <- function(result_array){
+create_graph_panel <- function(result_array, title){
   gdurations <- get_duration_array(result_array)
   gexposure <- get_exposure(result_array)
   gs.df <- get_all_sims("S", result_array)
@@ -128,7 +129,7 @@ create_graph_panel <- function(result_array){
                c(1,1,1,4),
                c(2,2,3,3))
 
-  grid.arrange(sir.graph,exposure.graph,duration.graph,farm.graph, layout_matrix = lay)
+  grid.arrange(sir.graph,exposure.graph,duration.graph,farm.graph, layout_matrix = lay, top=textGrob(title, gp = gpar(fontsize = 16)))
 
 }
 
