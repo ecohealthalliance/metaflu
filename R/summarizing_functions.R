@@ -147,19 +147,15 @@ get_number_culls <- function(results){
 
 #' @export
 vary_params <- function(param_value, param_vector, sims, farm_num, farm_size, parms){
-
   results_list <- lapply(param_vector, function(x){
     parms[[param_value]] <- x
-
     g_list <- mclapply(seq_len(sims), function(y){
       patches <- grow_patches_clustered(basic_patches(farm_size, farm_num))
       i_patches <- seed_initial_infection(patches)
       return(mf_sim(init = i_patches, parameters = parms, times=1:365, n_sims = 1))
-    }, mc.cores = 20)
-
+    }, mc.cores = detectCores()/2)
     return(do.call("abind", g_list))
   })
-
   final_df <- bind_rows(results_list)
 
   closs <- ggplot(data = final_df) +
@@ -187,7 +183,6 @@ vary_params <- function(param_value, param_vector, sims, farm_num, farm_size, pa
 
   grid.arrange(closs, cfarms, cduration, cexposure, layout_matrix = lay, top=textGrob("Cull Time Parameter Analysis", gp = gpar(fontsize = 16)))
 
-  rm(results_list)
 }
 
 
