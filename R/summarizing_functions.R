@@ -146,6 +146,7 @@ get_number_culls <- function(results){
 }
 
 #' @export
+#' @importFrom parallel detectCores
 vary_params <- function(param_value, param_vector, sims, farm_num, farm_size, parms){
   results_list <- lapply(param_vector, function(x){
     parms[[param_value]] <- x
