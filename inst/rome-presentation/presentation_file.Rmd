@@ -26,6 +26,7 @@ set.seed(123)
 P <- rprojroot::find_package_root_file
 library(parallel)
 library(gganimate)
+library(grid)
 ```
 
 ### Basic Run
@@ -149,7 +150,7 @@ kable_table <- function(df){
 
 ```{r visualize-basic}
 
-create_graph_panel(basic_results)
+create_graph_panel(basic_results, "Base Scenario")
 
 ```
 <br>
@@ -282,7 +283,7 @@ kable_table(bind_rows(rg_df, r_rg_df))
 
 ```{r visualize-gnc}
 
-create_graph_panel(random_growth)
+create_graph_panel(random_growth, "Random Growth Scenario")
 
 ```
 
@@ -335,7 +336,7 @@ kable_table(tot_df)
 
 ```{r visualize-gncr}
 
-create_graph_panel(random_growth)
+create_graph_panel(random_growth_c, "Localized Growth Scenario")
 
 ```
 
@@ -355,28 +356,28 @@ final_df <- readRDS(P("inst", "rome-presentation","cull-time-data.RDS"))
 
 closs <- ggplot(data = final_df) +
   geom_point(aes(x = scenario, y = mean_prop_loss)) +
-  labs(title = "Proportion of Loss by Time to Culling", x = "Cull Time", y = "Days") +
+  labs(title = "Proportion of Loss", x = "Culling Time (Days)", y = "Proportion of Chickens Lost") +
   theme_minimal()
 
 cfarms <- ggplot(data = final_df) +
   geom_point(aes(x = scenario, y = mean_proportion_farms)) +
-  labs(title = "Proportion of Infected Farms by Time to Culling", x = "Cull Time", y = "Days") +
+  labs(title = "Proportion of Infected Farms", x = "Culling Time (Days)", y = "Proportion of Farms Infected") +
   theme_minimal()
 
 cduration <- ggplot(data = final_df) +
   geom_point(aes(x = scenario, y = mean_duration)) +
-  labs(title = "Duration of Epidemic by Time to Culling", x = "Cull Time", y = "Days") +
+  labs(title = "Duration of Epidemic ", x = "Culling Time (Days)", y = "Days") +
   theme_minimal()
 
 cexposure <- ggplot(data = final_df) +
   geom_point(aes(x = scenario, y = mean_fraction_exposure)) +
-  labs(title = "Fraction Exposed by Time to Culling", x = "Cull Time", y = "Days") +
+  labs(title = "Exposure Index", x = "Culling Time (Days)", y = "Exposure Index") +
   theme_minimal()
 
 lay <- rbind(c(1,2),
              c(3,4))
 
-grid.arrange(closs, cfarms, cduration, cexposure, layout_matrix = lay)
+grid.arrange(closs, cfarms, cduration, cexposure, layout_matrix = lay, top=textGrob("Cull Time Parameter Analysis", gp = gpar(fontsize = 16)))
 
 ```
 
