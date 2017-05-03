@@ -3,7 +3,7 @@
 #' The simulator uses the **foreach** and **doRNG** packages to ensure
 #' reproducible, parallelizable results.  To run code in parallel, register
 #' a **foreach** back-end such as [doMC::registerDoMC()].
-#' @param init Intital conditions - a patches X 4 (SIRV) matrix of populations
+#' @param init Initial conditions - a patches X 4 (SIRV) matrix of populations
 #' @param parameters a list of parameter values.  See below for details
 #' @param times a vector of output times to report
 #' @param n_sims number of simulations to run

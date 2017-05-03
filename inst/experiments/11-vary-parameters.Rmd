@@ -123,3 +123,32 @@ rate_vector <- seq(0.01,0.2, 0.01)
 vary_params("omega", rate_vector)
 omega <- 0.03 #reset
 ```
+
+
+#Large farms
+
+In this experiment, the network was 100 farms with 500 chickens each. 
+
+Varying t-detect from 1 to 20 days.
+
+``` {r culling-large}
+farm_size <- 500
+
+cull_time_vector <- c(1:20)
+vary_params("cull_time", cull_time_vector)
+cull_time <- 1 #reset
+```
+
+Varying $\pi$ from 0.1 to 1. $\pi$-report and $\pi$-detect have been condensed to 1 overall probability by setting $\pi$-detect = 1.
+``` {r prob-large}
+prob_vector <- seq(0.1,1,0.1)
+vary_params("pi_report", prob_vector)
+pi_report <- 1 #reset
+```
+
+Varying $\omega$ from 0.01 to 0.2, showing a peak at ~0.1.
+```{r omega-large}
+rate_vector <- seq(0.01,0.2, 0.01)
+vary_params("omega", rate_vector)
+omega <- 0.03 #reset
+```

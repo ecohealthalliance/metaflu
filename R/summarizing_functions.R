@@ -1,5 +1,7 @@
 
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
+#'
 get_duration_array <- function(results){
   sims <- seq_len(dim(results)[4])
   durations <- lapply(sims, function(x) {
