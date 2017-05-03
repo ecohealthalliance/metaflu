@@ -1,7 +1,7 @@
 
+#' Returns a dataframe of simulation number and epidemic duration, the number of days with at least one infection present.
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
-#'
 get_duration_array <- function(results){
   sims <- seq_len(dim(results)[4])
   durations <- lapply(sims, function(x) {
@@ -14,7 +14,9 @@ get_duration_array <- function(results){
   return(data.frame(sim = sims, duration = unlist(durations)))
 }
 
+#' Returns a dataframe of simulation number and lower/median/upper number of infected chickens
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_infectious_array <- function(results){
   times <- seq_len(dim(results)[3])
   summaries <- sapply(times, function(x){
@@ -27,7 +29,9 @@ get_infectious_array <- function(results){
   return(df)
 }
 
+#' Returns a dataframe of simulation number and lower/median/upper number of susceptible chickens
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_susceptibles_array <- function(results){
   times <- seq_len(dim(results)[3])
   summaries <- sapply(times, function(x){
@@ -40,8 +44,9 @@ get_susceptibles_array <- function(results){
   return(df)
 }
 
-
+#' Returns a dataframe of simulation number and lower/median/upper number of recovered chickens
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_recovered_array <- function(results){
   times <- seq_len(dim(results)[3])
   summaries <- sapply(times, function(x){
@@ -54,7 +59,9 @@ get_recovered_array <- function(results){
   return(df)
 }
 
+#' Returns a dataframe of simulation number and whether the outbreak failed (defined as at most 1 infection)
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_failure_array <- function(results){
   sims <- seq_len(dim(results)[4])
   f_info <- sapply(sims, function(x){
@@ -67,7 +74,9 @@ get_failure_array <- function(results){
   return(df)
 }
 
+#' Returns array
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 reduce_epi_array <- function(results){
   non_failure_tf <- !get_failure_array(results)[,2]
   non_failures <- results[,,,non_failure_tf]
@@ -75,13 +84,16 @@ reduce_epi_array <- function(results){
 }
 
 
-
+#' Returns the proportion of epidemic failures, define as the number of failures/total results
 #' @export
+#' @param failure_results
 proportion_failed <- function(failure_results){
   sum(failure_results$failed)/length(failure_results$failed)
 }
 
+#' Returns a dataframe of the simulation number and the proportion of chickens lost to disease or culling
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_proportion_loss <- function(results){
   sims <- seq_len(dim(results)[4])
   loss <- sapply(sims, function(x){
@@ -95,7 +107,9 @@ get_proportion_loss <- function(results){
   return(df)
 }
 
+#' Returns a dataframe of the simulation number and the number of birds infected
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_exposure <- function(results){
   infections <- apply(results,4,function(x){
     i <- x["I",,]
@@ -105,7 +119,9 @@ get_exposure <- function(results){
   return(df)
 }
 
+#' Returns a dataframe of the simulation number and the fraction of birds infected
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_exposure_fraction <- function(results){
   infections <- apply(results,4,function(x){
     i <- x["I",,]
@@ -117,8 +133,10 @@ get_exposure_fraction <- function(results){
   return(df)
 }
 
-
+#' Returns a dataframe of simulation number, time, and number of birds in the given compartment
 #' @export
+#' @param compartment character representing which compartment (S, I, R, V, or C) to analyze
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_all_sims <- function(compartment, results){
   c.results <- lapply(seq_len(dim(results)[4]), function(x) results[compartment,,,x])
   c.reduced <- t(sapply(c.results, function(x) colSums(x)))
@@ -129,7 +147,9 @@ get_all_sims <- function(compartment, results){
   return(c.df)
 }
 
+#' Returns a dataframe of the simulation number and the number of farms affected by the outbreak
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_number_farms <- function(results){
   farms <- sapply(seq_len(dim(results)[4]), function(x){
     tot_i <- rowSums(results["I",,,x])
@@ -139,7 +159,9 @@ get_number_farms <- function(results){
   return(f.df)
 }
 
+#' Returns a vector of the number of culling events in each simulation
 #' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_number_culls <- function(results){
   farms <- sapply(seq_len(dim(results)[4]), function(x){
     tot_culls <- rowSums(results["C",,,x])
@@ -147,8 +169,16 @@ get_number_culls <- function(results){
   })
 }
 
+#' Produces graphs showing how bird loss, farms affected, outbreak duration, and number of birds exposed changes
+#' as the given parameter varies along the given range
 #' @export
 #' @importFrom parallel detectCores
+#' @param param_value the name of the parameter to vary
+#' @param param_vector the range over which the parameter will vary
+#' @param sims the number of simulations to run for each value of the parameter
+#' @param farm_num the number of farms in the network
+#' @param farm_size the typical farm size
+#' @param parms the list of parameters
 vary_params <- function(param_value, param_vector, sims, farm_num, farm_size, parms){
   results_list <- lapply(param_vector, function(x){
     parms[[param_value]] <- x
