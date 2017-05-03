@@ -159,24 +159,25 @@ vary_params <- function(param_value, param_vector, sims, farm_num, farm_size, pa
     }, mc.cores = detectCores()/2)
     return(do.call("abind", g_list))
   })
+
   final_df <- bind_rows(results_list)
 
-  closs <- ggplot(data = final_df) +
+  loss <- ggplot(data = final_df) +
     geom_point(aes(x = scenario, y = mean_prop_loss)) +
     labs(title = "Proportion of Loss", x = "Culling Time (Days)", y = "Proportion of Chickens Lost") +
     theme_minimal()
 
-  cfarms <- ggplot(data = final_df) +
+  farms <- ggplot(data = final_df) +
     geom_point(aes(x = scenario, y = mean_proportion_farms)) +
     labs(title = "Proportion of Infected Farms", x = "Culling Time (Days)", y = "Proportion of Farms Infected") +
     theme_minimal()
 
-  cduration <- ggplot(data = final_df) +
+  duration <- ggplot(data = final_df) +
     geom_point(aes(x = scenario, y = mean_duration)) +
     labs(title = "Duration of Epidemic ", x = "Culling Time (Days)", y = "Days") +
     theme_minimal()
 
-  cexposure <- ggplot(data = final_df) +
+  exposure <- ggplot(data = final_df) +
     geom_point(aes(x = scenario, y = mean_fraction_exposure)) +
     labs(title = "Exposure Index", x = "Culling Time (Days)", y = "Exposure Index") +
     theme_minimal()

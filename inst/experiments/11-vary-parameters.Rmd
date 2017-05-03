@@ -63,23 +63,18 @@ vary_params <- function(param_value, param_vector){
 
     return(do.call("abind", g_list))
   })
-  #print("savingRDS")
-  #saveRDS(results_list, "vary_params_small.rds")
-  #print("loadingRDS")
-  #results_list <- readRDS("vary_params_small.rds")
-  #graph the duration of the outbreak for each param value
+ 
 
   dlist <- lapply(seq_along(results_list), function(x){
-    #print(x)
-    #print(paste("cull-time =",cull_time_vector[x]))
     return(get_duration_array(results_list[[x]]))
   })
   dmeans <- sapply(dlist, function(x) mean(x$duration))
   duration_df <- data.frame(values = param_vector, mean_durations = dmeans)
   duration <- ggplot(data = duration_df) + geom_point(aes(x = values, y = mean_durations)) +
     labs(x = param_value, y = "mean duration") + theme_classic()
-  #+ scale_y_log10() + scale_x_log10()
+  
   plot(duration)
+  
   #graph severity of outbreak for each param value
   farm_num <- lapply(results_list, function(x) get_number_farms(x))
 
@@ -91,6 +86,7 @@ vary_params <- function(param_value, param_vector){
   outbreak <- ggplot(data = outbreak_df) + geom_point(aes(x = values, y = props)) +
     labs(x = param_value, y = "proportion of outbreaks >5 farms")
   plot(outbreak)
+  
   #unclutter environment
   rm(results_list)
 }
