@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
-devtools::load_all()
+#devtools::load_all()
 library(metaflu)
 library(ggplot2)
 library(dplyr)
@@ -20,17 +20,9 @@ library(doRNG)
 set.seed(123)
 ```
 
-```{r patch-functions}
-
-basic_patches <- function(farm_size, farm_number){
-  initial_cond <- cbind(rpois(farm_number, farm_size), matrix(0, ncol = 3, nrow = farm_number))
-  return(initial_cond)
-}
-```
-
 ### Introduction
 
-The goal of this document is to determine what culling scenario returns the simulation to baseline after one infection.
+The goal of this document is to determine what culling scenario returns the simulation to equilibrium after an initial infection.
 
 The following parameters determine the scenario:
 
@@ -55,11 +47,6 @@ The simulation also inherits the following options from experiment 4:
 - 100 Farms
 
 - One initial seeded infection
-
-#Notes
-
-Compare duration, total infections, farm spread 
-Change one parameter & graph as it changes
 
 
 ```{r network-setup}
@@ -132,6 +119,8 @@ $\pi$-detect = 0.9 -- Detection probability
 
 ### Initial Run
 
+One initial infection is seeded on a farm. In this experiment, all farms have approximately 40 chickens.
+
 ```{r basic-run}
 basic_results <- mf_sim(init = initial_cond, parameters = parms, times=1:365, n_sims = 1000)
 
@@ -188,7 +177,7 @@ grid.arrange(sir.df,total_i,duration,farm_numbers, layout_matrix = lay)
 
 ### Growth Run
 
-Eleven percent of farms have grown in size by an order of magnititude, resulting in the doubling of total chicken population in the system. This intensification occurs in the same region.
+Eleven percent of farms have grown in size by an order of magnititude, resulting in the doubling of total chicken population in the system. This growth occurs in the same region, representing an intensification of the industry in a particular area.
 
 ```{r growth-run}
 #Grow an adjacent set of patches to get double total chicken population
