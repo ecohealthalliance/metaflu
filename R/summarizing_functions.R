@@ -169,6 +169,17 @@ get_number_culls <- function(results){
   })
 }
 
+#' Returns a vector of the number of farms culled in each simulation
+#' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
+get_farm_culls <- function(results){
+  farms <- sapply(seq_len(dim(results)[4]), function(x){
+    tot_culls <- sum((results["C",,,x])==2)
+    return(sum(tot_culls > 0))
+  })
+}
+
+
 #' Produces graphs showing how bird loss, farms affected, outbreak duration, and number of birds exposed changes
 #' as the given parameter varies along the given range
 #' @export
