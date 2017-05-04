@@ -215,7 +215,7 @@ vary_params <- function(param_value, param_vector, sims, farm_num, farm_size, pa
   lay <- rbind(c(1,2),
                c(3,4))
 
-  grid.arrange(closs, cfarms, cduration, cexposure, layout_matrix = lay, top=textGrob("Cull Time Parameter Analysis", gp = gpar(fontsize = 16)))
+  grid.arrange(loss, farms, duration, exposure, layout_matrix = lay, top=textGrob("Cull Time Parameter Analysis", gp = gpar(fontsize = 16)))
 
 }
 
