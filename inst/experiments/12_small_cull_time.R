@@ -38,6 +38,6 @@ parms = list(
   stochastic_network = TRUE
 )
 
-vary_params(param_vector = cull_times, param_value = "cull_time", farm_num = num,
-            farm_size = size, sims = sims, parms = parms)
+
+vary_params("cull_time", cull_times, sims, num, size, parms)
 
