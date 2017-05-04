@@ -39,6 +39,6 @@ parms = list(
 )
 
 
-vary_params(param_name = "cull_time", param_values = 1:2, sims = 10, num_of_farms = 200, num_of_chickens = 40, parms = parms)
+vary_params(param_name = "cull_time", param_values = cull_times, sims = 1000, num_of_farms = 200, num_of_chickens = 40, parms = parms)
 
 

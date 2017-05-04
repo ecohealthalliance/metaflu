@@ -201,30 +201,33 @@ vary_params <- function(param_name, param_values, sims, num_of_farms, num_of_chi
     return(df)
   }
 
-  summarized_runs <- lapply(seq_along(results_list), function(x) create_pres_df(results_list[[x]], x))
-
+  summarized_runs <- lapply(seq_along(results_list), function(x) create_pres_df(results_list[[x]], param_values[x]))
 
   final_df <- bind_rows(summarized_runs)
 
   loss <- ggplot(data = final_df) +
-    geom_point(aes(x = scenario, y = mean_prop_loss)) +
+    geom_point(aes(x = param_values, y = mean_prop_loss)) +
     labs(title = "Proportion of Loss", x = "Culling Time (Days)", y = "Proportion of Chickens Lost") +
-    theme_minimal()
+    theme_minimal() +
+    scale_x_log10() + scale_y_log10()
 
   farms <- ggplot(data = final_df) +
-    geom_point(aes(x = scenario, y = mean_proportion_farms)) +
+    geom_point(aes(x = param_values, y = mean_proportion_farms)) +
     labs(title = "Proportion of Infected Farms", x = "Culling Time (Days)", y = "Proportion of Farms Infected") +
-    theme_minimal()
+    theme_minimal() +
+    scale_x_log10() + scale_y_log10()
 
   duration <- ggplot(data = final_df) +
-    geom_point(aes(x = scenario, y = mean_duration)) +
+    geom_point(aes(x = param_values, y = mean_duration)) +
     labs(title = "Duration of Epidemic ", x = "Culling Time (Days)", y = "Days") +
-    theme_minimal()
+    theme_minimal() +
+    scale_x_log10() + scale_y_log10()
 
   exposure <- ggplot(data = final_df) +
-    geom_point(aes(x = scenario, y = mean_fraction_exposure)) +
+    geom_point(aes(x = param_values, y = mean_fraction_exposure)) +
     labs(title = "Exposure Index", x = "Culling Time (Days)", y = "Exposure Index") +
-    theme_minimal()
+    theme_minimal() +
+    scale_x_log10() + scale_y_log10()
 
   lay <- rbind(c(1,2),
                c(3,4))
