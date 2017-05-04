@@ -1,4 +1,3 @@
-knitr::opts_chunk$set(echo = TRUE)
 library(metaflu)
 library(ggplot2)
 library(dplyr)
@@ -9,6 +8,7 @@ library(gridExtra)
 library(abind)
 registerDoMC(cores = 20)
 library(doRNG)
+library(grid)
 set.seed(123)
 
 #Setup
@@ -39,5 +39,6 @@ parms = list(
 )
 
 
-vary_params("cull_time", cull_times, sims, num, size, parms)
+vary_params(param_name = "cull_time", param_values = 1:2, sims = 10, num_of_farms = 200, num_of_chickens = 40, parms = parms)
+
 
