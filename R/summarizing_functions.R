@@ -179,18 +179,32 @@ get_number_culls <- function(results){
 #' @param farm_num the number of farms in the network
 #' @param farm_size the typical farm size
 #' @param parms the list of parameters
-vary_params <- function(param_value, param_vector, sims, farm_num, farm_size, parms){
-  results_list <- lapply(param_vector, function(x){
-    parms[[param_value]] <- x
+vary_params <- function(param_name, param_values, sims, num_of_farms, num_of_chickens, parms){
+  results_list <- lapply(param_values, function(x){
+    parms[[param_name]] <- x
     g_list <- mclapply(seq_len(sims), function(y){
-      patches <- grow_patches_clustered(basic_patches(farm_size, farm_num))
+      patches <- grow_patches_clustered(basic_patches(num_of_chickens, num_of_farms))
       i_patches <- seed_initial_infection(patches)
       return(mf_sim(init = i_patches, parameters = parms, times=1:365, n_sims = 1))
     }, mc.cores = detectCores()/2)
     return(do.call("abind", g_list))
   })
 
-  final_df <- bind_rows(results_list)
+  create_pres_df <- function(res_array, scenario){ #results, cull_time (string)
+    mean_prop_loss <- mean(get_proportion_loss(res_array)[,2])
+    mean_proportion_farms <- mean(get_number_farms(res_array)[,2]/num_of_farms) #denominator: # of farms
+    mean_duration <- mean(get_duration_array(res_array)[,2])
+    mean_fraction_exposure <- mean(get_exposure_fraction(res_array)[,2])
+    prop_failure <- proportion_failed(get_failure_array(res_array))
+    df <- data.frame(scenario, mean_prop_loss, mean_proportion_farms, mean_duration,
+                     mean_fraction_exposure, prop_failure, stringsAsFactors = FALSE)
+    return(df)
+  }
+
+  summarized_runs <- lapply(seq_along(results_list), function(x) create_pres_df(results_list[[x]], x))
+
+
+  final_df <- bind_rows(summarized_runs)
 
   loss <- ggplot(data = final_df) +
     geom_point(aes(x = scenario, y = mean_prop_loss)) +
