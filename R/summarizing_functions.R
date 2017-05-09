@@ -1,4 +1,5 @@
-
+#' Duration of Outbreak
+#'
 #' Returns a dataframe of simulation number and epidemic duration, the number of days with at least one infection present.
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -14,6 +15,8 @@ get_duration_array <- function(results){
   return(data.frame(sim = sims, duration = unlist(durations)))
 }
 
+#' Infected Statistics
+#'
 #' Returns a dataframe of simulation number and lower/median/upper number of infected chickens
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -29,6 +32,8 @@ get_infectious_array <- function(results){
   return(df)
 }
 
+#' Susceptible Statistics
+#'
 #' Returns a dataframe of simulation number and lower/median/upper number of susceptible chickens
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -44,6 +49,8 @@ get_susceptibles_array <- function(results){
   return(df)
 }
 
+#' Recovered Statistics
+#'
 #' Returns a dataframe of simulation number and lower/median/upper number of recovered chickens
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -59,6 +66,8 @@ get_recovered_array <- function(results){
   return(df)
 }
 
+#' Failed Outbreaks
+#'
 #' Returns a dataframe of simulation number and whether the outbreak failed (defined as at most 1 infection)
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -74,7 +83,9 @@ get_failure_array <- function(results){
   return(df)
 }
 
-#' Returns array
+#' Epidemic Failures
+#'
+#' Returns array of epidemic failures
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 reduce_epi_array <- function(results){
@@ -83,7 +94,8 @@ reduce_epi_array <- function(results){
   return(non_failures)
 }
 
-
+#' Proportion of Outbreak Failures
+#'
 #' Returns the proportion of epidemic failures, define as the number of failures/total results
 #' @export
 #' @param failure_results the results of a get_failure_array() call
@@ -91,6 +103,8 @@ proportion_failed <- function(failure_results){
   sum(failure_results$failed)/length(failure_results$failed)
 }
 
+#' Loss Proportion
+#'
 #' Returns a dataframe of the simulation number and the proportion of chickens lost to disease or culling
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -107,6 +121,8 @@ get_proportion_loss <- function(results){
   return(df)
 }
 
+#' Number Infected
+#'
 #' Returns a dataframe of the simulation number and the number of birds infected
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -119,6 +135,8 @@ get_exposure <- function(results){
   return(df)
 }
 
+#' Fraction Infected
+#'
 #' Returns a dataframe of the simulation number and the fraction of birds infected
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -133,6 +151,8 @@ get_exposure_fraction <- function(results){
   return(df)
 }
 
+#' Outbreak Summary
+#'
 #' Returns a dataframe of simulation number, time, and number of birds in the given compartment
 #' @export
 #' @param compartment character representing which compartment (S, I, R, V, or C) to analyze
@@ -147,6 +167,8 @@ get_all_sims <- function(compartment, results){
   return(c.df)
 }
 
+#' Number of Affected Farms
+#'
 #' Returns a dataframe of the simulation number and the number of farms affected by the outbreak
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
@@ -176,6 +198,8 @@ get_farm_culls <- function(results){
   df <- data.frame(sim = seq_along(farms), culled_farms = farms)
 }
 
+#' Parameter Variation
+#'
 #' Produces graphs showing how bird loss, farms affected, outbreak duration, and number of birds exposed changes
 #' as the given parameter varies along the given range
 #' @export
