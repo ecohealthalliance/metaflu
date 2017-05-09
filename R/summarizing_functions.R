@@ -159,6 +159,8 @@ get_number_farms <- function(results){
   return(f.df)
 }
 
+#' Number of Infected Farms
+#'
 #' Returns a vector of the number of farms culled in each simulation
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)

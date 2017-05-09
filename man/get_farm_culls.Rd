@@ -2,7 +2,7 @@
 % Please edit documentation in R/summarizing_functions.R
 \name{get_farm_culls}
 \alias{get_farm_culls}
-\title{Returns a vector of the number of farms culled in each simulation}
+\title{Number of Infected Farms}
 \usage{
 get_farm_culls(results)
 }
