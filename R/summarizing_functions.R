@@ -86,7 +86,7 @@ reduce_epi_array <- function(results){
 
 #' Returns the proportion of epidemic failures, define as the number of failures/total results
 #' @export
-#' @param failure_results
+#' @param failure_results the results of a get_failure_array() call
 proportion_failed <- function(failure_results){
   sum(failure_results$failed)/length(failure_results$failed)
 }

@@ -7,7 +7,7 @@
 mf_sim(init, parameters, times, n_sims = 1, return_array = TRUE)
 }
 \arguments{
-\item{init}{Intital conditions - a patches X 4 (SIRV) matrix of populations}
+\item{init}{Initial conditions - a patches X 4 (SIRV) matrix of populations}
 
 \item{parameters}{a list of parameter values.  See below for details}
 
