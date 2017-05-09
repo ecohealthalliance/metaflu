@@ -83,9 +83,9 @@ get_failure_array <- function(results){
   return(df)
 }
 
-#' Epidemic Failures
+#' Successful Epidemics
 #'
-#' Returns array of epidemic failures
+#' Returns dataframe of successful epidemics
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 reduce_epi_array <- function(results){
