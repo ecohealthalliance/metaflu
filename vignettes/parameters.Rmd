@@ -14,6 +14,68 @@ cite_options(citation_format = 'pandoc')
 P <- rprojroot::find_rstudio_root_file
 ```
 
+###Questions
+
+__Movement Rate ($\omega$)__
+
+- How often do small / large farms exchange chickens?
+
+- How many chickens are at a market?
+
+- How many people would be at a market?
+
+- Do chickens that go to market return to farms?
+
+__Network__
+
+- Is a large farm realistically one large node, or a clustering of small nodes?
+
+- If large farms have separate sections, how are they connected and what are the movement patterns between sections?
+
+__Culling Parameters ($\tau$, $\iota$, $\pi$, t-detect)__
+
+- How long does it take between knowing a farm is infected and culling the farm?
+
+- How common is it for a farmer to report an infected farm?
+
+- What is a realistic threshold of deaths or infections for a farmer to notice a problem? What is a realistic time frame for this process?
+
+- What is the actual culling protocol?
+
+- Is there government oversight?
+
+- Is there some standard culling procedure?
+
+- How good are your diagnostic tools? Are there false alarms? (to get at pi-detect)
+
+__Direct Transmission ($\beta$, $\rho$)__
+
+- How does transmission change per strain?
+
+- How does it change based on farm size?
+
+__Recovery Rate ($\gamma$)__ 
+
+- What is the recovery rate per strain?
+
+- Does this change based on farm size (due to attention / resources)? 
+
+__Base Mortality Rate ($\mu$)__
+
+- What is the base mortality rate for chickens?
+
+- Does this change in different locales?
+
+- Does this differ based on the size or type of farm (due to attention / resources)?
+
+__Disease Mortality Rate ($\alpha$)__
+
+- What is the disease mortality per strain?
+
+- Does the disease mortality change during the course of an outbreak?
+
+
+
 ###Previous Model Parameters `r citep('10.1371/journal.pone.0080091')`:
 
 Direct Transmission $\beta = 0.004$  
@@ -32,38 +94,6 @@ Virion Shedding Rate $\sigma = 10^5$
 
 Movement Rate $\omega = 0.30$
 
-###New Model Paramaters
-
-__Poultry to Poultry Direct Transmission $\beta_{PP}$__
-Originally adapted from duck study `r citep('10.1128/JVI.78.9.4892-4901.2004')` ~ but unclear how exactly. Existing studies / models deal with village- or flock-level transmission, not individuals. For example, in West Bengal`r citep('10.1038/srep02175')`: $1.00 * 10^{-8}$, originally taken from a study in wild birds `r citep('10.3934/dcdsb.2012.17.2829')`. 
-
-__Wild Bird to Poultry Direct Transmission $\beta_{WP}$__  
-Transmission between wild birds and poultry *communities* ($1.00 * 10^{-8}$) was based on previous study of avian influenza dynamics in *wild birds* `r citep('10.3934/dcdsb.2012.17.2829')`
-
-__Poultry to Human Direct Transmission $\beta_{PH}$__  
-Fitted parameters from models predicting the seasonality of cumulative cases of HPAI H5N1 `r citep('10.1142/S0218339013400044')`, the estimated range for direct poultry to human transmission was $1.9 * 10^{-11}$ to $2.3 * 10^{-11}$.
-
-__Recovery Rate $\upsilon$__  
-Recovery for HPAI infected poultry does not seem to be commonly modeled -- instead either SI models `r citep(list('10.1017/S0950268808000885', '10.1142/S0218339013400044'))` or SIC (Culled) `r citep('10.1038/srep02175')` are used.  
-
-__Disease Mortality Rate $\alpha$__  
-Originally given as a range from studies based on ducks / chickens. When re-calculated based on chicken-specific parameter paper`r citep('10.1371/journal.ppat.1000281')`, $\alpha = 0.39$.
-
-__Environmental Uptake Rate $\nu$__  
-__Virion Infectiousness $\phi$__  
-__Virus Degradation Rate $\eta$__  
-__Virion Shedding Rate $\sigma$__  
-
-Environmental transmission not deemed relevant for initial model ~ more relevant for fecal-oral LPAI transmission when no epidemic occurs. In a long-term model could be interesting to consider effects of cleaning. HPAI environmental persistence has been researched under laboratory conditions `r citep('10.1021/es1016153')`. 
-
-__Movement Rate $\omega$__
-
-Original paper uses values from FAO Poultry Review in Egypt `r citep('ftp://ftp.fao.org/docrep/fao/011/ai355e/ai355e00.pdf')`, although exact decision on how to quantify $\omega$ not immediately clear. Once the method is understood, this resource may provide more specific information for Ethiopia: `r citep('http://www.fao.org/docrep/013/al837e/al837e00.pdf')`. Alternatively, FAO data may be relevant here. 
-
-
-```{r, include=FALSE}
-write.bibtex(file = P("vignettes/references.bib"))
-```
 
 ## References
 
