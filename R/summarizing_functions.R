@@ -200,8 +200,7 @@ get_farm_culls <- function(results){
 
 #' Parameter Variation
 #'
-#' Produces graphs showing how bird loss, farms affected, outbreak duration, and number of birds exposed changes
-#' as the given parameter varies along the given range
+#' Returns the results of varying the given parameter over the given range.
 #' @export
 #' @importFrom parallel detectCores
 #' @param param_value the name of the parameter to vary
@@ -221,9 +220,21 @@ vary_params <- function(param_name, param_values, sims, num_of_farms, num_of_chi
     return(do.call("abind", g_list))
   })
 
-  create_pres_df <- function(res_array, scenario){ #results, cull_time (string)
+
+}
+
+#' Summarizing Graphs
+#'
+#' Summarizes the results of vary_params by graphing bird loss, farms affected, outbreak duration,
+#' and number of birds exposed against the given range of values.
+#' @export
+#' @param results_list list of results
+#' @param param_values list of independent variable
+make_graphs <- function(results_list, param_values){
+
+  create_pres_df <- function(res_array, scenario){
     mean_prop_loss <- mean(get_proportion_loss(res_array)[,2])
-    mean_proportion_farms <- mean(get_number_farms(res_array)[,2]/num_of_farms) #denominator: # of farms
+    mean_proportion_farms <- mean(get_number_farms(res_array)[,2]/num_of_farms)
     mean_duration <- mean(get_duration_array(res_array)[,2])
     mean_fraction_exposure <- mean(get_exposure_fraction(res_array)[,2])
     prop_failure <- proportion_failed(get_failure_array(res_array))
@@ -239,26 +250,26 @@ vary_params <- function(param_name, param_values, sims, num_of_farms, num_of_chi
   loss <- ggplot(data = final_df) +
     geom_point(aes(x = param_values, y = mean_prop_loss)) +
     labs(title = "Proportion of Loss", x = "Culling Time (Days)", y = "Proportion of Chickens Lost") +
-    theme_minimal() +
-    scale_x_log10() + scale_y_log10()
+    theme_minimal()
+  #scale_x_log10() + scale_y_log10()
 
   farms <- ggplot(data = final_df) +
     geom_point(aes(x = param_values, y = mean_proportion_farms)) +
     labs(title = "Proportion of Infected Farms", x = "Culling Time (Days)", y = "Proportion of Farms Infected") +
-    theme_minimal() +
-    scale_x_log10() + scale_y_log10()
+    theme_minimal()
+  #scale_x_log10() + scale_y_log10()
 
   duration <- ggplot(data = final_df) +
     geom_point(aes(x = param_values, y = mean_duration)) +
     labs(title = "Duration of Epidemic ", x = "Culling Time (Days)", y = "Days") +
-    theme_minimal() +
-    scale_x_log10() + scale_y_log10()
+    theme_minimal()
+  #scale_x_log10() + scale_y_log10()
 
   exposure <- ggplot(data = final_df) +
     geom_point(aes(x = param_values, y = mean_fraction_exposure)) +
     labs(title = "Exposure Index", x = "Culling Time (Days)", y = "Exposure Index") +
-    theme_minimal() +
-    scale_x_log10() + scale_y_log10()
+    theme_minimal()
+  #scale_x_log10() + scale_y_log10()
 
   lay <- rbind(c(1,2),
                c(3,4))
