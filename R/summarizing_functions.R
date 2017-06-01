@@ -200,7 +200,7 @@ get_farm_culls <- function(results){
 
 #' Parameter Variation
 #'
-#' Returns the results of varying the given parameter over the given range.
+#' Returns an array of the results of varying the given parameter over the given range.
 #' @export
 #' @importFrom parallel detectCores
 #' @param param_value the name of the parameter to vary
@@ -209,7 +209,28 @@ get_farm_culls <- function(results){
 #' @param farm_num the number of farms in the network
 #' @param farm_size the typical farm size
 #' @param parms the list of parameters
-vary_params <- function(param_name, param_values, sims, num_of_farms, num_of_chickens, parms){
+vary_params <- function(param_name, param_values, sims = 1000, num_of_farms = 200, num_of_chickens = 50,
+                        parms = list(
+                        beta = 1.44456,   #contact rate for direct transmission
+                        gamma = 0.167,  #recovery rate
+                        mu = 0,         #base mortality rate
+                        alpha = 0.4,      #disease mortality rate
+                        phi = 0,  #infectiousness of environmental virions
+                        eta = 0,     #degradation rate of environmental virions
+                        nu =  0.00,    #uptake rate of environmental virion
+                        sigma = 0,      #virion shedding rate
+                        omega = 0.03,   #movement rate (look at varying this too--inversely dependent with farm size)
+                        rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+                        lambda = 0,     #force of infection from external sources
+                        tau_crit = 5,   #critical suveillance time
+                        I_crit = 1,     #threshold for reporting
+                        pi_report = 1, #reporting probability
+                        pi_detect = 1, #detection probability
+                        cull_time = 1,   #time to detect
+                        network_type = "smallworld",
+                        network_parms = list(dim = 1, size = num_of_farms, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+                        stochastic_network = TRUE
+                        )){
   results_list <- lapply(param_values, function(x){
     parms[[param_name]] <- x
     g_list <- mclapply(seq_len(sims), function(y){
@@ -217,10 +238,60 @@ vary_params <- function(param_name, param_values, sims, num_of_farms, num_of_chi
       i_patches <- seed_initial_infection(patches)
       return(mf_sim(init = i_patches, parameters = parms, times=1:365, n_sims = 1))
     }, mc.cores = detectCores()/2)
-    return(do.call("abind", g_list))
+    bound_array <- do.call("abind", g_list)
+    return(bound_array)
   })
+  return(results_list)
+}
 
-
+#' 2-Dimensional Parameter Variation
+#'
+#' Returns an array of the results of varying the 2 given parameters over the given ranges.
+#' @export
+#' @importFrom parallel detectCores
+#' @param param_value the name of the parameter to vary
+#' @param param_vector the range over which the parameter will vary
+#' @param sims the number of simulations to run for each value of the parameter
+#' @param farm_num the number of farms in the network
+#' @param farm_size the typical farm size
+#' @param parms the list of parameters
+vary_params_2d <- function(param1_name, param1_values, param2_name, param2_values, sims = 1000, num_of_farms = 200, num_of_chickens = 50,
+                           parms = list(
+                             beta = 1.44456,   #contact rate for direct transmission
+                             gamma = 0.167,  #recovery rate
+                             mu = 0,         #base mortality rate
+                             alpha = 0.4,      #disease mortality rate
+                             phi = 0,  #infectiousness of environmental virions
+                             eta = 0,     #degradation rate of environmental virions
+                             nu =  0.00,    #uptake rate of environmental virion
+                             sigma = 0,      #virion shedding rate
+                             omega = 0.03,   #movement rate (look at varying this too--inversely dependent with farm size)
+                             rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+                             lambda = 0,     #force of infection from external sources
+                             tau_crit = 5,   #critical suveillance time
+                             I_crit = 1,     #threshold for reporting
+                             pi_report = 1, #reporting probability
+                             pi_detect = 1, #detection probability
+                             cull_time = 1,   #time to detect
+                             network_type = "smallworld",
+                             network_parms = list(dim = 1, size = num_of_farms, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+                             stochastic_network = TRUE
+                           )){
+  param_combos <- expand.grid(param1_values, param2_values)
+  results_list <- map2(param_combos[,1],param_combos[,2],function(a,b){
+    parms[[param1_name]] <- a
+    parms[[param2_name]] <- b
+    g_list <- mclapply(seq_len(sims), function(y){
+      patches <- grow_patches_clustered(basic_patches(num_of_chickens, num_of_farms))
+      i_patches <- seed_initial_infection(patches)
+      return(mf_sim(init = i_patches, parameters = parms, times=1:365, n_sims = 1))
+    }, mc.cores = detectCores()/2)
+    bound_array <- do.call("abind", g_list)
+    attributes(bound_array)[[param1_name]] <- a
+    attributes(bound_array)[[param2_name]] <- b
+    return(bound_array)
+  })
+  return(results_list)
 }
 
 #' Summarizing Graphs
@@ -231,17 +302,6 @@ vary_params <- function(param_name, param_values, sims, num_of_farms, num_of_chi
 #' @param results_list list of results
 #' @param param_values list of independent variable
 make_graphs <- function(results_list, param_values){
-
-  create_pres_df <- function(res_array, scenario){
-    mean_prop_loss <- mean(get_proportion_loss(res_array)[,2])
-    mean_proportion_farms <- mean(get_number_farms(res_array)[,2]/num_of_farms)
-    mean_duration <- mean(get_duration_array(res_array)[,2])
-    mean_fraction_exposure <- mean(get_exposure_fraction(res_array)[,2])
-    prop_failure <- proportion_failed(get_failure_array(res_array))
-    df <- data.frame(scenario, mean_prop_loss, mean_proportion_farms, mean_duration,
-                     mean_fraction_exposure, prop_failure, stringsAsFactors = FALSE)
-    return(df)
-  }
 
   summarized_runs <- lapply(seq_along(results_list), function(x) create_pres_df(results_list[[x]], param_values[x]))
 
@@ -277,5 +337,3 @@ make_graphs <- function(results_list, param_values){
   grid.arrange(loss, farms, duration, exposure, layout_matrix = lay, top=textGrob("Cull Time Parameter Analysis", gp = gpar(fontsize = 16)))
 
 }
-
-
