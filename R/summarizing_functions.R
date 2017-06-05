@@ -255,30 +255,31 @@ vary_params <- function(param_name, param_values, sims = 1000, num_of_farms = 20
 #' @param farm_num the number of farms in the network
 #' @param farm_size the typical farm size
 #' @param parms the list of parameters
-vary_params_2d <- function(param1_name, param1_values, param2_name, param2_values, sims = 1000, num_of_farms = 200, num_of_chickens = 50,
-                           parms = list(
-                             beta = 1.44456,   #contact rate for direct transmission
-                             gamma = 0.167,  #recovery rate
-                             mu = 0,         #base mortality rate
-                             alpha = 0.4,      #disease mortality rate
-                             phi = 0,  #infectiousness of environmental virions
-                             eta = 0,     #degradation rate of environmental virions
-                             nu =  0.00,    #uptake rate of environmental virion
-                             sigma = 0,      #virion shedding rate
-                             omega = 0.03,   #movement rate (look at varying this too--inversely dependent with farm size)
-                             rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
-                             lambda = 0,     #force of infection from external sources
-                             tau_crit = 5,   #critical suveillance time
-                             I_crit = 1,     #threshold for reporting
-                             pi_report = 1, #reporting probability
-                             pi_detect = 1, #detection probability
-                             cull_time = 1,   #time to detect
-                             network_type = "smallworld",
-                             network_parms = list(dim = 1, size = num_of_farms, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
-                             stochastic_network = TRUE
-                           )){
+vary_params_2d <- function(param1_name, param1_values, param2_name, param2_values, sims = 1000, num_of_farms = 200, num_of_chickens = 50, parms #,
+                           # parms = list(
+                           #   beta = 1.44456,   #contact rate for direct transmission
+                           #   gamma = 0.167,  #recovery rate
+                           #   mu = 0,         #base mortality rate
+                           #   alpha = 0.4,      #disease mortality rate
+                           #   phi = 0,  #infectiousness of environmental virions
+                           #   eta = 0,     #degradation rate of environmental virions
+                           #   nu =  0.00,    #uptake rate of environmental virion
+                           #   sigma = 0,      #virion shedding rate
+                           #   omega = 0.03,   #movement rate (look at varying this too--inversely dependent with farm size)
+                           #   rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+                           #   lambda = 0,     #force of infection from external sources
+                           #   tau_crit = 5,   #critical suveillance time
+                           #   I_crit = 1,     #threshold for reporting
+                           #   pi_report = 1, #reporting probability
+                           #   pi_detect = 1, #detection probability
+                           #   cull_time = 1,   #time to detect
+                           #   network_type = "smallworld",
+                           #   network_parms = list(dim = 1, size = num_of_farms, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+                           #   stochastic_network = TRUE
+                           # )
+                           ){
   param_combos <- expand.grid(param1_values, param2_values)
-  results_list <- map2(param_combos[,1],param_combos[,2],function(a,b){
+  results_list <- purrr::map2(param_combos[,1],param_combos[,2],function(a,b){
     parms[[param1_name]] <- a
     parms[[param2_name]] <- b
     g_list <- mclapply(seq_len(sims), function(y){
