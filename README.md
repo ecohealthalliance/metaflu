@@ -8,4 +8,18 @@ This repository contains code and analysis for EcoHealth Alliance's Africa Susta
 
 This repository is setup as an R package that implements the core model, which is based on Hosseini et al.'s 2013 metapopulation model \[1\]. The `vignettes/` directory contains interim notes and analyses. References for this project can be found in [this Paperpile folder](https://paperpile.com/shared/NmMQtu)
 
+---
+### Installation
+
+In order to install this package you need to install and use the development version of `devtools`:
+
+`devtools::install_github("hadley/devtools@1.13.0")` 
+
+This will allow you to install private packages from github without throwing an error:
+
+`devtools::install_github("ecohealthalliance/metaflu")`
+
+---
+### References
+
 Hosseini, P. R., T. Fuller, R. Harrigan, D. Zhao, C. S. Arriola, A. Gonzalez, M. J. Miller, X. Xiao, T. B. Smith, J. H. Jones, and P. Daszak. 2013. Metapopulation Dynamics Enable Persistence of Influenza A, Including A/H5N1, in Poultry. PLoS ONE 8:e80091.
