@@ -278,7 +278,7 @@ vary_params_2d <- function(param1_name, param1_values, param2_name, param2_value
                              stochastic_network = TRUE
                            )){
   param_combos <- expand.grid(param1_values, param2_values)
-  results_list <- map2(param_combos[,1],param_combos[,2],function(a,b){
+  results_list <- purrr::map2(param_combos[,1],param_combos[,2],function(a,b){
     parms[[param1_name]] <- a
     parms[[param2_name]] <- b
     g_list <- mclapply(seq_len(sims), function(y){
