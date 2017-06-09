@@ -68,7 +68,7 @@ get_recovered_array <- function(results){
 
 #' Failed Outbreaks
 #'
-#' Returns a dataframe of simulation number and whether the outbreak failed (defined as at most 1 infection)
+#' Returns a dataframe of simulation number and whether the outbreak failed (defined as spreading to more than 1 farm)
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_failure_array <- function(results){
@@ -219,7 +219,7 @@ vary_params <- function(param_name, param_values, sims = 1000, num_of_farms = 20
                         eta = 0,     #degradation rate of environmental virions
                         nu =  0.00,    #uptake rate of environmental virion
                         sigma = 0,      #virion shedding rate
-                        omega = 0.03,   #movement rate (look at varying this too--inversely dependent with farm size)
+                        omega = 0.03,   #movement rate
                         rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
                         lambda = 0,     #force of infection from external sources
                         tau_crit = 5,   #critical suveillance time
@@ -265,7 +265,7 @@ vary_params_2d <- function(param1_name, param1_values, param2_name, param2_value
                              eta = 0,     #degradation rate of environmental virions
                              nu =  0.00,    #uptake rate of environmental virion
                              sigma = 0,      #virion shedding rate
-                             omega = 0.03,   #movement rate (look at varying this too--inversely dependent with farm size)
+                             omega = 0.03,   #movement rate
                              rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
                              lambda = 0,     #force of infection from external sources
                              tau_crit = 5,   #critical suveillance time
@@ -336,4 +336,30 @@ make_graphs <- function(results_list, param_values){
 
   grid.arrange(loss, farms, duration, exposure, layout_matrix = lay, top=textGrob("Cull Time Parameter Analysis", gp = gpar(fontsize = 16)))
 
+}
+
+#' Summary Dataframe
+#' Returns a dataframe of the epidemic duration, proportion loss, exposure index, and
+#' number of affected farms for every simulation produced by vary_params
+#' @export
+#' @param filename path to file containing results of vary_params
+#' @param val_vector range of the varied parameter
+#' @param param_name name of the varied parameter
+create_summary_df <- function(filename, val_vector, param_name){
+  P <- rprojroot::find_rstudio_root_file
+  res <- readRDS(P("inst/experiments/", filename))
+  sum_df_list <- purrr::map2(res, val_vector, function(x,y){
+    duration_df <- get_duration_array(x)
+    loss_df <- get_proportion_loss(x)
+    exposure_df <- get_exposure_fraction(x)
+    farms_df <- get_number_farms(x)
+    summary_df <- full_join(duration_df, loss_df, by = "sim") %>%
+      full_join(exposure_df, by = "sim") %>%
+      full_join(farms_df, by = "sim")
+    summary_df[[param_name]] <- y
+    summary_df <- rename(summary_df, prop_loss = total_i)
+    return(summary_df)
+  })
+  total_df <- bind_rows(sum_df_list)
+  return(total_df)
 }
