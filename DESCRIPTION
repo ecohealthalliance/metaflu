@@ -23,7 +23,11 @@ Imports:
     igraph,
     doRNG (>= 1.6.2),
     foreach,
-    stringi
+    stringi,
+    animation,
+    gganimate,
+    ggraph,
+    gridExtra
 Suggests:
     testthat,
     doMC,
