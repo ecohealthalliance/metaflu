@@ -10,5 +10,5 @@ get_failure_array(results)
 \item{results}{4-dimensional array of results (compartment, patch, time, simulation)}
 }
 \description{
-Returns a dataframe of simulation number and whether the outbreak failed (defined as at most 1 infection)
+Returns a dataframe of simulation number and whether the outbreak failed (defined as spreading to more than 1 farm)
 }

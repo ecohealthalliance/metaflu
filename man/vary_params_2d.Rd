@@ -5,7 +5,12 @@
 \title{2-Dimensional Parameter Variation}
 \usage{
 vary_params_2d(param1_name, param1_values, param2_name, param2_values,
-  sims = 1000, num_of_farms = 200, num_of_chickens = 50, parms)
+  sims = 1000, num_of_farms = 200, num_of_chickens = 50,
+  parms = list(beta = 1.44456, gamma = 0.167, mu = 0, alpha = 0.4, phi = 0,
+  eta = 0, nu = 0, sigma = 0, omega = 0.03, rho = 0.85256, lambda = 0, tau_crit
+  = 5, I_crit = 1, pi_report = 1, pi_detect = 1, cull_time = 1, network_type =
+  "smallworld", network_parms = list(dim = 1, size = num_of_farms, nei = 2.33, p
+  = 0.0596, multiple = FALSE, loops = FALSE), stochastic_network = TRUE))
 }
 \arguments{
 \item{sims}{the number of simulations to run for each value of the parameter}
