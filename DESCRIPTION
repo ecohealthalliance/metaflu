@@ -31,6 +31,8 @@ Suggests:
     rprojroot
 Remotes:
     enozao/doRNG
+    dgrtwo/gganimate
+    thomasp85/ggraph
 RoxygenNote: 6.0.1
 SystemRequirements: C++11
 URL: https://github.com/noamross/metaflu
