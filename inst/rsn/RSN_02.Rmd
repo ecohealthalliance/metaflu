@@ -1,0 +1,390 @@
+---
+title: "Exploring Livestock Census Data- Ethiopia"
+author: "Aishwarya Venkat"
+date: "June 14, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+library(rgdal);
+library(maptools)
+library(raster);
+library(spatstat);
+library(igraph);
+library(reshape2);
+library(rgeos);
+library(dplyr);
+library(RColorBrewer);
+library(gridExtra);
+library(knitr);
+
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+P <-rprojroot::find_rstudio_root_file
+options(scipen=999)
+
+# Functions to create voronoi tesselations
+
+owin2Polygons <- function(x, id="1") {
+  stopifnot(is.owin(x))
+  x <- as.polygonal(x)
+  closering <- function(df) { df[c(seq(nrow(df)), 1), ] }
+  pieces <- lapply(x$bdry,
+                   function(p) {
+                     Polygon(coords=closering(cbind(p$x,p$y))) })
+  z <- Polygons(pieces, id)
+  return(z)
+}
+
+tess2SP <- function(x) {
+  stopifnot(is.tess(x))
+  y <- tiles(x)
+  nom <- names(y)
+  z <- list()
+  for(i in seq(y))
+    z[[i]] <- owin2Polygons(y[[i]], nom[i])
+  return(SpatialPolygons(z))
+}
+
+# Read in data
+
+path<-paste0("./data_toread/")
+filenames<-gsub(".csv", "", list.files(path))
+
+for(i in 1:length(filenames)){
+  assign(filenames[i], read.csv(paste0(path, filenames[i], ".csv")))
+}
+
+## Loading Ethiopia shapefile data:
+
+## OLD WAY--results in boundary issues
+# ethiopia<-raster::getData('GADM', country='ETH', level=0)   # Country shp
+# projection(ethiopia)<-wgs84
+
+## NEW way, using Africa Open data dataset
+## Also removes Lake Tana extent from the Ethiopia shapefile
+
+url<-"https://africaopendata.org/dataset/76683f42-e659-4c57-8d4f-bc1debdf2720/resource/31a214fd-c5aa-4a39-bbc8-87bd8483032a/download/ethiopiaall.zip"
+
+tmpdir <- tempdir()
+file <- basename(url)
+download.file(url, file)
+unzip(file, exdir = tmpdir)
+
+shapeFile <- paste0(tmpdir,"\\Ethiopia_All\\Eth_Zone_2013.shp")
+ethiopia<-readOGR(shapeFile)
+
+```
+
+## Processing data
+
+All Ethiopia's data is considered "valid coordinates". However, there is a bit of noise associated with these coordinates. So we figure out how the hierarchy of these households to figure out how they are grouped.
+
+```{r eth_1}
+
+# Bring in Ethiopia Admin 2 shapefile
+
+wgs84<-"+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0";
+ethiopia<-spTransform(ethiopia, wgs84)
+
+## We will expand the country boundary by 50 km just to make sure none of the border points get cut off
+#adindan<-"+proj=utm +zone=36 +ellps=clrk80 +units=m +no_defs"
+#ethiopia_buf<-spTransform(ethiopia, CRS(adindan))
+#ethiopia_buf<-gBuffer(ethiopia, byid=FALSE, 50000)
+#ethiopia<-spTransform(ethiopia_buf, wgs84)
+
+# Remove any data where X and Y are NA
+completeFun <- function(data, desiredCols) {
+  completeVec <- complete.cases(data[, desiredCols])
+  return(data[completeVec, ])
+}
+
+lc_ethiopia<-completeFun(lc_ethiopia, c("latitude", "longitude"))
+lc_ethiopia$id<-id(lc_ethiopia)
+head(lc_ethiopia)
+
+adm_strat<-lc_ethiopia %>% group_by(zone,woreda, kebele, hhid) %>% tally()
+head(adm_strat)  
+
+# Looks like they sampled anywhere between 1 - 12 households per kebele
+
+# Since there are multiple points with one central location, let's use these points # to create n number of points per lat/long with different extents
+
+tally_table<-lc_ethiopia %>% group_by(latitude, longitude, hhid) %>% tally()
+
+# So for each point in the survey, sum(n)=# of points which need to be sampled, and
+# hhid*n = total unique hhids to be assigned.
+
+```
+
+## Create Voronoi polygons 
+
+From the above table, we know that the same lat/long can appear multiple times. The n here is the number of samples we need to generate within the Voronoi polygon surrounding the point.
+
+For each polygon, we also need a unique list of hhids so we can match up points to the survey data.
+
+
+```{r hh_adm}
+
+ethiopia_owin<-as.owin(ethiopia)
+pts_ppp<-ppp(lc_ethiopia$longitude, lc_ethiopia$latitude, window=ethiopia_owin)
+dlet<-dirichlet(pts_ppp)
+voronoi<-tess2SP(dlet)
+
+allpts=NULL
+
+# Set up spatialpoints layer for the unique lat/longs
+
+pts_sp<-SpatialPoints(data.frame(x=tally_table$longitude, y=tally_table$latitude))
+
+for(i in 1:length(voronoi)){
+  
+  # Extract polygon
+  poly<-voronoi[i]
+  
+  # Figure out which points fall within this specific poly
+  pts<-pts_sp[poly]
+  
+  # subset hhids by the unique lat/long combos in this df
+  
+  id_sub<-subset(lc_ethiopia, longitude %in% pts@coords[,1] & 
+                     latitude %in% pts@coords[,2])$id
+
+  sampledpts<-spsample(voronoi[i],n=length(id_sub),type="random")
+  
+  if(length(sampledpts)==1){
+    sampledpts<-SpatialPointsDataFrame(sampledpts, 
+                                     data=data.frame(newid=id_sub))
+  } else{
+  sampledpts<-SpatialPointsDataFrame(sampledpts, 
+                                     data=data.frame(newid=sample(id_sub)))
+  }
+  
+    if(i==1){
+      allpts=sampledpts
+    } else{
+      allpts<-rbind(allpts, sampledpts)
+    }
+}
+
+## THIS PORTION MIGHT THROW ERRORS SOMETIMES--because of issues sampling in 
+## "zero-area" polygons. Run this chunk again if it doesn't work.
+
+lc_eth_spdf<-allpts
+
+par(mar=c(0,0,0,0), oma=c(0,0,0,0))
+plot(voronoi, main=NULL);
+plot(lc_eth_spdf, add=TRUE, main=NULL)
+
+```
+
+### FIX--FIGURE OUT HOW TO HANDLE POINTS IN ETHIOPIA/ERITREA BORDER 
+
+```{r hh_match}
+
+missingrows<-lc_ethiopia[setdiff(lc_ethiopia$id, lc_eth_spdf$newid),]
+missingrows<-SpatialPoints(data.frame(missingrows$longitude, missingrows$latitude))
+
+plot(ethiopia); plot(missingrows, add=TRUE, col="red", fil="red", pch=16, cex=1)
+
+# There is one point that is outside the border of Ethiopia. This is part of a contested boundary--need to figure out how to process
+
+```
+
+### Merge survey data with spatial data
+
+```{r merge_surv_spat}
+
+lc_eth_spdf@data<-merge(lc_eth_spdf@data, lc_ethiopia, 
+                        by.x="newid", by.y="id", all=FALSE)
+
+```
+
+### Initial plots
+
+```{r plot1, fig.height=10, fig.width=8}
+
+# Create a layer-list
+eth_outline <- list("sp.polygons", ethiopia, col = "grey")
+
+par(oma=c(0,0,0,0), mar=c(0,0,0,0))
+
+pal1 <- brewer.pal(n =4, name = "Reds"); 
+chickens<-spplot(lc_eth_spdf, "chicken", 
+       cuts = quantile(lc_eth_spdf$chicken[lc_eth_spdf$chicken>0]),
+       col.regions = pal1, col = "transparent",
+       sp.layout = eth_outline, auto.key=TRUE, key.space="right",
+       par.settings = list(axis.line = list(col =  'transparent')),
+       main="Chickens")
+
+pal2 <- brewer.pal(n =4, name = "Greens"); 
+cattle<-spplot(lc_eth_spdf, "cattle", 
+       cuts = quantile(lc_eth_spdf$cattle[lc_eth_spdf$cattle>0]),
+       col.regions = pal2, col = "transparent",
+       sp.layout = eth_outline, auto.key=TRUE, key.space="right",
+       par.settings = list(axis.line = list(col =  'transparent')),
+       main="Cattle")
+
+
+pal3 <- brewer.pal(n=4, name = "Greys"); 
+sheep<-spplot(lc_eth_spdf, "sheep", 
+       cuts = quantile(lc_eth_spdf$sheep[lc_eth_spdf$sheep>0]),
+       col.regions = pal3, col = "transparent",
+       sp.layout = eth_outline, auto.key=TRUE, key.space="right",
+       par.settings = list(axis.line = list(col =  'transparent')),
+       main="Sheep")
+
+pal4 <- brewer.pal(n=4, name = "YlOrBr"); 
+goats<-spplot(lc_eth_spdf, "goats", 
+       cuts = quantile(lc_eth_spdf$goats[lc_eth_spdf$goats>0]),
+       col.regions = pal4, col = "transparent",
+       sp.layout = eth_outline, auto.key=TRUE, key.space="right",
+       par.settings = list(axis.line = list(col =  'transparent')),
+       main="Goats")
+
+pal5 <- brewer.pal(n=2, name = "Blues"); 
+otheran<-spplot(lc_eth_spdf, "otheran", 
+       cuts = quantile(lc_eth_spdf$otheran[lc_eth_spdf$otheran>0])[3:5],
+       col.regions = pal5, col = "transparent",
+       sp.layout = eth_outline, auto.key=TRUE, key.space="right",
+       par.settings = list(axis.line = list(col =  'transparent')),
+       main="Other Animals")
+
+grid.arrange(chickens, cattle, sheep, goats, otheran, ncol=2, nrow=3)
+
+```
+
+### Making a "Real-World Network" from the data
+
+```{r distmat}
+
+distMat<-round(spDists(as.matrix(lc_eth_spdf@coords), longlat=TRUE))  # dist in km
+row.names(distMat)<-lc_eth_spdf$newid;
+colnames(distMat)<-lc_eth_spdf$newid;
+
+# Process KNOWN
+
+mat1<-setNames(melt(distMat), c('row', 'col', 'values'))
+mat1$weight<-1/(mat1$values)
+
+mat1$values[mat1$values > 50] <- 0  # No links between points > 50 km apart
+mat1$values[mat1$values != 0] <- 1  # all other links are 1
+
+# Now let's randomly rewire some 0s & 1s
+
+mat1$newvalues<-sample(c(0,1), size=nrow(mat1), replace=TRUE, prob=c(.99, 0.01))
+
+# Now we remove all the matrices where we didn't have any links, and pick out only # the connected network
+
+mat2<-mat1[mat1$newvalues==1,]; mat2$values<-NULL; mat2$newvalues<-NULL;
+
+# We will also set up vertices here
+nodes<-data.frame(row=unique(mat2$row))
+nodes<-merge(nodes, 
+             data.frame(subset(lc_eth_spdf@data, select=c("newid", "chicken"))),
+             by.x="row", by.y="newid", all=FALSE)
+
+rw <- graph_from_data_frame(d=mat2, vertices=nodes, directed=T)
+
+rws<- simplify(rw, remove.multiple = T, remove.loops = F, 
+                   edge.attr.comb=c(weight="mean", type="ignore") )
+
+```
+
+### Compare this to a Watts-Strogatz model of similar extent:
+
+```{r}
+
+ws<-watts.strogatz.game(1, nrow(lc_eth_spdf@coords), 10, 0.01)
+V(ws)$chicken<-sample(lc_eth_spdf@data$chicken, nrow(lc_eth_spdf@coords))
+
+```
+
+### Compare clustering coefficients
+
+```{r rsn_clust}
+
+data.frame(Model=c("Real World", "Small World"), 
+           Value=round(c(transitivity(rws), transitivity(ws)), 3),
+           Meaning=c("Low clustering", "Higher clustering"))
+
+```
+
+### Compare path lengths between all pairs of vertices
+
+```{r rsn_dist}
+
+data.frame(Model=c("Real World", "Small World"), 
+           Value=round(c(mean_distance(rws), mean_distance(ws)), 3))
+
+```
+
+### Compare closeness centrality
+
+Closeness centrality is defined as how many steps are required to access every other vertex from a given vertex.
+
+```{r rsn_close}
+
+data.frame(Model=c("Real World", "Small World"), 
+           Value=round(c(mean(closeness(rws)), mean(closeness((ws)))), 6))
+
+```
+
+### Compare assortativity based on chicken variable
+
+```{r rsn_assort}
+
+data.frame(Model=c("Real World", "Small World"), 
+           Value=round(c(assortativity(rws, V(rws)$chicken, directed=F),
+                         assortativity(ws, V(ws)$chicken, directed=F)), 6),
+           Meaning=c("Negative tendency of node connections where chicken values are similar", "Negative tendency of node connections where chicken values are similar"))
+
+```
+
+### Communities: Small World Network
+
+```{r community_ws}
+
+cfg<-cluster_fast_greedy(ws)
+clp<-cluster_label_prop(ws)
+kc <- coreness(ws, mode="all")   
+
+## GENERATE PLOT OF COMMUNITIES PER ALGORITHM
+
+layout(matrix(c(1,2,3,4), 2, 2, byrow = TRUE))
+par(mar=c(0,0,2,0), oma=c(0,0,0,0))
+plot(cfg, ws, main="Greedy Optimization", edge.arrow.size=.2,
+     vertex.label.color="transparent", vertex.color="transparent",
+     vertex.frame.color="transparent")
+plot(clp, ws, main="Propagating Labels", edge.arrow.size=.2,
+     vertex.label.color="transparent", vertex.color="transparent",
+     vertex.frame.color="transparent")
+plot(ws, vertex.size=kc, main="K-Core Decomp", edge.arrow.size=.2,
+    vertex.label.color="transparent", vertex.color="transparent",
+     vertex.frame.color="transparent")
+
+```
+
+### Communities: Real World Network
+
+```{r community_rws}
+
+cfg<-cluster_fast_greedy(rws)
+clp<-cluster_label_prop(rws)
+kc <- coreness(rws, mode="all")   
+
+## GENERATE PLOT OF COMMUNITIES PER ALGORITHM
+
+layout(matrix(c(1,2,3,4), 2, 2, byrow = TRUE))
+par(mar=c(0,0,2,0), oma=c(0,0,0,0))
+plot(cfg, rws, main="Greedy Optimization", edge.arrow.size=.2,
+     vertex.label.color="transparent", vertex.color="transparent",
+     vertex.frame.color="transparent")
+plot(clp, rws, main="Propagating Labels", edge.arrow.size=.2,
+     vertex.label.color="transparent", vertex.color="transparent",
+     vertex.frame.color="transparent")
+plot(rws, vertex.size=kc, main="K-Core Decomp", edge.arrow.size=.2,
+    vertex.label.color="transparent", vertex.color="transparent",
+     vertex.frame.color="transparent")
+
+```
