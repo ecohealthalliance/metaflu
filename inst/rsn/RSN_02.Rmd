@@ -369,7 +369,7 @@ plot(ws, vertex.size=kc, main="K-Core Decomp", edge.arrow.size=.2,
 
 ```{r community_rws}
 
-cfg<-cluster_fast_greedy(rws)
+cfg<-cluster_fast_greedy(as.undirected(rws))
 clp<-cluster_label_prop(rws)
 kc <- coreness(rws, mode="all")   
 
