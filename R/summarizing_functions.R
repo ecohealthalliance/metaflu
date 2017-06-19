@@ -68,7 +68,7 @@ get_recovered_array <- function(results){
 
 #' Failed Outbreaks
 #'
-#' Returns a dataframe of simulation number and whether the outbreak failed (defined as at most 1 infection)
+#' Returns a dataframe of simulation number and whether the outbreak failed (defined as spreading to more than 1 farm)
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_failure_array <- function(results){
@@ -219,7 +219,7 @@ vary_params <- function(param_name, param_values, sims = 1000, num_of_farms = 20
                         eta = 0,     #degradation rate of environmental virions
                         nu =  0.00,    #uptake rate of environmental virion
                         sigma = 0,      #virion shedding rate
-                        omega = 0.03,   #movement rate (look at varying this too--inversely dependent with farm size)
+                        omega = 0.03,   #movement rate
                         rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
                         lambda = 0,     #force of infection from external sources
                         tau_crit = 5,   #critical suveillance time
@@ -255,29 +255,28 @@ vary_params <- function(param_name, param_values, sims = 1000, num_of_farms = 20
 #' @param farm_num the number of farms in the network
 #' @param farm_size the typical farm size
 #' @param parms the list of parameters
-vary_params_2d <- function(param1_name, param1_values, param2_name, param2_values, sims = 1000, num_of_farms = 200, num_of_chickens = 50, parms #,
-                           # parms = list(
-                           #   beta = 1.44456,   #contact rate for direct transmission
-                           #   gamma = 0.167,  #recovery rate
-                           #   mu = 0,         #base mortality rate
-                           #   alpha = 0.4,      #disease mortality rate
-                           #   phi = 0,  #infectiousness of environmental virions
-                           #   eta = 0,     #degradation rate of environmental virions
-                           #   nu =  0.00,    #uptake rate of environmental virion
-                           #   sigma = 0,      #virion shedding rate
-                           #   omega = 0.03,   #movement rate (look at varying this too--inversely dependent with farm size)
-                           #   rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
-                           #   lambda = 0,     #force of infection from external sources
-                           #   tau_crit = 5,   #critical suveillance time
-                           #   I_crit = 1,     #threshold for reporting
-                           #   pi_report = 1, #reporting probability
-                           #   pi_detect = 1, #detection probability
-                           #   cull_time = 1,   #time to detect
-                           #   network_type = "smallworld",
-                           #   network_parms = list(dim = 1, size = num_of_farms, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
-                           #   stochastic_network = TRUE
-                           # )
-                           ){
+vary_params_2d <- function(param1_name, param1_values, param2_name, param2_values, sims = 1000, num_of_farms = 200, num_of_chickens = 50,
+                           parms = list(
+                             beta = 1.44456,   #contact rate for direct transmission
+                             gamma = 0.167,  #recovery rate
+                             mu = 0,         #base mortality rate
+                             alpha = 0.4,      #disease mortality rate
+                             phi = 0,  #infectiousness of environmental virions
+                             eta = 0,     #degradation rate of environmental virions
+                             nu =  0.00,    #uptake rate of environmental virion
+                             sigma = 0,      #virion shedding rate
+                             omega = 0.03,   #movement rate
+                             rho = 0.85256,        #contact  nonlinearity 0=dens-dependent, 1=freq-dependent
+                             lambda = 0,     #force of infection from external sources
+                             tau_crit = 5,   #critical suveillance time
+                             I_crit = 1,     #threshold for reporting
+                             pi_report = 1, #reporting probability
+                             pi_detect = 1, #detection probability
+                             cull_time = 1,   #time to detect
+                             network_type = "smallworld",
+                             network_parms = list(dim = 1, size = num_of_farms, nei = 2.33, p = 0.0596, multiple = FALSE, loops = FALSE),
+                             stochastic_network = TRUE
+                           )){
   param_combos <- expand.grid(param1_values, param2_values)
   results_list <- purrr::map2(param_combos[,1],param_combos[,2],function(a,b){
     parms[[param1_name]] <- a
@@ -337,4 +336,30 @@ make_graphs <- function(results_list, param_values){
 
   grid.arrange(loss, farms, duration, exposure, layout_matrix = lay, top=textGrob("Cull Time Parameter Analysis", gp = gpar(fontsize = 16)))
 
+}
+
+#' Summary Dataframe
+#' Returns a dataframe of the epidemic duration, proportion loss, exposure index, and
+#' number of affected farms for every simulation produced by vary_params
+#' @export
+#' @param filename path to file containing results of vary_params
+#' @param val_vector range of the varied parameter
+#' @param param_name name of the varied parameter
+create_summary_df <- function(filename, val_vector, param_name){
+  P <- rprojroot::find_rstudio_root_file
+  res <- readRDS(P("inst/experiments/", filename))
+  sum_df_list <- purrr::map2(res, val_vector, function(x,y){
+    duration_df <- get_duration_array(x)
+    loss_df <- get_proportion_loss(x)
+    exposure_df <- get_exposure_fraction(x)
+    farms_df <- get_number_farms(x)
+    summary_df <- full_join(duration_df, loss_df, by = "sim") %>%
+      full_join(exposure_df, by = "sim") %>%
+      full_join(farms_df, by = "sim")
+    summary_df[[param_name]] <- y
+    summary_df <- rename(summary_df, prop_loss = total_i)
+    return(summary_df)
+  })
+  total_df <- bind_rows(sum_df_list)
+  return(total_df)
 }

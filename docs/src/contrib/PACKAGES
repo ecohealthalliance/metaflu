@@ -1,0 +1,10 @@
+Package: metaflu
+Version: 0.1.0
+Imports: Rcpp (>= 0.12.7), dplyr, tibble, tidyr, reshape2, igraph, doRNG (>= 1.6.2), foreach,
+          stringi
+LinkingTo: Rcpp, RcppArmadillo, RcppProgress
+Suggests: testthat, doMC, knitcitations, rprojroot
+License: MIT + file LICENSE
+MD5sum: 5afb7e3f8b6dcd83d08efdf9a67d670b
+NeedsCompilation: yes
+

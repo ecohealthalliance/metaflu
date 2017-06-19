@@ -1,0 +1,96 @@
+---
+title: "royce-presentation"
+author: "Kate Royce"
+date: "6/9/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(metaflu)
+library(here)
+library(gridExtra)
+```
+
+## Effect of Different Parameters
+
+We first varied the parameters $\iota$ (reporting threshold), $\pi$ (reporting probability), and t-detect (time to culling) according to reported ranges to determine if one intervention had a different effect from the others. While varying $\iota$ and $\pi$ did not change the proportion loss significantly, varying t-detect had a strong effect.
+
+```{r comparison-plots, echo = FALSE}
+# The code to produce these .rds files is in experiment 13.
+
+Icrit_df <- readRDS(here("inst/experiments/kate_presentation/Icrit_df.rds"))
+means <- Icrit_df %>%
+  group_by(I_crit) %>%
+  summarize(mean_prop_loss = mean(total_i))
+
+Icrit_prop_lost <- ggplot(data = means) +
+  geom_point(aes(x = c(1:10), y = mean_prop_loss)) +
+  labs(title = "Proportion of Loss", x = "Reporting Threshold", y = "Proportion of Chickens Lost") +
+  scale_y_continuous(limits = c(0.2,0.8)) +
+  theme(axis.text = element_text(size = 60)) +
+  theme_minimal()
+
+plot(Icrit_prop_lost)
+
+#for pi_report
+pi_df <- readRDS(here("inst/experiments/kate_presentation/pi_df.rds"))
+means <- pi_df %>%
+  group_by(pi_report) %>%
+  summarize(mean_prop_loss = mean(total_i))
+
+pi_prop_lost <- ggplot(data = means) +
+  geom_point(aes(x = seq(0.05,1,0.05), y = mean_prop_loss)) +
+  labs(title = "Proportion of Loss", x = "Reporting Probability", y = "Proportion of Chickens Lost") +
+  scale_y_continuous(limits = c(0.2,0.8)) +
+  theme_minimal()
+
+plot(pi_prop_lost)
+
+#for cull_time
+cull_df <- readRDS(here("inst/experiments/kate_presentation/cull_df.rds"))
+means <- cull_df %>%
+  group_by(cull_time) %>%
+  summarize(mean_prop_loss = mean(total_i))
+
+cull_prop_lost <- ggplot(data = means) +
+  geom_point(aes(x = c(1:20), y = mean_prop_loss)) +
+  labs(title = "Proportion of Loss", x = "Cull Time", y = "Proportion of Chickens Lost") +
+  scale_y_continuous(limits = c(0.2,0.8)) +
+  theme_minimal()
+
+plot(cull_prop_lost)
+```
+
+## Preliminary findings for varying farm size
+
+Varying the farm size produces the same threshold behavior for culling: after a week, changes in t-detect don't produce a noticeable difference, but there's a strong correlation between lowering cull time and mitigating an outbreak under 7 days. This graph also shows a difference in outbreak severity for household farms (size ~50) versus larger commercial activity (200-1000 birds per farm), where more of the population was lost during an epidemic.
+
+```{r vary-size, echo = FALSE}
+# to produce the 3D graph of cull time, farm size, and proportion lost
+three_dim = readRDS(here("inst/experiments/kate_presentation/3D_size_variation.rds"))
+means <- three_dim %>%
+  group_by(cull_time, size) %>%
+  summarize(mean_prop_loss = mean(prop_loss))
+
+plot_ly(means, x = ~cull_time, y = ~size, z = ~mean_prop_loss)
+```
+
+## Culling at different intensity levels
+
+Varying both farm size and the per-chicken movement rate, $\omega$, produces the same pattern for varying t-detect. While the different levels of severity between household and commercial farms are present at $\omega$ < 0.03, the similar levels of severity for $\omega$ = 0.05 may be due to the outbreak burning through all susceptibles before even the fastest culling can take effect.
+
+``` {r vary-both, echo = FALSE}
+final <- readRDS(here("inst/experiments/kate_presentation/vary_omega_size_df.rds"))
+means <- final %>%
+  group_by(omega, size, cull_time) %>%
+  summarize(mean_prop_loss = mean(prop_loss))
+
+ggplot(data = means, aes(x = cull_time, y = mean_prop_loss)) +
+  geom_point() +
+  facet_grid(omega ~ size) +
+  theme_minimal()
+```

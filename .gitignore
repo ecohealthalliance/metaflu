@@ -2,8 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
-docs/
-docs/
 *test.R
 cull_time*.rds
 

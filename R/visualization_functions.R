@@ -85,7 +85,7 @@ create_gif <- function(list_el, fname, g_status = FALSE, title = ""){
     theme(legend.position="none",
           panel.border = element_blank())
 
-  animation::ani.options(interval=0.25)
+  ani.options(interval=0.25)
   gganimate(plot, paste0(fname,'.gif'), title_frame = FALSE)
 }
 
