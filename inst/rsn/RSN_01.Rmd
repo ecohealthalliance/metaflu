@@ -1,0 +1,229 @@
+---
+title: "Random Spatial Network Generation"
+author: "Aishwarya Venkat"
+date: "June 14, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE, message=FALSE, warning=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE, fig.width=10, fig.height=6, warning = FALSE)
+
+library(rgdal);
+library(maptools)
+library(raster);
+library(spatstat);
+library(igraph);
+library(reshape2);
+
+P <-rprojroot::find_rstudio_root_file
+
+```
+
+### Loading data
+
+Let's create some data to test this method with. We will generate 100 random points within Egypt's national borders. 
+Note: explore removing water bodies from this extent?
+
+```{r load_data}
+
+wgs84<-"+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0";
+
+egypt<-raster::getData('GADM', country='EGY', level=0)   # Country shp
+projection(egypt)<-wgs84
+
+```
+
+### Generating Voronoi Polygons
+
+```{r voronoi, message=FALSE, warning=FALSE}
+
+## Sample 100 random points within Egypt
+
+pts<-spsample(egypt, n=100, type="random")
+
+egypt<-as.owin(egypt)
+pts_ppp<-ppp(pts@coords[,1], pts@coords[,2], window=egypt)
+dlet<-dirichlet(pts_ppp)
+
+owin2Polygons <- function(x, id="1") {
+  stopifnot(is.owin(x))
+  x <- as.polygonal(x)
+  closering <- function(df) { df[c(seq(nrow(df)), 1), ] }
+  pieces <- lapply(x$bdry,
+                   function(p) {
+                     Polygon(coords=closering(cbind(p$x,p$y))) })
+  z <- Polygons(pieces, id)
+  return(z)
+}
+
+tess2SP <- function(x) {
+  stopifnot(is.tess(x))
+  y <- tiles(x)
+  nom <- names(y)
+  z <- list()
+  for(i in seq(y))
+    z[[i]] <- owin2Polygons(y[[i]], nom[i])
+  return(SpatialPolygons(z))
+}
+
+voronoi<-tess2SP(dlet)
+
+```
+
+### Randomly sample within Voronoi polygons
+
+```{r samp_in_voronoi, message=FALSE, warning=FALSE}
+
+allpts=NULL
+
+for(i in 1:length(voronoi)){
+  sampledpts<-spsample(voronoi[i],n=2,type="random")
+    if(i==1){
+      allpts=sampledpts
+    } else{
+      allpts<-rbind(allpts, sampledpts)
+    }
+}
+allpts<-SpatialPoints(data.frame(allpts))
+allpts$id<-1:nrow(allpts@coords)
+
+plot(egypt, main=NULL); 
+plot(voronoi, add=TRUE, main=NULL);
+plot(allpts, add=TRUE, main=NULL)
+```
+
+### Build Watts-Strogatz model
+
+First, we build a Watts-Strogatz small-world model based on the derived points. We will also assign it a random farm size value between 1 and 100.
+
+```{r}
+
+ws<-watts.strogatz.game(1, nrow(allpts@coords), 5, 0.05)
+V(ws)$farmsize<-round(runif(length(V(ws)), 1, 100))
+
+```
+
+### Build "real-world" model
+
+We can also use the generated data to create another model closer to the real world. We begin by assuming that there is a lesser likelihood that points less than 50 km apart would be connected--individual farmers will likely not travel >50 km to sell chickens. Then, to assign some randomness to points over large distances, we randomly create links between points, simulating to the Strogatz model.
+
+```{r}
+
+distMat<-round(spDists(as.matrix(allpts@coords), longlat=TRUE))  # dist in km
+rownames(distMat)<-allpts$id
+
+# Process KNOWN
+
+distMat[distMat > 50] <- 0  # No links between points > 50 km apart
+mat1<-setNames(melt(distMat), c('row', 'col', 'values'))
+mat1$values[mat1$values != 0] <- 1  # all other links are 1
+
+# Now let's randomly rewire some 0s to 1s
+
+mat1$newvalues<-sample(c(0,1), size=nrow(mat1), replace=TRUE, prob=c(.99, 0.01))
+
+# Now we remove all the matrices where we didn't have any links, and pick out only # the connected network
+
+mat2<-mat1[mat1$newvalues==1,]; mat2$values<-NULL;
+
+# We will also set up vertices here
+nodes<-append(unique(mat2$row), unique(mat2$col))
+nodes<-data.frame(row=unique(nodes))
+
+# Randomly assign a "household" anywhere between 1-100 chickens
+
+nodes$farmsize<-round(runif(nrow(nodes), 1, 100))
+
+rw <- graph_from_data_frame(d=mat2, vertices=nodes, directed=T)
+
+```
+
+This function derives network and community characteristics from the points. The outputs are added to the global environment with a prefix of choice
+
+```{r derive_network_metrics}
+
+network_metrics<-function(obj, prefix){
+
+  obj2<-simplify(obj, remove.multiple = F, remove.loops = T)
+
+  ## Get vertex characteristics
+
+  vert_char<-data.frame(
+    id=1:length(V(obj2)),
+    Closeness=closeness(obj2, mode="all", weights=NA),
+    Degree=degree(obj2, mode="all", normalized=T),
+    Hub_Score=hub_score(obj2, weights=NA)$vector,
+    AuthoritY_Score=authority_score(obj2, weights=NA)$vector,
+    Transitivity_Local=transitivity(obj2, type="local")
+  )
+
+  ## Get network characteristics
+
+  net_char<-data.frame(
+    Assortativity_FarmSize=assortativity(obj2, V(obj2)$farmsize, directed=F),
+    Assortativity_Degree=assortativity_degree(obj2, directed=F),
+    Transitivity_Global=transitivity(obj2, type="global")
+  )
+
+  ## DEFINE COMMUNITITES BASED ON DIFFERENT ALGORITHMS
+
+  ceb <- cluster_edge_betweenness(as.undirected(obj2))   # Edge betweenness (Newman-Girvan)
+  clp <- cluster_label_prop(as.undirected(obj2))     # Propagating labels
+  cfg <- cluster_fast_greedy(as.undirected(obj2))   # Greedy optimization of modularity
+  kc <- coreness(obj2, mode="all")    # K-core decomposition
+
+  ## GENERATE PLOT OF COMMUNITIES PER ALGORITHM
+
+  p<-recordPlot()
+  layout(matrix(c(1,2,3,4), 2, 2, byrow = TRUE))
+  par(mar=c(0,0,2,0), oma=c(0,0,0,0))
+  plot(ceb, obj2, main="Edge-Betweenness", edge.arrow.size=.2)
+  plot(cfg, obj2, main="Greedy Optimization", edge.arrow.size=.2)
+  plot(clp, obj2, main="Propagating Labels", edge.arrow.size=.2)
+  plot(obj2, vertex.size=kc, vertex.label=kc, vertex.color=kc,
+       main="K-Core Decomp", edge.arrow.size=.2)
+
+  ## ASSIGN TO ENVIRONMENT
+
+  assign(paste0(prefix, "_simp"), obj2, envir=globalenv())
+  assign(paste0(prefix, "_vert_char"), vert_char, envir=globalenv())
+  assign(paste0(prefix, "_net_char"), net_char, envir=globalenv())
+  assign(paste0(prefix, "_ceb"), ceb, envir=globalenv())
+  assign(paste0(prefix, "_clp"), clp, envir=globalenv())
+  assign(paste0(prefix, "_cfg"), cfg, envir=globalenv())
+  assign(paste0(prefix, "_kc"), kc, envir=globalenv())
+  assign(paste0(prefix, "_communities"), p, envir=globalenv())
+
+}
+
+```
+
+### Watts-Strogatz Model
+
+We can use the above loop to extract network and vertex characteristics to better understand potential differences between the models. We can also build communities to identify potential trade partners or hubs (markets).
+
+```{r results_ws}
+
+network_metrics(ws, "ws")
+ws_communities
+
+ws_net_char
+
+colMeans(ws_vert_char)[2:7]
+
+```
+
+### "Real World" Model
+
+```{r results_rw}
+
+network_metrics(rw, "rw")
+rw_communities
+
+rw_net_char
+
+colMeans(rw_vert_char)[2:7]
+
+```
+
