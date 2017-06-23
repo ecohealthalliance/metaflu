@@ -33,7 +33,8 @@ Suggests:
     testthat,
     doMC,
     knitcitations,
-    rprojroot
+    rprojroot,
+    abind
 Remotes:
     enozao/doRNG,
     dgrtwo/gganimate,
