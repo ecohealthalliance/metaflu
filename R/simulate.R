@@ -30,7 +30,7 @@
 #' @importFrom dplyr as_data_frame lst_
 #' @importFrom tidyr crossing_
 #' @importFrom stringi stri_subset_regex
-#' @importFrom foreach foreach
+#' @importFrom foreach foreach %dopar%
 #' @importFrom doRNG %dorng%
 #' @importFrom purrr transpose
 #' @export
