@@ -34,7 +34,7 @@ arma::vec set_rates(arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
   vals.deathtimes = std::vector<std::priority_queue<double, std::vector<double>, std::greater<double>>>(parms.K);
   vals.cull = false;
 
-  vals.rates_mat.row(0) = vals.state_mat.row(0) % (parms.beta *  vals.state_mat.row(1) / pow(sum(vals.state_mat.rows(0, 2), 0), parms.rho) + //infection events (contact)
+  vals.rates_mat.row(0) = vals.state_mat.row(0) % (parms.beta *  vals.state_mat.row(1) / pow(sum(vals.state_mat.rows(0, 2), 0) + (vals.state_mat.row(0) == 0), parms.rho) + //infection events (contact)
     parms.nu * ( 1 - exp(-parms.phi * vals.state_mat.row(3))) + //virion uptake
     parms.lambda); //external infection
 
