@@ -75,10 +75,10 @@ get_failure_array <- function(results){
   sims <- seq_len(dim(results)[4])
   f_info <- sapply(sims, function(x) {
     i <- results["I", , , x]
+    if(is.vector(i)) return(FALSE)
     initials <- which(i[, 1] > 0)
     new_i <- i[-initials, ]
     if(is.vector(new_i)) return(sum(new_i) == 0)
-    if(dim(new_i)[1] == 0) return(FALSE)
     return(max(colSums(new_i)) == 0)
   })
   df <- data.frame(sim = sims, failed = f_info)
