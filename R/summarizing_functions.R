@@ -85,6 +85,50 @@ get_failure_array <- function(results){
   return(df)
 }
 
+
+#' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
+get_n_spread <- function(results, spread_number){
+  spread_q <- apply(results, 4, function(z){
+    i <- z["I",,]
+    if(is.vector(i)) return(FALSE)
+    infected_patches <- rowSums(i)
+    return(sum(infected_patches > 0) >= (spread_number + 1))
+  })
+  df <- data.frame(sim = seq_len(dim(results)[4]), spread_n = spread_q)
+}
+
+
+#' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
+get_depth2_spread <- function(results){
+  network <- attr(results, "network")
+  initial_i <- which(results["I",,1,1] > 0)
+  connected_i <- which(network[initial_i,] > 0)
+  connected_i <- connected_i[connected_i %in% initial_i == FALSE]
+  spread_q <- apply(results, 4, function(z){
+    i <- z["I",,]
+    if(is.vector(i)) return(FALSE)
+    if(nrow(i) == 2) return(FALSE)
+    if(sum(rowSums(i[connected_i,]) == 0)) return(FALSE)
+    level2_connections <- sapply(connected_i, function(c){
+      connected_2 <- which(network[c, ] > 0)
+      connected_2 <- connected_2[connected_2 %in% c(initial_i, c) == FALSE]
+      if(any(rowSums(i[connected2,] > 0))){
+        return(TRUE)
+      } else{
+        return(FALSE)
+      }
+    })
+    return(any(level2_connections))
+      })
+  return(data.frame(sim = dim(results)[4], depth_two_spread = spread_q))
+}
+
+
+
+
+
 #' Successful Epidemics
 #'
 #' Returns dataframe of successful epidemics
