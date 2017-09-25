@@ -86,19 +86,9 @@ get_failure_array <- function(results){
 }
 
 
-#' @export
-#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
-get_n_spread <- function(results, spread_number){
-  spread_q <- apply(results, 4, function(z){
-    i <- z["I",,]
-    if(is.vector(i)) return(FALSE)
-    infected_patches <- rowSums(i)
-    return(sum(infected_patches > 0) >= (spread_number + 1))
-  })
-  df <- data.frame(sim = seq_len(dim(results)[4]), spread_n = spread_q)
-}
-
-
+#' Depth Two Spread
+#'
+#' Returns a dataframe of simulation number and whether there are infections along a depth two section of the network
 #' @export
 #' @param results 4-dimensional array of results (compartment, patch, time, simulation)
 get_depth2_spread <- function(results){
@@ -107,24 +97,60 @@ get_depth2_spread <- function(results){
   connected_i <- which(network[initial_i,] > 0)
   connected_i <- connected_i[connected_i %in% initial_i == FALSE]
   spread_q <- apply(results, 4, function(z){
+    #print(z)
     i <- z["I",,]
     if(is.vector(i)) return(FALSE)
     if(nrow(i) == 2) return(FALSE)
-    if(sum(rowSums(i[connected_i,]) == 0)) return(FALSE)
-    level2_connections <- sapply(connected_i, function(c){
+    if(length(connected_i) == 1){
+
+    }
+    if(all(b_rowSums(i[connected_i,]) == 0)) return(FALSE)
+    infected_connected <- connected_i[b_rowSums(i[connected_i,]) > 0]
+    level2_connections <- sapply(infected_connected, function(c){
       connected_2 <- which(network[c, ] > 0)
       connected_2 <- connected_2[connected_2 %in% c(initial_i, c) == FALSE]
-      if(any(rowSums(i[connected2,] > 0))){
+      if(length(connected_2) == 0) return(FALSE)
+      if(length(connected_2) == 1){
+        if(sum(i[connected_2,]) > 0){
+          return(TRUE)
+        }else return(FALSE)
+      }
+      if(any(b_rowSums(i[connected_2,]) > 0)){
         return(TRUE)
       } else{
         return(FALSE)
       }
     })
     return(any(level2_connections))
-      })
-  return(data.frame(sim = dim(results)[4], depth_two_spread = spread_q))
+  })
+  return(data.frame(sim = seq_len(dim(results)[4]), depth_two_spread = spread_q))
 }
 
+b_rowSums <- function(mat){
+  if(is.vector(mat)){
+    return(sum(mat))
+  }else{
+    return(rowSums(mat))
+  }
+}
+
+#' Retrieve N Spread of Infections
+#'
+#' Returns a dataframe of whether or not infections have spread to N nodes in the network.
+#'
+#' @export
+#' @param results 4-dimensional array of results (compartment, patch, time, simulation)
+#' @param spread_number number of nodes spread to examine
+get_n_spread <- function(results, spread_number){
+  spread_q <- apply(results, 4, function(z){
+    i <- z["I",,]
+    if(is.vector(i)) return(FALSE)
+    infected_patches <- rowSums(i)
+    return(sum(infected_patches > 0) >= (spread_number + 1))
+  })
+  df <- data.frame(sim = seq_len(dim(results)[4]), spread_n = spread_q)
+  return(df)
+}
 
 
 
