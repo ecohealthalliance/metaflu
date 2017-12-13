@@ -173,4 +173,12 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
   }
 }
 
+bool abort_criterion(arma::vec &inits, arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
+  arma::mat inits_mat = arma::mat(inits.memptr(), parms.n_pstates, parms.K, true, true);  //vector of whether infected by site at initialization
+  arma::urowvec inits_I = inits_mat.row(1) > 0;
+  arma::urowvec inits_In = (sum(parms.chi.rows(find(inits_I)), 0) + inits_I) > 0;  //vector of whether infected or adjacent to infected site at initialization
+  bool out = sum((vals.state_mat.row(1) > 0) + (1 - inits_In)) >= 2;
+  return out;
+}
+
 #endif

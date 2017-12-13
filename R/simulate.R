@@ -34,7 +34,7 @@
 #' @importFrom doRNG %dorng%
 #' @importFrom purrr transpose
 #' @export
-mf_sim <- function(init, parameters, times, n_sims=1, return_array=TRUE) {
+mf_sim <- function(init, parameters, times, n_sims=1, return_array=TRUE, abort=FALSE) {
 
   times <- as.double(times)
   init <- as.vector(t(init))
@@ -65,7 +65,7 @@ mf_sim <- function(init, parameters, times, n_sims=1, return_array=TRUE) {
       net_gen <- NULL
     }
     return(list(
-      sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE),
+      sim_gillespie(init=init, parmlist=parameters, times=times, progress=FALSE, abort=abort),
       net_gen))
   }
 

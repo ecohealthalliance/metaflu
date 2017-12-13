@@ -7,22 +7,23 @@
 using namespace Rcpp;
 
 // sim_gillespie
-arma::mat sim_gillespie(const arma::vec& init, const List parmlist, const arma::vec& times, const bool& progress);
-RcppExport SEXP _metaflu_sim_gillespie(SEXP initSEXP, SEXP parmlistSEXP, SEXP timesSEXP, SEXP progressSEXP) {
+arma::mat sim_gillespie(arma::vec& init, const List parmlist, const arma::vec& times, const bool& progress, const bool& abort);
+RcppExport SEXP _metaflu_sim_gillespie(SEXP initSEXP, SEXP parmlistSEXP, SEXP timesSEXP, SEXP progressSEXP, SEXP abortSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const arma::vec& >::type init(initSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type init(initSEXP);
     Rcpp::traits::input_parameter< const List >::type parmlist(parmlistSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type times(timesSEXP);
     Rcpp::traits::input_parameter< const bool& >::type progress(progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(sim_gillespie(init, parmlist, times, progress));
+    Rcpp::traits::input_parameter< const bool& >::type abort(abortSEXP);
+    rcpp_result_gen = Rcpp::wrap(sim_gillespie(init, parmlist, times, progress, abort));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_metaflu_sim_gillespie", (DL_FUNC) &_metaflu_sim_gillespie, 4},
+    {"_metaflu_sim_gillespie", (DL_FUNC) &_metaflu_sim_gillespie, 5},
     {NULL, NULL, 0}
 };
 
