@@ -99,8 +99,14 @@ void update_state(arma::vec &state, mf_parmlist &parms, const double &time, mf_v
       sample_cumrates_row(vals.target_patch, parms.chi_cum.row(vals.patch), 1);
       for(uword i = 0; i < parms.n_pstates; i++) {
         state[vals.target_patch * parms.n_pstates + i] -= parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
-      }}
+      }
+      if(vals.action == 8){
+        //std::cout << "An infected chicken has moved!" << std::endl;
+      }
+
+      }
   }
+
 
   // if(any(vals.rates_mat.col(vals.patch) < 0) || any(vals.state_mat.col(vals.patch) < 0)) {
   //   std::stringstream err_string;

@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 sim_gillespie <- function(init, parmlist, times, progress) {
-    .Call('metaflu_sim_gillespie', PACKAGE = 'metaflu', init, parmlist, times, progress)
+    .Call('_metaflu_sim_gillespie', PACKAGE = 'metaflu', init, parmlist, times, progress)
 }
 

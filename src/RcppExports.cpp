@@ -8,7 +8,7 @@ using namespace Rcpp;
 
 // sim_gillespie
 arma::mat sim_gillespie(const arma::vec& init, const List parmlist, const arma::vec& times, const bool& progress);
-RcppExport SEXP metaflu_sim_gillespie(SEXP initSEXP, SEXP parmlistSEXP, SEXP timesSEXP, SEXP progressSEXP) {
+RcppExport SEXP _metaflu_sim_gillespie(SEXP initSEXP, SEXP parmlistSEXP, SEXP timesSEXP, SEXP progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,7 +22,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"metaflu_sim_gillespie", (DL_FUNC) &metaflu_sim_gillespie, 4},
+    {"_metaflu_sim_gillespie", (DL_FUNC) &_metaflu_sim_gillespie, 4},
     {NULL, NULL, 0}
 };
 
