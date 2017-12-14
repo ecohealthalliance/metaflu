@@ -83,6 +83,8 @@ struct mf_vals {  //holds interim objects
 
   arma::mat rates_mat;
   arma::mat state_mat;
+  arma::urowvec init_I_ind;
+  arma::urowvec init_I2_ind;
   uword target_patch;
   uword patch;
   uword action;

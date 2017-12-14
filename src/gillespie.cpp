@@ -43,9 +43,11 @@ arma::mat sim_gillespie(arma::vec &init, const List parmlist, const arma::vec &t
       ++(next_record_time);
       ++record;
       results.col(record) = state;
+      //Rcpp::Rcout << abort << std::endl;
       if(abort) {
         abort_yes = abort_criterion(init, state, parms, vals);
       }
+      //Rcpp::Rcout << abort_yes << std::endl;
     }
 
     if(sum_rates == 0 || abort_yes) break;

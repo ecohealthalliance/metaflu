@@ -31,6 +31,10 @@ arma::vec set_rates(arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
   arma::vec rates(parms.K * parms.n_actions);
   vals.rates_mat = arma::mat(rates.memptr(), parms.n_actions, parms.K, false, false);
   vals.state_mat = arma::mat(state.memptr(), parms.n_pstates, parms.K, false, false);
+  vals.init_I_ind = vals.state_mat.row(1) > 0;
+  //Rcpp::Rcout << vals.init_I_ind << std::endl;
+  vals.init_I2_ind = (sum(parms.chi.rows(find(vals.init_I_ind)), 0) + vals.init_I_ind) > 0;
+  //Rcpp::Rcout << vals.init_I2_ind << std::endl;
   vals.deathtimes = std::vector<std::priority_queue<double, std::vector<double>, std::greater<double>>>(parms.K);
   vals.cull = false;
 
@@ -174,11 +178,9 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
 }
 
 bool abort_criterion(arma::vec &inits, arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
-  arma::mat inits_mat = arma::mat(inits.memptr(), parms.n_pstates, parms.K, true, true);  //vector of whether infected by site at initialization
-  arma::urowvec inits_I = inits_mat.row(1) > 0;
-  arma::urowvec inits_In = (sum(parms.chi.rows(find(inits_I)), 0) + inits_I) > 0;  //vector of whether infected or adjacent to infected site at initialization
-  bool out = sum((vals.state_mat.row(1) > 0) + (1 - inits_In)) >= 2;
-  return out;
+  //bool out = sum((vals.state_mat.row(1) > 0) + (1 - vals.init_I2_ind)) >= 2;
+  //Rcpp::Rcout << out << std::endl;
+  return false;
 }
 
 #endif
