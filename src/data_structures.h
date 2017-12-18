@@ -30,7 +30,7 @@ struct mf_parmlist {
   arma::rowvec pi_report;         //probability of reporting deaths
   arma::rowvec pi_detect;         //probability of detecting AI
   arma::rowvec cull_rate;      //rate at which culling occurs at a reported farm
-
+  bool abort;
 
   int n_actions;            // number of possible actions
   int n_pstates;            // number of possible classes
@@ -51,6 +51,7 @@ struct mf_parmlist {
     rho = as<double>(parmlist["rho"]);
     lambda = as<arma::rowvec>(parmlist["lambda"]);
     chi = as<arma::mat>(parmlist["chi"]);
+    chi.each_col() /= sum(chi, 1);
     chi_cum = cumsum(chi, 1);
     K = chi.n_rows;
     tau_crit = as<arma::rowvec>(parmlist["tau_crit"]);
@@ -58,7 +59,7 @@ struct mf_parmlist {
     pi_report = as<arma::rowvec>(parmlist["pi_report"]);
     pi_detect = as<arma::rowvec>(parmlist["pi_detect"]);
     cull_rate = 1 / as<arma::rowvec>(parmlist["cull_time"]);
-
+    abort = as<bool>(parmlist["abort"]);
     n_actions = 11;
     n_pstates = 5;
     action_matrix = {
@@ -83,6 +84,8 @@ struct mf_vals {  //holds interim objects
 
   arma::mat rates_mat;
   arma::mat state_mat;
+  arma::urowvec init_I_ind;
+  arma::urowvec init_I2_ind;
   uword target_patch;
   uword patch;
   uword action;

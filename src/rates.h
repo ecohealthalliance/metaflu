@@ -31,6 +31,10 @@ arma::vec set_rates(arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
   arma::vec rates(parms.K * parms.n_actions);
   vals.rates_mat = arma::mat(rates.memptr(), parms.n_actions, parms.K, false, false);
   vals.state_mat = arma::mat(state.memptr(), parms.n_pstates, parms.K, false, false);
+  if(parms.abort) {
+    vals.init_I_ind = vals.state_mat.row(1) > 0;
+    vals.init_I2_ind = (sum(parms.chi.rows(find(vals.init_I_ind)), 0) + vals.init_I_ind) > 0;
+  }
   vals.deathtimes = std::vector<std::priority_queue<double, std::vector<double>, std::greater<double>>>(parms.K);
   vals.cull = false;
 
@@ -99,8 +103,14 @@ void update_state(arma::vec &state, mf_parmlist &parms, const double &time, mf_v
       sample_cumrates_row(vals.target_patch, parms.chi_cum.row(vals.patch), 1);
       for(uword i = 0; i < parms.n_pstates; i++) {
         state[vals.target_patch * parms.n_pstates + i] -= parms.action_matrix.at(i, vals.action);  //Apply the given action to the patch
-      }}
+      }
+      if(vals.action == 8){
+        //std::cout << "An infected chicken has moved!" << std::endl;
+      }
+
+      }
   }
+
 
   // if(any(vals.rates_mat.col(vals.patch) < 0) || any(vals.state_mat.col(vals.patch) < 0)) {
   //   std::stringstream err_string;
@@ -165,6 +175,11 @@ void update_rates(arma::vec &rates, arma::vec &cumrates, const arma::vec &state,
   for( ; vals.min_patch < cumrates.size(); vals.min_patch++) {
     cumrates[vals.min_patch] = cumrates[vals.min_patch-1] + rates[vals.min_patch];
   }
+}
+
+bool abort_criterion(arma::vec &inits, arma::vec &state, const mf_parmlist &parms, mf_vals &vals) {
+  bool out = sum(((vals.state_mat.row(1) > 0) + (1 - vals.init_I2_ind)) >= 2) >= 1;
+  return out;
 }
 
 #endif

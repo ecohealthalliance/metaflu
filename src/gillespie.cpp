@@ -7,7 +7,7 @@ using namespace Rcpp;
 using namespace arma;
 
 // [[Rcpp::export]]
-arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::vec &times, const bool &progress) {
+arma::mat sim_gillespie(arma::vec &init, const List parmlist, const arma::vec &times, const bool &progress) {
   mf_parmlist parms(parmlist);
 
   mf_vals vals;
@@ -24,7 +24,7 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
   arma::vec::const_iterator next_record_time = times.begin();
   uword record = 0;
   double time_max = as_scalar(times.tail(1));
-
+  bool abort_yes = false;
   uword event;
 
   results.col(record) = state;
@@ -43,9 +43,13 @@ arma::mat sim_gillespie(const arma::vec &init, const List parmlist, const arma::
       ++(next_record_time);
       ++record;
       results.col(record) = state;
+      if(parms.abort) {
+        abort_yes = abort_criterion(init, state, parms, vals);
+      }
     }
-
+    if(abort_yes) break;
     if(sum_rates == 0) break;
+
     if(!is_finite(time)) {
       std::stringstream err_msg;
       err_msg<< "Time has an invalid value: " << time << std::endl;
