@@ -33,11 +33,6 @@ notifications:
     on_success: change
     on_failure: change
 
-r_github_packages:
-  - klutometis/roxygen
-  - jimhester/covr
-  - MangoTheCat/goodpractice
-  - hadley/pkgdown
 
 before_script:  #do this before the build so as to cache the vignettes
   - if Rscript -e "pkgdown::build_site()"; then PKGDOWN_BUILT=1; fi
