@@ -28,7 +28,9 @@ Imports:
     gganimate,
     ggraph,
     gridExtra,
-    threejs
+    threejs,
+    ggforce,
+    units
 Suggests:
     testthat,
     doMC,
@@ -44,7 +46,8 @@ Remotes:
     jimhester/covr,
     MangoTheCat/goodpractice,
     hadley/pkgdown,
-    thomasp85/ggforce
+    thomasp85/ggforce,
+    r-quantities/units
 RoxygenNote: 6.0.1
 SystemRequirements: C++11
 URL: https://github.com/noamross/metaflu
